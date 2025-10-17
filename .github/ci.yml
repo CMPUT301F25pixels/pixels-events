@@ -1,0 +1,11 @@
+name: ci
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  build-test:
+    name: ci/build-test 
+    runs-on: ubuntu-latest
+    permissions: {}      
+    steps:
+      - run: echo "green means go"
