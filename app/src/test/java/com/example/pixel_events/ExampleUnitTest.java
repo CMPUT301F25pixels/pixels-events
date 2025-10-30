@@ -1,4 +1,4 @@
-package com.example.pixels;
+package com.example.pixel_events;
 
 import org.junit.Test;
 

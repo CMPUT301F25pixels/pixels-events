@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "pixels"
+rootProject.name = "pixel-events"
 include(":app")

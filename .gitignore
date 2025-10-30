@@ -13,9 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-
-# Android Studio settings
-.idea/
-# Gradle build output
-build/
-app/build/
