@@ -73,7 +73,7 @@ public class DataBaseHandler {
     }
     // NOTE:
     // Usage for this function should be as such:
-    //      getAccInfo(10, accountData -> {
+    //      db.getAccInfo(10, accountData -> {
     //          < use the data however needed >
     //      });
 
