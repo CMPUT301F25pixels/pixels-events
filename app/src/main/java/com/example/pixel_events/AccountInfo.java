@@ -22,7 +22,7 @@ public class AccountInfo {
     public List<Integer> eventsUpcoming;        // list of upcoming eventID
     public List<Integer> eventsPart;            // list of past eventID that user participated in
     public List<Integer> eventsNPart;           // list of past eventID that user did not participate in
-    public Boolean notify;                      // True: notifications on; off otherwise
+    public List<Boolean> notify;                 // [All Notif, Win notif, Lose Notif]
 
     /**
      * Empty constructor for Firebase
@@ -34,7 +34,7 @@ public class AccountInfo {
      */
     public AccountInfo(int id, String accType, String  userName, Date DOB, String gender,
                               String email, String city, String  province, int phoneNum,
-                              Boolean notify) {
+                              List<Boolean> notify) {
         // Assign all variables
         this.id = id;
         this.accType = accType;
@@ -62,6 +62,5 @@ public class AccountInfo {
  *      Setup an object to easily use account data
  *
  * Collaborators:
- *
- *
+ *      DataBaseHandler
  */

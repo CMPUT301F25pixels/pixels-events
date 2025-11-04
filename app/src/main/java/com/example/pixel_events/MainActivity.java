@@ -14,11 +14,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.checkerframework.checker.units.qual.A;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private DataBaseHandler db;
-    private CollectionReference accountsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,23 +32,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Init DataBase
         db = new DataBaseHandler();
-
-        db.addAcc(1, "admin","Boba Bob", new Date(), "Male",
-                "bobabob@gmail.com", "Edmonton", "AB", 1233224531,
-                true);
-        db.addEvent(1, 1, 0);
-        db.addEvent(1, 2, 1);
-        db.addEvent(1, 3, 2);
-
-
-        db.getAcc(1, account -> {
-            if (account != null) {
-                Log.d("TEST", "Got user: " + account.userName);
-            } else {
-                Log.e("TEST", "User not found");
-            }
-        });
 
     }
 }

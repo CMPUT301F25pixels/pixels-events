@@ -10,6 +10,8 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import org.checkerframework.common.aliasing.qual.Unique;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +29,15 @@ public class DataBaseHandler {
         accRef = db.collection("AccountData");
     }
 
+
+    // ACCOUNT INFO FUNCTIONS ---------------------------------------------------------------------
+
     /**
      *  Add a new entry for user data
      */
     public void addAcc(int id, String accType, String userName, Date DOB, String gender,
                         String email, String city, String  province, int phoneNum,
-                        Boolean notify) {
+                        List<Boolean> notify) {
 
         // Create a new Account
         AccountInfo newUser = new AccountInfo(id, accType, userName, DOB, gender, email,
@@ -96,6 +101,115 @@ public class DataBaseHandler {
                 .addOnFailureListener(e ->
                         Log.e("DB", "Error adding event for user " + userID, e));
     }
+
+    /**
+     * Update Username
+     * @param userID Unique userID
+     * @param newUSN New Username
+     */
+    public void updateUSN(int userID, String newUSN) {
+        accRef.document(String.valueOf(userID))
+                .update("userName", newUSN);
+    }
+
+    /**
+     * Update Date of Birth
+     * @param userID Unique userID
+     * @param newDate New Date of Birth
+     */
+    public void updateDOB(int userID, Date newDate) {
+        accRef.document(String.valueOf(userID))
+                .update("DOB", newDate);
+    }
+
+    /**
+     * Update Gender
+     * @param userID Unique userID
+     * @param newGender New gender
+     */
+    public void updateGender(int userID, String newGender) {
+        accRef.document(String.valueOf(userID))
+                .update("gender", newGender);
+    }
+
+    /**
+     * Update E-mail
+     * @param userID Unique userID
+     * @param newEmail New E-mail
+     */
+    public void updateEmail(int userID, String newEmail) {
+        accRef.document(String.valueOf(userID))
+                .update("email", newEmail);
+    }
+
+    /**
+     * Update City of residence
+     * @param userID Unique userID
+     * @param newCity New City name
+     */
+    public void updateCity(int userID, String newCity) {
+        accRef.document(String.valueOf(userID))
+                .update("city", newCity);
+    }
+
+    /**
+     * Update Province of residence
+     * @param userID Unique userID
+     * @param newProv New Province name
+     */
+    public void updateProvince(int userID, String newProv) {
+        accRef.document(String.valueOf(userID))
+                .update("province", newProv);
+    }
+
+    /**
+     * Update Phone number
+     * @param userID Unique userID
+     * @param newPhone New Phone number
+     */
+    public void updatePhone(int userID, int newPhone) {
+        accRef.document(String.valueOf(userID))
+                .update("phoneNum", newPhone);
+    }
+
+    /**
+     * Update Notification status
+     * @param userID Unique userID
+     * @param newNotify New Notification Status
+     * @param idx 0: All Notif, 1: Win Notif, 2: Lose Notif
+     */
+    public void updateNotify(int userID, boolean newNotify, int idx) {
+        // return if index out of range
+        if (idx > 2 || idx < 0) {
+            return;
+        }
+
+        // index in range:
+        DocumentReference notiRef = accRef.document(String.valueOf(userID));
+
+        // get the notify list
+        notiRef.get().addOnSuccessListener(snapshot -> {
+            List<Boolean> notifyList = (List<Boolean>) snapshot.get("notify");
+
+            if (notifyList != null && idx < notifyList.size()) {
+
+                // update only the selected index
+                notifyList.set(idx, newNotify);
+                notiRef.update("notify", notifyList);
+            }
+        });
+    }
+
+    /**
+     * Delete the user's account
+     * @param userID Unique userID
+     */
+    public void delAccount(int userID) {
+        accRef.document(String.valueOf(userID)).delete();
+    }
+
+    // EVENTS INFO FUNCTIONS ----------------------------------------------------------------------
+    // TODO:
 }
 
 /*
@@ -104,10 +218,14 @@ public class DataBaseHandler {
  *
  * Responsibilities:
  *      Initialize DB
- *      Get account information
- *      Add a new account
- *      Add new events for users
- *
+ *      Account Data:
+ *          Get account information
+ *          Add a new account
+ *          Add new events for users
+ *          Update any of the account fields
+ *          Delete an account
+ *      Events Data:
+ *          TODO
  *
  * Collaborators:
  *      Database
