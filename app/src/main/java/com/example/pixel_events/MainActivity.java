@@ -1,7 +1,6 @@
 package com.example.pixel_events;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,17 +8,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.checkerframework.checker.units.qual.A;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.example.pixel_events.database.DatabaseHandler;
 public class MainActivity extends AppCompatActivity {
-    private DataBaseHandler db;
+    private DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Init DataBase
-        db = new DataBaseHandler();
+        db = new DatabaseHandler();
 
     }
 }
