@@ -4,8 +4,11 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,12 +17,14 @@ import java.util.function.Consumer;
 
 public class DataBaseHandler {
     private final FirebaseFirestore db;
+    private final CollectionReference accRef;
 
     /**
      * Initialize the database
      */
     public DataBaseHandler() {
         db = FirebaseFirestore.getInstance();
+        accRef = db.collection("AccountData");
     }
 
     /**
@@ -31,44 +36,37 @@ public class DataBaseHandler {
 
         // Create a new Account
         AccountInfo newUser = new AccountInfo(id, accType, userName, DOB, gender, email,
-                city,   province,  phoneNum, notify);
+                                                city,   province,  phoneNum, notify);
 
-        // Add to database
-        db.collection("AccountData")
-                .document(String.valueOf(id))       // docID = string(userID)
+        // Add the account to DB
+        accRef.document(String.valueOf(newUser.id))
                 .set(newUser)
-
-                // Check for Success
-                .addOnSuccessListener(unused ->
-                        Log.d("DB", "Added User:" + id))
-
-                // Failed to add
-                .addOnFailureListener(e ->
-                        Log.w("DB", "Error adding user!", e));
-
+                .addOnSuccessListener(unused -> Log.d("DB", "Added User: " + newUser.id))
+                .addOnFailureListener(e -> Log.w("DB", "Error adding user!", e));
     }
 
     /**
-     * Get account information for a given user
+     * Sets up a listener to get real-time info
      *
      * @param id Unique user ID
      */
-    public void getAccInfo(int id, Consumer<AccountInfo> callback) {
+    public void getAcc(int id, Consumer<AccountInfo> acc) {
         // Find the account
-        db.collection("AccountData")
-                .document(String.valueOf(id))
+        accRef.document(String.valueOf(id))
                 .get()
 
-                .addOnCompleteListener(task -> {
-                    // Account found
-                    if (task.isComplete()) {
-                        AccountInfo userInfo = task.getResult().toObject(AccountInfo.class);
-                        callback.accept(userInfo);
-
-                    // Account no found
+                // Account found
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        acc.accept(snapshot.toObject(AccountInfo.class));
                     } else {
-                        callback.accept(null);
+                        acc.accept(null);           // return null if some error
                     }
+                })
+                // Account not found
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting account", e);
+                    acc.accept(null);
                 });
     }
     // NOTE:
@@ -85,16 +83,18 @@ public class DataBaseHandler {
      * @param eventStatus 0: upcoming, 1: past and participated, 2: past and not participated
      */
     public void addEvent(int userID, int eventID, int eventStatus) {
+        String field;
         // Store the new even value as a list
-        List<Integer> newEvent = new ArrayList<>();
-        newEvent.add(eventID);
-        newEvent.add(eventStatus);
+        if (eventStatus == 0) field = "eventsUpcoming";
+        else if (eventStatus == 1) field = "eventsPart";
+        else field = "eventsNPart";
 
-        // Find the account
-        var ref = db.collection("AccountData").document(String.valueOf(userID));
-
-        // Append the new event
-        ref.update("events", FieldValue.arrayUnion(newEvent));
+        accRef.document(String.valueOf(userID))
+                .update(field, FieldValue.arrayUnion(eventID))
+                .addOnSuccessListener(unused ->
+                        Log.d("DB", "Added event " + eventID + " for user " + userID))
+                .addOnFailureListener(e ->
+                        Log.e("DB", "Error adding event for user " + userID, e));
     }
 }
 

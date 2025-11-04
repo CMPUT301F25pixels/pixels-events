@@ -19,7 +19,9 @@ public class AccountInfo {
     public String city;                         // city of residence
     public String province;                     // province of residence
     public int phoneNum;                        // user's phone number
-    public List<List<Integer>> events;          // list: [ [eventID, { 0, 1, 2}], [...], ... ]
+    public List<Integer> eventsUpcoming;        // list of upcoming eventID
+    public List<Integer> eventsPart;            // list of past eventID that user participated in
+    public List<Integer> eventsNPart;           // list of past eventID that user did not participate in
     public Boolean notify;                      // True: notifications on; off otherwise
 
     /**
@@ -46,7 +48,9 @@ public class AccountInfo {
         this.notify = notify;
 
         // assign an empty events list
-        this.events = new ArrayList<>();
+        this.eventsUpcoming = new ArrayList<>();
+        this.eventsPart = new ArrayList<>();
+        this.eventsNPart = new ArrayList<>();
     }
 }
 
