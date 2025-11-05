@@ -251,20 +251,21 @@ public class DatabaseHandler {
      * @param location Event location
      * @param capacity Event capacity
      * @param description Event description
+     * @param fee Event fee (e.g., "Free" or a price string)
      * @param eventStartDate Event start date
      * @param eventEndDate Event end date
      * @param registrationStartDate Registration start date
      * @param registrationEndDate Registration end date
      */
     public void addEvent(int eventId, int organizerId, String title, String imageUrl,
-                         String location, String capacity, String description,
-                         String eventStartDate, String eventEndDate,
+                         String location, String capacity, String description, String fee,
+                         String eventStartDate, String eventEndDate, String eventStartTime, String eventEndTime,
                          String registrationStartDate, String registrationEndDate) {
 
-        // Create a new Event
+        // Create a new Event (includes fee)
         Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
-                capacity, description, eventStartDate, eventEndDate,
-                registrationStartDate, registrationEndDate);
+            capacity, description, fee, eventStartDate, eventEndDate,
+            eventStartTime, eventEndTime, registrationStartDate, registrationEndDate);
 
         // Add the event to DB
         eventRef.document(String.valueOf(newEvent.getEventId()))

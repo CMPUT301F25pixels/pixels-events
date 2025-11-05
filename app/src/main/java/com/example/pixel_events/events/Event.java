@@ -21,6 +21,9 @@ public class Event {
     private String eventEndDate;
     private String registrationStartDate;
     private String registrationEndDate;
+    private String eventStartTime;
+    private String eventEndTime;
+    private String fee;
     
     // Flag to control whether setters should automatically update database
     private boolean autoUpdateDatabase = true;
@@ -49,8 +52,11 @@ public class Event {
             String location,
             String capacity,
             String description,
+            String fee,
             String eventStartDate,
             String eventEndDate,
+            String eventStartTime,
+            String eventEndTime,
             String registrationStartDate,
             String registrationEndDate
     ) {
@@ -61,6 +67,8 @@ public class Event {
         validateNotEmpty(description, "Description");
         validateNotEmpty(eventStartDate, "Event Start Date");
         validateNotEmpty(eventEndDate, "Event End Date");
+        validateNotEmpty(eventStartTime, "Event Start Time");
+        validateNotEmpty(eventEndTime, "Event End Time");
         validateNotEmpty(registrationStartDate, "Registration Start Date");
         validateNotEmpty(registrationEndDate, "Registration End Date");
         
@@ -79,15 +87,24 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.description = description;
+        // Fee: if null/empty -> assume Free; normalize user-entered "free"
+        if (fee == null || fee.trim().isEmpty()) {
+            this.fee = "Free";
+        } else {
+            String f = fee.trim();
+            if (f.equalsIgnoreCase("free")) {
+                this.fee = "Free";
+            } else {
+                this.fee = f;
+            }
+        }
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
+        this.eventStartTime = eventStartTime;
+        this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
-        // Add a reference to the QR code class
-        // this.qrCode = new qrcode(this).
-        
-        // Note: Event is not automatically saved to database
-        // Call saveToDatabase() explicitly to persist
+
     }
 
     /**
@@ -110,8 +127,9 @@ public class Event {
         try {
             DatabaseHandler db = DatabaseHandler.getInstance();
             db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
-                    this.location, this.capacity, this.description, this.eventStartDate,
-                    this.eventEndDate, this.registrationStartDate, this.registrationEndDate);
+                    this.location, this.capacity, this.description, this.fee, this.eventStartDate,
+                    this.eventEndDate, this.eventStartTime, this.eventEndTime,
+                    this.registrationStartDate, this.registrationEndDate);
         } catch (Exception e) {
             Log.e("Event", "Failed to save event to database", e);
         }
@@ -150,6 +168,24 @@ public class Event {
     }
     public String getEventEndDate() {
         return eventEndDate;
+    }
+    public String getFee() {
+        return fee;
+    }
+    /**
+     * Get the event start time (HH:mm)
+     * @return event start time string
+     */
+    public String getEventStartTime() {
+        return eventStartTime;
+    }
+
+    /**
+     * Get the event end time (HH:mm)
+     * @return event end time string
+     */
+    public String getEventEndTime() {
+        return eventEndTime;
     }
     public String getRegistrationStartDate() {
         return registrationStartDate;

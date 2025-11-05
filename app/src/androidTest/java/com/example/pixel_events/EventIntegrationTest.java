@@ -39,6 +39,8 @@ public class EventIntegrationTest {
     private static final String TEST_DESCRIPTION = "This is a test event";
     private static final String TEST_EVENT_START = "2025-12-01";
     private static final String TEST_EVENT_END = "2025-12-03";
+    private static final String TEST_EVENT_START_TIME = "12:00";
+    private static final String TEST_EVENT_END_TIME = "14:00";
     private static final String TEST_REG_START = "2025-11-01";
     private static final String TEST_REG_END = "2025-11-30";
 
@@ -94,19 +96,22 @@ public class EventIntegrationTest {
         AtomicReference<Event> modifiedEvent = new AtomicReference<>();
 
         // Step 1: ADD EVENT
-        databaseHandler.addEvent(
-                TEST_EVENT_ID,
-                TEST_ORGANIZER_ID,
-                TEST_TITLE,
-                TEST_IMAGE_URL,
-                TEST_LOCATION,
-                TEST_CAPACITY,
-                TEST_DESCRIPTION,
-                TEST_EVENT_START,
-                TEST_EVENT_END,
-                TEST_REG_START,
-                TEST_REG_END
-        );
+    databaseHandler.addEvent(
+        TEST_EVENT_ID,
+        TEST_ORGANIZER_ID,
+        TEST_TITLE,
+        TEST_IMAGE_URL,
+        TEST_LOCATION,
+        TEST_CAPACITY,
+        TEST_DESCRIPTION,
+        "Free",
+        TEST_EVENT_START,
+        TEST_EVENT_END,
+        TEST_EVENT_START_TIME,
+        TEST_EVENT_END_TIME,
+        TEST_REG_START,
+        TEST_REG_END
+    );
         
         // Wait for add operation
         Thread.sleep(2000);
@@ -222,19 +227,22 @@ public class EventIntegrationTest {
         AtomicReference<Event> retrievedEvent = new AtomicReference<>();
 
         // Add event
-        databaseHandler.addEvent(
-                TEST_EVENT_ID,
-                TEST_ORGANIZER_ID,
-                TEST_TITLE,
-                TEST_IMAGE_URL,
-                TEST_LOCATION,
-                TEST_CAPACITY,
-                TEST_DESCRIPTION,
-                TEST_EVENT_START,
-                TEST_EVENT_END,
-                TEST_REG_START,
-                TEST_REG_END
-        );
+    databaseHandler.addEvent(
+        TEST_EVENT_ID,
+        TEST_ORGANIZER_ID,
+        TEST_TITLE,
+        TEST_IMAGE_URL,
+        TEST_LOCATION,
+        TEST_CAPACITY,
+        TEST_DESCRIPTION,
+        "Free",
+        TEST_EVENT_START,
+        TEST_EVENT_END,
+        TEST_EVENT_START_TIME,
+        TEST_EVENT_END_TIME,
+        TEST_REG_START,
+        TEST_REG_END
+    );
 
         Thread.sleep(2000);
 
@@ -261,6 +269,8 @@ public class EventIntegrationTest {
         assertEquals("Description should match", TEST_DESCRIPTION, event.getDescription());
         assertEquals("Event start date should match", TEST_EVENT_START, event.getEventStartDate());
         assertEquals("Event end date should match", TEST_EVENT_END, event.getEventEndDate());
+    assertEquals("Event start time should match", TEST_EVENT_START_TIME, event.getEventStartTime());
+    assertEquals("Event end time should match", TEST_EVENT_END_TIME, event.getEventEndTime());
         assertEquals("Registration start date should match", TEST_REG_START, event.getRegistrationStartDate());
         assertEquals("Registration end date should match", TEST_REG_END, event.getRegistrationEndDate());
     }
@@ -271,19 +281,22 @@ public class EventIntegrationTest {
     @Test
     public void testModifyMultipleFields() throws InterruptedException {
         // First add the event
-        databaseHandler.addEvent(
-                TEST_EVENT_ID,
-                TEST_ORGANIZER_ID,
-                TEST_TITLE,
-                TEST_IMAGE_URL,
-                TEST_LOCATION,
-                TEST_CAPACITY,
-                TEST_DESCRIPTION,
-                TEST_EVENT_START,
-                TEST_EVENT_END,
-                TEST_REG_START,
-                TEST_REG_END
-        );
+    databaseHandler.addEvent(
+        TEST_EVENT_ID,
+        TEST_ORGANIZER_ID,
+        TEST_TITLE,
+        TEST_IMAGE_URL,
+        TEST_LOCATION,
+        TEST_CAPACITY,
+        TEST_DESCRIPTION,
+        "Free",
+        TEST_EVENT_START,
+        TEST_EVENT_END,
+        TEST_EVENT_START_TIME,
+        TEST_EVENT_END_TIME,
+        TEST_REG_START,
+        TEST_REG_END
+    );
 
         Thread.sleep(2000);
 
