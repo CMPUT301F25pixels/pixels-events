@@ -26,12 +26,12 @@ public class EventTest {
     private static final String TEST_CAPACITY = "500";
     private static final String TEST_DESCRIPTION = "Annual tech conference";
     private static final String TEST_FEE = "Free";
-    private static final String TEST_EVENT_START = "2025-12-01";
-    private static final String TEST_EVENT_END = "2025-12-03";
+    private static final String TEST_EVENT_START = "2025-12-24";
+    private static final String TEST_EVENT_END = "2025-12-30";
     private static final String TEST_EVENT_START_TIME = "12:00";
     private static final String TEST_EVENT_END_TIME = "14:00";
-    private static final String TEST_REG_START = "2025-11-01";
-    private static final String TEST_REG_END = "2025-11-30";
+    private static final String TEST_REG_START = "2025-12-10";
+    private static final String TEST_REG_END = "2025-12-20";
 
     @Before
     public void setUp() {
@@ -195,8 +195,8 @@ public class EventTest {
         2002, 502, "Music Festival", "https://example.com/music.jpg",
         "Vancouver", "2000", "Annual music festival",
         "Free",
-        "2025-08-01", "2025-08-05", "10:00", "22:00",
-        "2025-06-01", "2025-07-31"
+        "2026-08-01", "2026-08-05", "10:00", "22:00",
+        "2026-06-01", "2026-07-31"
     );
 
         assertEquals("Event ID should match", 2002, newEvent.getEventId());
@@ -206,10 +206,10 @@ public class EventTest {
         assertEquals("Location should match", "Vancouver", newEvent.getLocation());
         assertEquals("Capacity should match", "2000", newEvent.getCapacity());
         assertEquals("Description should match", "Annual music festival", newEvent.getDescription());
-        assertEquals("Event start date should match", "2025-08-01", newEvent.getEventStartDate());
-        assertEquals("Event end date should match", "2025-08-05", newEvent.getEventEndDate());
-        assertEquals("Registration start date should match", "2025-06-01", newEvent.getRegistrationStartDate());
-        assertEquals("Registration end date should match", "2025-07-31", newEvent.getRegistrationEndDate());
+        assertEquals("Event start date should match", "2026-08-01", newEvent.getEventStartDate());
+        assertEquals("Event end date should match", "2026-08-05", newEvent.getEventEndDate());
+        assertEquals("Registration start date should match", "2026-06-01", newEvent.getRegistrationStartDate());
+        assertEquals("Registration end date should match", "2026-07-31", newEvent.getRegistrationEndDate());
     }
 
     @Test
@@ -447,8 +447,8 @@ public class EventTest {
                 2002, 502, "Music Festival", "https://example.com/music.jpg",
                 "Vancouver", "2000", "Annual music festival",
                 "Free",
-                "2025-08-01", "2025-08-05", "10:00", "22:00",
-                "2025-06-01", "2025-07-31"
+                "2026-08-01", "2026-08-05", "10:00", "22:00",
+                "2026-06-01", "2026-07-31"
         );
         newEvent.setAutoUpdateDatabase(false);
 
@@ -498,8 +498,8 @@ public class EventTest {
         Event consistencyEvent = new Event(
                 4004, 504, "Consistency Test", "url",
                 "Location", "100", "Description", "Free",
-                "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31"
+                "2026-01-01", "2026-01-05", "09:00", "17:00",
+                "2026-12-01", "2026-12-31"
         );
         consistencyEvent.setAutoUpdateDatabase(false);
         
@@ -513,6 +513,34 @@ public class EventTest {
         consistencyEvent.setTitle("Updated Consistency Test");
         assertEquals("Updated Consistency Test", consistencyEvent.getTitle());
         assertEquals(4004, consistencyEvent.getEventId()); // ID should remain unchanged
+    }
+
+    // ========================================================================================
+    // NEW VALIDATION TESTS - Date/time validation
+    // ========================================================================================
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithEndDateBeforeStartDate() {
+        // end date earlier than start date
+        new Event(5005, 505, "Bad Dates", "url", "Somewhere", "50",
+                "Info", "Free", "2025-12-10", "2025-12-01", "10:00", "12:00",
+                "2025-11-01", "2025-11-30");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithDatesInPast() {
+        // dates clearly in the past should be rejected
+        new Event(5006, 506, "Past Event", "url", "Somewhere", "50",
+                "Info", "Free", "2000-01-01", "2000-01-02", "10:00", "12:00",
+                "1999-12-01", "1999-12-31");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithEndTimeBeforeStartTimeOnSameDay() {
+        // same start and end date but end time before start time
+        new Event(5007, 507, "Bad Times", "url", "Somewhere", "50",
+                "Info", "Free", "2026-01-01", "2026-01-01", "18:00", "09:00",
+                "2025-12-01", "2025-12-31");
     }
 
     // ========================================================================================

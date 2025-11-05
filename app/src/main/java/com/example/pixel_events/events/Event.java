@@ -6,6 +6,10 @@ import com.example.pixel_events.database.DatabaseHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
 
 public class Event {
     private int eventId;
@@ -87,6 +91,57 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.description = description;
+        // Validate dates and times: strict formats expected (yyyy-MM-dd and HH:mm)
+        try {
+            SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            dateFmt.setLenient(false);
+
+            Date startDateObj = dateFmt.parse(eventStartDate);
+            Date endDateObj = dateFmt.parse(eventEndDate);
+            Date regStartObj = dateFmt.parse(registrationStartDate);
+            Date regEndObj = dateFmt.parse(registrationEndDate);
+
+            // Today's date at midnight (strip time)
+            Date today = dateFmt.parse(dateFmt.format(new Date()));
+
+            // All dates must be strictly after today
+            if (!startDateObj.after(today)) {
+                throw new IllegalArgumentException("Event start date must be after today");
+            }
+            if (!endDateObj.after(today)) {
+                throw new IllegalArgumentException("Event end date must be after today");
+            }
+            if (!regStartObj.after(today)) {
+                throw new IllegalArgumentException("Registration start date must be after today");
+            }
+            if (!regEndObj.after(today)) {
+                throw new IllegalArgumentException("Registration end date must be after today");
+            }
+
+            // End dates must be after corresponding start dates
+            if (!endDateObj.after(startDateObj)) {
+                throw new IllegalArgumentException("Event end date must be after event start date");
+            }
+            if (!regEndObj.after(regStartObj)) {
+                throw new IllegalArgumentException("Registration end date must be after registration start date");
+            }
+
+            // Validate times format and ordering when needed
+            SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm", Locale.US);
+            timeFmt.setLenient(false);
+            Date startTimeObj = timeFmt.parse(eventStartTime);
+            Date endTimeObj = timeFmt.parse(eventEndTime);
+
+            // If event occurs on the same day, ensure end time is after start time
+            if (dateFmt.format(startDateObj).equals(dateFmt.format(endDateObj))) {
+                if (!endTimeObj.after(startTimeObj)) {
+                    throw new IllegalArgumentException("Event end time must be after start time when on the same date");
+                }
+            }
+
+        } catch (ParseException pe) {
+            throw new IllegalArgumentException("Invalid date/time format: " + pe.getMessage());
+        }
         // Fee: if null/empty -> assume Free; normalize user-entered "free"
         if (fee == null || fee.trim().isEmpty()) {
             this.fee = "Free";
