@@ -195,25 +195,7 @@ public class Event {
         this.description = description;
         updateDatabase("description", description);
     }
-    
-    public void setWaitlistId(int waitlistId) {
-        this.waitlistId = waitlistId;
-        updateDatabase("waitlistId", waitlistId);
-    }
-    
-    public void setOrganizerId(int organizerId) {
-        if (organizerId <= 0) {
-            throw new IllegalArgumentException("Organizer ID must be positive");
-        }
-        this.organizerId = organizerId;
-        updateDatabase("organizerId", organizerId);
-    }
-    
-    public void setQrCode(String qrCode) {
-        this.qrCode = qrCode;
-        updateDatabase("qrCode", qrCode);
-    }
-    
+
     public void setEventStartDate(String eventStartDate) {
         validateNotEmpty(eventStartDate, "Event Start Date");
         this.eventStartDate = eventStartDate;

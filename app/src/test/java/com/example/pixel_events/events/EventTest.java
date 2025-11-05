@@ -177,27 +177,7 @@ public class EventTest {
         testEvent.setRegistrationEndDate(newRegEnd);
         assertEquals("Registration end date should be updated", newRegEnd, testEvent.getRegistrationEndDate());
     }
-
-    @Test
-    public void testSetOrganizerId() {
-        int newOrganizerId = 999;
-        testEvent.setOrganizerId(newOrganizerId);
-        assertEquals("Organizer ID should be updated", newOrganizerId, testEvent.getOrganizerId());
-    }
-
-    @Test
-    public void testSetWaitlistId() {
-        int waitlistId = 2001;
-        testEvent.setWaitlistId(waitlistId);
-        assertEquals("Waitlist ID should be updated", waitlistId, testEvent.getWaitlistId());
-    }
-
-    @Test
-    public void testSetQrCode() {
-        String qrCode = "QR_CODE_DATA_12345";
-        testEvent.setQrCode(qrCode);
-        assertEquals("QR code should be updated", qrCode, testEvent.getQrCode());
-    }
+    
 
     // ========================================================================================
     // UNIT TESTS - Testing event creation
@@ -409,16 +389,6 @@ public class EventTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetZeroOrganizerId() {
-        testEvent.setOrganizerId(0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetNegativeOrganizerId() {
-        testEvent.setOrganizerId(-1);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testSetNullEventStartDate() {
         testEvent.setEventStartDate(null);
     }
@@ -589,7 +559,6 @@ public class EventTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMinIntEventId() {
         testEvent.setEventId(Integer.MIN_VALUE);
-        assertEquals("Min integer event ID should be set", Integer.MIN_VALUE, testEvent.getEventId());
     }
 }
 
