@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js for Firebase CLI
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
@@ -46,8 +46,8 @@ jobs:
         run: ./gradlew build
 
       - name: Run integrated tests
-        run: ./gradlew connectedAndroidTest  
-          
+        run: ./gradlew connectedAndroidTest --stacktrace
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
@@ -57,6 +57,3 @@ jobs:
         if: always()
         run: |
           pkill -f firebase || true
-
-      
-
