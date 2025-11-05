@@ -1,11 +1,118 @@
-name: ci
+name: CI - Build and Test
+
 on:
+  push:
+    branches: [ main, develop, feature/* ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+
 jobs:
-  build-test:
-    name: ci/build-test 
+  test:
     runs-on: ubuntu-latest
-    permissions: {}      
+    
     steps:
-      - run: echo "green means go"
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Setup Node.js for Firebase CLI
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+
+    - name: Cache Firebase Emulators
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/firebase/emulators
+        key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('firebase.json') }}
+        restore-keys: |
+          ${{ runner.os }}-firebase-emulators-
+
+    - name: Start Firebase Emulators
+      run: |
+        firebase emulators:start --only firestore --project demo-test &
+        echo "Waiting for emulator to start..."
+        sleep 10
+        curl -f http://localhost:8080 || echo "Emulator might not be ready yet"
+
+    - name: Run Unit Tests
+      run: ./gradlew test --stacktrace
+      continue-on-error: false
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --stacktrace
+
+    - name: Setup and Run Instrumented Tests with Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: google_apis
+        arch: x86_64
+        profile: Nexus 6
+        script: |
+          # Make Firebase emulator accessible from Android emulator
+          adb reverse tcp:8080 tcp:8080
+          
+          # Run the instrumented tests
+          ./gradlew connectedAndroidTest --stacktrace
+          
+    - name: Stop Firebase Emulators
+      if: always()
+      run: |
+        pkill -f firebase || true
+
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: |
+          app/build/reports/tests/
+          app/build/test-results/
+          app/build/reports/androidTests/
+
+    - name: Upload Build Artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/*.apk
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run Lint
+      run: ./gradlew lint --stacktrace
+
+    - name: Upload Lint Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-reports
+        path: app/build/reports/lint-results-*.html

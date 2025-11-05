@@ -21,11 +21,21 @@ public class Event {
     private String eventEndDate;
     private String registrationStartDate;
     private String registrationEndDate;
+    
+    // Flag to control whether setters should automatically update database
+    private boolean autoUpdateDatabase = true;
 
     /**
      * Empty constructor for Firebase
      */
     public Event() {}
+    
+    /**
+     * Disable automatic database updates (useful for testing)
+     */
+    public void setAutoUpdateDatabase(boolean autoUpdate) {
+        this.autoUpdateDatabase = autoUpdate;
+    }
 
     /**
      * Initialize Event
@@ -75,6 +85,9 @@ public class Event {
         this.registrationEndDate = registrationEndDate;
         // Add a reference to the QR code class
         // this.qrCode = new qrcode(this).
+        
+        // Note: Event is not automatically saved to database
+        // Call saveToDatabase() explicitly to persist
     }
 
     /**
@@ -90,13 +103,18 @@ public class Event {
     }
 
     /**
-     * Create and save event to database
-     * @param db DatabaseHandler reference
+     * Save this event to the database
+     * Call this method explicitly to persist the event to Firebase
      */
-    public void createEvent(DatabaseHandler db) {
-        db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
-                this.location, this.capacity, this.description, this.eventStartDate,
-                this.eventEndDate, this.registrationStartDate, this.registrationEndDate);
+    public void saveToDatabase() {
+        try {
+            DatabaseHandler db = DatabaseHandler.getInstance();
+            db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
+                    this.location, this.capacity, this.description, this.eventStartDate,
+                    this.eventEndDate, this.registrationStartDate, this.registrationEndDate);
+        } catch (Exception e) {
+            Log.e("Event", "Failed to save event to database", e);
+        }
     }
 
     // Getters
@@ -226,14 +244,23 @@ public class Event {
      * @param value The new value for the field
      */
     private void updateDatabase(String fieldName, Object value) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(fieldName, value);
+        // Only update database if auto-update is enabled and event has valid ID
+        if (!autoUpdateDatabase || this.eventId <= 0) {
+            return;
+        }
         
-        DatabaseHandler.getInstance().modifyEvent(this.eventId, updates, error -> {
-            if (error != null) {
-                Log.e("Event", "Failed to update " + fieldName + ": " + error);
-            }
-        });
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put(fieldName, value);
+            
+            DatabaseHandler.getInstance().modifyEvent(this.eventId, updates, error -> {
+                if (error != null) {
+                    Log.e("Event", "Failed to update " + fieldName + ": " + error);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("Event", "Failed to access database for update", e);
+        }
     }
 }
 

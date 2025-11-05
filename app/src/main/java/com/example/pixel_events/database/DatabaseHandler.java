@@ -19,12 +19,36 @@ public class DatabaseHandler {
     private final FirebaseFirestore db;
     private final CollectionReference accRef;
     private final CollectionReference eventRef;
+    private boolean isOfflineMode = false;
 
     /**
      * Initialize the database
      */
     public DatabaseHandler() {
+        this(false);
+    }
+
+    /**
+     * Initialize the database with specified mode
+     * @param offlineMode If true, connects to Firebase emulator; if false, connects to real Firebase
+     */
+    public DatabaseHandler(boolean offlineMode) {
         db = FirebaseFirestore.getInstance();
+        this.isOfflineMode = offlineMode;
+        
+        if (offlineMode) {
+            // Connect to Firebase emulator
+            // Use 10.0.2.2 for Android emulator (localhost equivalent)
+            // Use 127.0.0.1 for instrumentation tests on desktop
+            try {
+                db.useEmulator("10.0.2.2", 8080);
+                Log.d("DatabaseHandler", "Connected to Firebase emulator at 10.0.2.2:8080");
+            } catch (IllegalStateException e) {
+                // Emulator already set, ignore
+                Log.d("DatabaseHandler", "Emulator already configured");
+            }
+        }
+        
         accRef = db.collection("AccountData");
         eventRef = db.collection("EventData");
     }
@@ -34,6 +58,33 @@ public class DatabaseHandler {
             instance = new DatabaseHandler();
         }
         return instance;
+    }
+
+    /**
+     * Get or create instance with specified mode
+     * @param offlineMode If true, uses Firebase emulator; if false, uses real Firebase
+     * @return DatabaseHandler instance
+     */
+    public static synchronized DatabaseHandler getInstance(boolean offlineMode) {
+        if (instance == null) {
+            instance = new DatabaseHandler(offlineMode);
+        }
+        return instance;
+    }
+
+    /**
+     * Reset the singleton instance (useful for testing)
+     */
+    public static synchronized void resetInstance() {
+        instance = null;
+    }
+
+    /**
+     * Check if running in offline mode (emulator)
+     * @return true if connected to emulator, false if connected to real Firebase
+     */
+    public boolean isOfflineMode() {
+        return isOfflineMode;
     }
 
     // Optional accessors for other classes to read internal references
