@@ -1,8 +1,10 @@
 package com.example.pixel_events.events;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.qr.QRCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,8 @@ public class Event {
     private String description;
     private int waitlistId;
     private int organizerId;
-    private String qrCode;
+    private String qrCodeData;  // The data encoded in the QR code
+    private transient QRCode qrCode;  // Transient so Firebase doesn't try to serialize it
     private String eventStartDate;
     private String eventEndDate;
     private String registrationStartDate;
@@ -83,11 +86,17 @@ public class Event {
         this.eventEndDate = eventEndDate;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
-        // Add a reference to the QR code class
-        // this.qrCode = new qrcode(this).
-        
-        // Note: Event is not automatically saved to database
-        // Call saveToDatabase() explicitly to persist
+        this.qrCodeData = generateQRCodeData();
+        this.qrCode = new QRCode(this.qrCodeData);
+    }
+    
+    /**
+     * Generate QR code data string for this event
+     * Format: "Event-{eventId}-{organizerId}"
+     * @return The QR code data string
+     */
+    private String generateQRCodeData() {
+        return "Event-" + this.eventId + "-" + this.organizerId;
     }
 
     /**
@@ -142,9 +151,38 @@ public class Event {
     public int getOrganizerId() {
         return organizerId;
     }
-    public String getQrCode() {
+    
+    /**
+     * Get the QR code data string (what's encoded in the QR code)
+     * @return The QR code data string
+     */
+    public String getQrCodeData() {
+        return qrCodeData;
+    }
+    
+    /**
+     * Get the QR code object
+     * If the QR code hasn't been generated yet (e.g., after Firebase retrieval),
+     * it will be generated on-demand
+     * @return The QRCode object containing the bitmap
+     */
+    public QRCode getQrCode() {
+        if (qrCode == null && qrCodeData != null) {
+            // Regenerate QR code if it doesn't exist (e.g., after Firebase deserialization)
+            qrCode = new QRCode(qrCodeData);
+        }
         return qrCode;
     }
+    
+    /**
+     * Get the QR code as a Bitmap
+     * @return The QR code bitmap, or null if generation fails
+     */
+    public Bitmap getQrCodeBitmap() {
+        QRCode qr = getQrCode();
+        return qr != null ? qr.getBitmap() : null;
+    }
+    
     public String getEventStartDate() {
         return eventStartDate;
     }
