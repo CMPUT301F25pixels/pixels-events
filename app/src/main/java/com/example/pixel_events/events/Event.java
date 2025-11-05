@@ -75,9 +75,6 @@ public class Event {
         this.registrationEndDate = registrationEndDate;
         // Add a reference to the QR code class
         // this.qrCode = new qrcode(this).
-        
-        // Note: Event is not automatically saved to database
-        // Call saveToDatabase() explicitly to persist
     }
 
     /**
@@ -93,18 +90,13 @@ public class Event {
     }
 
     /**
-     * Save this event to the database
-     * Call this method explicitly to persist the event to Firebase
+     * Create and save event to database
+     * @param db DatabaseHandler reference
      */
-    public void saveToDatabase() {
-        try {
-            DatabaseHandler db = DatabaseHandler.getInstance();
-            db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
-                    this.location, this.capacity, this.description, this.eventStartDate,
-                    this.eventEndDate, this.registrationStartDate, this.registrationEndDate);
-        } catch (Exception e) {
-            Log.e("Event", "Failed to save event to database", e);
-        }
+    public void createEvent(DatabaseHandler db) {
+        db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
+                this.location, this.capacity, this.description, this.eventStartDate,
+                this.eventEndDate, this.registrationStartDate, this.registrationEndDate);
     }
 
     // Getters
