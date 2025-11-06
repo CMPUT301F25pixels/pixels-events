@@ -1,6 +1,9 @@
 package com.example.pixel_events;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,8 +12,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.events.EventActivity;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private DatabaseHandler db;
+    private Button addFormButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +32,27 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Init DataBase
-        db = new DatabaseHandler();
+        // Verify Firebase initialization (already done in PixelEventsApplication)
+        try {
+            FirebaseApp app = FirebaseApp.getInstance();
+            Log.d(TAG, "Firebase is initialized: " + (app != null));
+            
+            // Verify Firestore connection
+            FirebaseFirestore.getInstance();
+            Log.d(TAG, "Firestore instance retrieved successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Firebase initialization error", e);
+        }
 
+        // Init DatabaseHandler (singleton pattern)
+        db = DatabaseHandler.getInstance();
+        Log.d(TAG, "DatabaseHandler initialized");
+
+        addFormButton = findViewById(R.id.addEvent);
+
+        addFormButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EventActivity.class);
+            startActivity(intent);
+        });
     }
 }
