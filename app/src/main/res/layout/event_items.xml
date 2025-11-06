@@ -51,7 +51,6 @@
                 android:layout_height="wrap_content"
                 android:text="6:00 AM"
                 android:textColor="@android:color/darker_gray"
-
                 android:textSize="14sp" />
 
             <TextView
