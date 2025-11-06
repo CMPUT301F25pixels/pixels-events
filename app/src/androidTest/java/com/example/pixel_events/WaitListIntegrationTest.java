@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-public class WaitListIntergationTest {
+public class WaitListIntegrationTest {
 
     private static final String EVENT_ID = "1762386210";
     private static final String USER_1   = "testUser_A";
