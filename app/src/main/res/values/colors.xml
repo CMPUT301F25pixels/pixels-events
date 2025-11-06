@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Colors -->
+    <color name="dark_bg">#0F1419</color>
+    <color name="card_bg">#1A1F2E</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Text Colors -->
+    <color name="text_secondary">#8B8F99</color>
+    <color name="text_primary">@color/white</color>
+
+    <!-- Accent Colors -->
+    <color name="accent_blue">#4A9FFF</color>
+    <color name="accent_blue_light">#3679F7</color>
+    <color name="accent_blue_lighter">#74AEFF</color>
+    <color name="user_input">#74AEFF</color>
+    <color name="cancel_button">#777</color>
+    <color name="placeholder_gray">#3A3F4E</color>
+
+    <!-- Status Colors -->
+    <color name="bottom_drawer">#2B44BA</color>
+    <color name="status_selected">#4CAF50</color>
+    <color name="status_not_selected">#F44336</color>
+    <color name="status_pending">#FF9800</color>
+
+    <!-- Background Colors -->
+    <color name="search_bg">#1A1F2E</color>
+    <color name="dropdown_bg">#1A1F2E</color>
+    <color name="badge_color">#4A9FFF</color>
+    <color name="stroke_color">#3A3F4E</color>
+
+    <!-- Additional -->
+    <color name="red">#F44336</color>
+    <color name="green">#4CAF50</color>
+    <color name="gray">#808080</color>
+    <color name="black">#000000</color>
+
 </resources>
