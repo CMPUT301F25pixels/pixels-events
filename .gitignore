@@ -14,6 +14,7 @@
 /captures
 .externalNativeBuild
 .cxx
+.log
 
 # Ignore additional IntelliJ settings
 /.idea/caches
