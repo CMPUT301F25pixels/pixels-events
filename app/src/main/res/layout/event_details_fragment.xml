@@ -58,18 +58,108 @@
             android:textColor="#F3F4F6"
             android:textSize="15sp" />
 
+        <!-- Status (e.g., 'You’re on the waiting list') -->
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text=""
+            android:textColor="#A7F3D0"
+            android:textSize="14sp" />
+
         <!-- Join / Leave Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cta"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="12dp"
             android:text="Join"
             android:textColor="#FFFFFF"
             app:iconTint="#FFFFFF"
             app:strokeColor="#3B82F6"
             android:backgroundTint="#1E40AF" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="#233155" />
+
+        <!-- Section: Information -->
+        <TextView
+            android:id="@+id/info_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Information"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF" />
+
+        <!-- About Event header -->
+        <TextView
+            android:id="@+id/about_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="  About Event:"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF" />
+
+        <!-- About Event body (reuse description text if you want) -->
+        <TextView
+            android:id="@+id/about_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="(Same as description above)"
+            android:textColor="#F3F4F6"
+            android:textSize="14sp" />
+
+        <!-- Lottery header -->
+        <TextView
+            android:id="@+id/lottery_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="  How the Lottery works:"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF" />
+
+        <!-- Step 1 -->
+        <TextView
+            android:id="@+id/lottery_step1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="•  Step 1: Join the Waitlist if registration is open."
+            android:textColor="#F3F4F6"
+            android:textSize="14sp" />
+
+        <!-- Step 2 -->
+        <TextView
+            android:id="@+id/lottery_step2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="•  Step 2: Watch for an acceptance/denial notification or check the Notifications tab for updates."
+            android:textColor="#F3F4F6"
+            android:textSize="14sp" />
+
+        <!-- Step 3 -->
+        <TextView
+            android:id="@+id/lottery_step3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="•  Step 3: If accepted, accept or decline the invite. Otherwise, better luck next time."
+            android:textColor="#F3F4F6"
+            android:textSize="14sp" />
 
     </LinearLayout>
 </ScrollView>
