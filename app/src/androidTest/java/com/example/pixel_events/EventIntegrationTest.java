@@ -37,12 +37,12 @@ public class EventIntegrationTest {
     private static final String TEST_LOCATION = "Test City";
     private static final String TEST_CAPACITY = "500";
     private static final String TEST_DESCRIPTION = "This is a test event";
-    private static final String TEST_EVENT_START = "2025-12-01";
-    private static final String TEST_EVENT_END = "2025-12-03";
+    private static final String TEST_EVENT_START = "2026-02-01";
+    private static final String TEST_EVENT_END = "2026-02-03";
     private static final String TEST_EVENT_START_TIME = "12:00";
     private static final String TEST_EVENT_END_TIME = "14:00";
-    private static final String TEST_REG_START = "2025-11-01";
-    private static final String TEST_REG_END = "2025-11-30";
+    private static final String TEST_REG_START = "2026-01-01";
+    private static final String TEST_REG_END = "2026-01-30";
 
     @Before
     public void setUp() {
