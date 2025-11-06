@@ -4,6 +4,20 @@ import android.util.Log;
 
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
+import com.example.pixel_events.waitingList.WaitingList;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -19,6 +33,8 @@ public class DatabaseHandler {
     private final FirebaseFirestore db;
     private final CollectionReference accRef;
     private final CollectionReference eventRef;
+    private final CollectionReference waitListRef;
+
     private boolean isOfflineMode = false;
 
     /**
@@ -51,6 +67,7 @@ public class DatabaseHandler {
         
         accRef = db.collection("AccountData");
         eventRef = db.collection("EventData");
+        waitListRef = db.collection("WaitListData");
     }
 
     public static synchronized DatabaseHandler getInstance() {
@@ -97,6 +114,11 @@ public class DatabaseHandler {
     public CollectionReference getEventCollection() {
         return eventRef;
     }
+    public CollectionReference getWaitListCollection() {
+        return waitListRef;
+    }
+
+
 
 
     // ACCOUNT INFO FUNCTIONS ---------------------------------------------------------------------
@@ -384,6 +406,166 @@ public class DatabaseHandler {
                 .addOnFailureListener(e ->
                         Log.e("DB", "Error deleting event " + eventID, e));
     }
+
+    // WAITING LIST FUNCTIONS ------------------------------------------------------------------------
+    /**
+     * Creates a new waiting list document for an event if it doesn't already exist.
+     *
+     * @param eventId  The unique identifier of the event (used as the document ID in WaitListData).
+     * @param capacity The maximum number of people allowed in the waiting list.
+     * @return A Task<Void> that completes when the document is successfully created or merged.
+     *
+     * <p>This method initializes default fields for the waiting list:
+     * <ul>
+     *     <li>eventId</li>
+     *     <li>status ("waiting")</li>
+     *     <li>maxWaitlistSize (capacity)</li>
+     *     <li>capacity (duplicate for query convenience)</li>
+     *     <li>waitList (empty array)</li>
+     *     <li>selected (empty array)</li>
+     * </ul>
+     * The method uses {@link com.google.firebase.firestore.SetOptions#merge()} to ensure that
+     * existing fields are preserved if the document already exists.
+     */
+    public Task<Void> createWaitingList(String eventId, int capacity) {
+        DocumentReference doc = waitListRef.document(eventId);
+
+        Map<String, Object> init = new HashMap<>();
+        init.put("eventId", eventId);
+        init.put("status", "waiting");
+        init.put("maxWaitlistSize", capacity);  // store capacity here
+        init.put("capacity", capacity);         // optional duplicate for readability/queries
+        init.put("waitList", new ArrayList<String>());
+        init.put("selected", new ArrayList<String>());
+
+        return doc.set(init, SetOptions.merge());
+    }
+
+    /**
+     * Retrieves the waiting list object for a given event.
+     *
+     * @param eventId        The unique identifier of the event whose waiting list should be fetched.
+     * @param listener       A success callback that returns a {@link com.example.pixel_events.waitingList.WaitingList}
+     *                       object, or null if the document does not exist.
+     * @param errorListener  A failure callback invoked if the Firestore operation fails.
+     *
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * db.getWaitingList("12345", waitList -> {
+     *     if (waitList != null) {
+     *         Log.d("WAITLIST", "Loaded waitlist for event: " + waitList.getEventId());
+     *     } else {
+     *         Log.d("WAITLIST", "No waitlist found for this event.");
+     *     }
+     * }, e -> Log.e("WAITLIST", "Failed to fetch waitlist", e));
+     * }</pre>
+     */
+    public void getWaitingList(String eventId, OnSuccessListener<WaitingList> listener, OnFailureListener errorListener) {
+        waitListRef.document(String.valueOf(eventId))
+                .get()
+                .addOnSuccessListener(snap -> {
+                    if (!snap.exists()) {
+                        listener.onSuccess(null); // no doc yet
+                        return;
+                    }
+                    WaitingList wl = snap.toObject(WaitingList.class);
+                    listener.onSuccess(wl);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting waiting list", e);
+                    errorListener.onFailure(e);
+                });
+    }
+    /**
+     * Attempts to add a user to the waiting list for a given event.
+     *
+     * @param eventId the identifier of the event whose waiting list to modify; must match
+     *                the document ID in the {@code WaitListData} collection.
+     * @param userId  the unique identifier of the user to add to the waiting list.
+     * @return a {@link com.google.android.gms.tasks.Task} that completes when the update is applied.
+     *         The task is successful even if the user was already present (no-op). The task fails if
+     *         the waiting list document does not exist or if Firestore update fails.
+     */
+    public Task<Void> joinWaitingList(String eventId, String userId) {
+        DocumentReference doc = waitListRef.document(eventId);
+
+        return doc.get().continueWithTask(task -> {
+            DocumentSnapshot snap = task.getResult();
+            if (snap == null || !snap.exists()) {
+                throw new Exception("Waiting list does not exist for eventId: " + eventId);
+            }
+
+            List<String> waitList = (List<String>) snap.get("waitList");
+            if (waitList == null) waitList = new ArrayList<>();
+
+            if (waitList.contains(userId)) {
+                Log.d("DB", "User already in waitlist: " + userId);
+                // Return a completed task to signal success without changes
+                return Tasks.forResult(null);
+            }
+
+            waitList.add(userId);
+            long newCount = waitList.size();
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("waitList", waitList);
+            updates.put("waitlistCount", newCount);
+
+            return doc.update(updates);
+        });
+    }
+
+    /**
+     * Attempts to remove a user from the waiting list for a given event.
+     *
+     * <p><b>Behavior:</b>
+     * <ul>
+     *   <li>Fails if the waiting list document for the event does not exist.</li>
+     *   <li>No-ops (successful Task with no changes) if the user is not currently in the list.</li>
+     *   <li>Otherwise, removes the user from {@code waitList} and updates {@code waitlistCount} to the list size.</li>
+     * </ul>
+     *
+     * <p><b>Important:</b> This method performs a read-then-write (no Firestore transaction).
+     * In highly concurrent scenarios, two writers could overwrite each other. If you need
+     * strict consistency under contention, use a transaction.
+     *
+     * @param eventId the identifier of the event whose waiting list to modify; must match
+     *                the document ID in the {@code WaitListData} collection.
+     * @param userId  the unique identifier of the user to remove from the waiting list.
+     * @return a {@link com.google.android.gms.tasks.Task} that completes when the update is applied.
+     *         The task is successful even if the user was not present (no-op). The task fails if
+     *         the waiting list document does not exist or if Firestore update fails.
+     */
+    public Task<Void> leaveWaitingList(String eventId, String userId) {
+        DocumentReference doc = waitListRef.document(eventId);
+
+        return doc.get().continueWithTask(task -> {
+            DocumentSnapshot snap = task.getResult();
+            if (snap == null || !snap.exists()) {
+                throw new Exception("Waiting list does not exist for eventId: " + eventId);
+            }
+
+            List<String> waitList = (List<String>) snap.get("waitList");
+            if (waitList == null) waitList = new ArrayList<>();
+
+            if (!waitList.contains(userId)) {
+                Log.d("DB", "User not found in waitlist: " + userId);
+                // Return a completed task to signal success without changes
+                return Tasks.forResult(null);
+            }
+
+            waitList.remove(userId);
+            long newCount = waitList.size();
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("waitList", waitList);
+            updates.put("waitlistCount", newCount);
+
+            return doc.update(updates);
+        });
+    }
+
+
 }
 
 /*
