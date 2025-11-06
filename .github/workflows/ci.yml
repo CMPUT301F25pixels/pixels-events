@@ -96,7 +96,7 @@ jobs:
           path: |
             app/build/reports/androidTests/connected/
             app/build/outputs/androidTest-results/
-
+          path: app/build/reports/androidTests/
       - name: Stop Firebase Emulators
         if: always()
         run: |
