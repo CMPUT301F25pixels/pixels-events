@@ -1,17 +1,26 @@
 package com.example.pixel_events;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.pixel_events.qr.QRScannerActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
+    private static final int CAMERA_PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,5 +34,43 @@ public class MainActivity extends AppCompatActivity {
             db = FirebaseFirestore.getInstance();
             return insets;
         });
+
+        // button to open qr scanner
+        Button scanButton = findViewById(R.id.scan_qr_button);
+        scanButton.setOnClickListener(v -> {
+            if (checkCameraPermission()) {
+                openQRScanner();
+            } else {
+                requestCameraPermission();
+            }
+        });
+    }
+
+    private boolean checkCameraPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        ActivityCompat.requestPermissions(this, 
+                new String[]{Manifest.permission.CAMERA}, 
+                CAMERA_PERMISSION_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openQRScanner();
+            } else {
+                Toast.makeText(this, "Camera permission needed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void openQRScanner() {
+        Intent intent = new Intent(this, QRScannerActivity.class);
+        startActivity(intent);
     }
 }
