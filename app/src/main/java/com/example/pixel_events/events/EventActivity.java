@@ -79,8 +79,8 @@ public class EventActivity extends AppCompatActivity {
             String imageUrl = "";
 
             try {
-        Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
-            capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
+                Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
+                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
 
                 // Persist to database
                 newEvent.saveToDatabase();
@@ -103,10 +103,16 @@ public class EventActivity extends AppCompatActivity {
     }
 
     private void showDatePicker(TextInputEditText field) {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(this, (view, year, month, dayOfMonth) ->
-                field.setText(dayOfMonth + "/" + (month + 1) + "/" + year),
-                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+    Calendar c = Calendar.getInstance();
+    DatePickerDialog dpd = new DatePickerDialog(this, (view, year, month, dayOfMonth) ->
+        // Use ISO format yyyy-MM-dd to match Event tests and parsing
+        field.setText(String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)),
+        c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+
+    // Disallow selecting today or earlier: set min date to tomorrow
+    long oneDay = 24L * 60L * 60L * 1000L;
+    dpd.getDatePicker().setMinDate(System.currentTimeMillis() + oneDay);
+    dpd.show();
     }
 
     private void showTimePicker(TextInputEditText field) {
@@ -115,6 +121,4 @@ public class EventActivity extends AppCompatActivity {
                 field.setText(String.format("%02d:%02d", hourOfDay, minute)),
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
-
-
 }
