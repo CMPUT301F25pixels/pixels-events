@@ -104,12 +104,16 @@ public class LoginActivity extends AppCompatActivity {
 
         db.getAcc(userIdString, profile -> {
             if (profile != null) {
-                // Existing entrant profile
+                // Existing entrant profile: just log in
                 onLoginSuccess("user", entrantId);
             } else {
-                // First-time entrant: create a simple profile
-                createEntrantProfile(entrantId);
+                // First-time entrant: go to signup screen
+                Intent intent = new Intent(LoginActivity.this, EntrantSignupActivity.class);
+                intent.putExtra("entrant_id", entrantId);
+                startActivity(intent);
+                finish();
             }
+            setButtonsEnabled(true);
         }, e -> {
             Toast.makeText(LoginActivity.this,
                     "Error checking entrant account: " + e.getMessage(),
@@ -117,6 +121,7 @@ public class LoginActivity extends AppCompatActivity {
             setButtonsEnabled(true);
         });
     }
+
 
     /**
      * Organizer/Admin login using simple access codes.
@@ -129,44 +134,40 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void handleOrganizerOrAdminLogin(boolean isAdmin) {
         String enteredCode = accessCodeEditText.getText().toString().trim();
+        String role = isAdmin ? "admin" : "org";
 
+        // Simple MVP validation
         if (enteredCode.isEmpty()) {
-            Toast.makeText(this, "Please enter an access code", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Enter an access code", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        if (isAdmin && !enteredCode.equals(ADMIN_CODE)) {
+            Toast.makeText(this, "Invalid admin code", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (!isAdmin && !enteredCode.equals(ORGANIZER_CODE)) {
             Toast.makeText(this, "Invalid organizer code", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (isAdmin && !enteredCode.equals(ADMIN_CODE)) {
-            Toast.makeText(this, "Invalid admin code", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         setButtonsEnabled(false);
 
-        String role = isAdmin ? "admin" : "org";
-        int fixedId = isAdmin ? 200001 : 100001; // Stable IDs for MVP
+        int profileId = isAdmin ? 200001 : 100001;
+        String idString = String.valueOf(profileId);
 
-        String userIdString = String.valueOf(fixedId);
-
-        db.getAcc(userIdString, profile -> {
+        db.getAcc(idString, profile -> {
             if (profile != null) {
-                // Profile already exists in Firestore
-                onLoginSuccess(role, fixedId);
+                onLoginSuccess(role, profileId);
             } else {
-                // Create a basic profile for this role
-                createStaffProfile(fixedId, role);
+                createStaffProfile(profileId, role);
             }
+            setButtonsEnabled(true);
         }, e -> {
-            Toast.makeText(LoginActivity.this,
-                    "Error checking account: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "DB error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             setButtonsEnabled(true);
         });
     }
+
 
     /**
      * Create a simple entrant profile in Firestore and then complete login.
@@ -199,7 +200,7 @@ public class LoginActivity extends AppCompatActivity {
      * Create a simple Organizer/Admin profile in Firestore and then complete login.
      */
     private void createStaffProfile(int id, String role) {
-        String userName = role.equals("admin") ? "Admin" : "Organizer";
+        String name = role.equals("admin") ? "Admin User" : "Organizer User";
         Date dob = new Date();
         String gender = "";
         String email = "";
@@ -212,9 +213,7 @@ public class LoginActivity extends AppCompatActivity {
         notifyPrefs.add(true);
         notifyPrefs.add(true);
 
-        db.addAcc(id, role, userName, dob, gender,
-                email, city, province, phoneNum, notifyPrefs);
-
+        db.addAcc(id, role, name, dob, gender, email, city, province, phoneNum, notifyPrefs);
         onLoginSuccess(role, id);
     }
 
