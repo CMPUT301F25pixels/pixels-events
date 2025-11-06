@@ -57,7 +57,6 @@ dependencies {
 
     // Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-firestore")
     
     // Google Play Services (required for Firebase)
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
