@@ -39,17 +39,28 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
+    
+    // JUnit 4 for unit testing
     testImplementation(libs.junit)
+    testImplementation("junit:junit:4.13.2")
+    
+    // Mockito for mocking in unit tests
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    
+    // Android testing
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-      // Import the Firebase BoM
+    
+    // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
 
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
+    // Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
-
+    implementation("com.google.firebase:firebase-firestore")
+    
+    // Google Play Services (required for Firebase)
+    implementation("com.google.android.gms:play-services-tasks:18.1.0")
 
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
