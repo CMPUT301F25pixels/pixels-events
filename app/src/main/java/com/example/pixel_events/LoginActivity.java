@@ -189,7 +189,7 @@ public class LoginActivity extends AppCompatActivity {
         notifyPrefs.add(true);
 
         // This constructor automatically calls db.addAcc(...) via createProfile()
-        new Profile(entrantId, accType, userName, dob, gender,
+        db.addAcc(entrantId, accType, userName, dob, gender,
                 email, city, province, phoneNum, notifyPrefs);
 
         onLoginSuccess(accType, entrantId);
@@ -212,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
         notifyPrefs.add(true);
         notifyPrefs.add(true);
 
-        new Profile(id, role, userName, dob, gender,
+        db.addAcc(id, role, userName, dob, gender,
                 email, city, province, phoneNum, notifyPrefs);
 
         onLoginSuccess(role, id);
