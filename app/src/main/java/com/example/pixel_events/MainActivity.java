@@ -13,13 +13,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.EventActivity;
+import com.example.pixel_events.organizer.OrganizerActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private DatabaseHandler db;
-    private Button addFormButton;
+    private Button entrantButton, organizerButton, adminButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +49,14 @@ public class MainActivity extends AppCompatActivity {
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
-        addFormButton = findViewById(R.id.addEvent);
+        // Initialize buttons
+        entrantButton = findViewById(R.id.EntrantButton);
+        organizerButton = findViewById(R.id.OrganizerButton);
+        adminButton = findViewById(R.id.AdminButton);
 
-        addFormButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventActivity.class);
+        organizerButton.setOnClickListener(v -> {
+            Log.d(TAG, "Organizer button clicked");
+            Intent intent = new Intent(MainActivity.this, OrganizerActivity.class);
             startActivity(intent);
         });
     }

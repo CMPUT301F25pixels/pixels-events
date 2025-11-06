@@ -26,6 +26,8 @@
         <activity
             android:name=".events.EventActivity"
             android:exported="true" />
+        <activity android:name=".organizer.OrganizerActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
