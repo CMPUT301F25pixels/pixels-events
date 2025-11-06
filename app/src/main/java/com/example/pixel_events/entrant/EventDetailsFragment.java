@@ -47,6 +47,7 @@ public class EventDetailsFragment extends Fragment {
     private long waitingListCount = 0L;
     private String startTime;
     private String endTime;
+    private TextView infoHeader, aboutHeader, aboutBody, lotteryHeader, lotteryStep1, lotteryStep2, lotteryStep3;
 
     @Nullable
     @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -63,7 +64,14 @@ public class EventDetailsFragment extends Fragment {
         dateView = v.findViewById(R.id.date);
         description = v.findViewById(R.id.description);
         cta = v.findViewById(R.id.cta);
-
+        infoHeader = v.findViewById(R.id.info_header);
+        status = v.findViewById(R.id.status);
+        aboutHeader = v.findViewById(R.id.about_header);
+        aboutBody = v.findViewById(R.id.about_body);
+        lotteryHeader = v.findViewById(R.id.lottery_header);
+        lotteryStep1 = v.findViewById(R.id.lottery_step1);
+        lotteryStep2 = v.findViewById(R.id.lottery_step2);
+        lotteryStep3 = v.findViewById(R.id.lottery_step3);
         eventId = requireArguments().getString(ARG_EVENT_ID, null);
         if (TextUtils.isEmpty(eventId)) {
             toast("Missing event id"); requireActivity().finish(); return;
@@ -120,14 +128,13 @@ public class EventDetailsFragment extends Fragment {
         String dateText = startDate + " " + startTime + " - " + endDate + " " + endTime;
         dateView.setText(dateText);
         title.setText(name);
+        aboutBody.setText(desc);
         description.setText(desc);
+        ((TextView) requireView().findViewById(R.id.about_body)).setText(desc);
 
         if (!TextUtils.isEmpty(posterUrl)) Glide.with(this).load(posterUrl).into(poster);
         else poster.setImageDrawable(null);
 
-
-        String capText = (waitingListCap == null) ? "∞" : String.valueOf(waitingListCap);
-        wlCount.setText("Waiting list: " + waitingListCount + "/" + capText);
 
         renderCTA();
     }
