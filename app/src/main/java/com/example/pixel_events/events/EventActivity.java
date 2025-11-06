@@ -79,8 +79,8 @@ public class EventActivity extends AppCompatActivity {
             String imageUrl = "";
 
             try {
-        Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
-            capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
+                Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
+                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
 
                 // Persist to database
                 newEvent.saveToDatabase();
@@ -121,6 +121,4 @@ public class EventActivity extends AppCompatActivity {
                 field.setText(String.format("%02d:%02d", hourOfDay, minute)),
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
-
-
 }

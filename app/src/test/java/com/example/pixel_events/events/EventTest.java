@@ -158,28 +158,28 @@ public class EventTest {
 
     @Test
     public void testSetEventStartDate() {
-        String newStartDate = "2025-12-15";
+        String newStartDate = "2025-12-25";
         testEvent.setEventStartDate(newStartDate);
         assertEquals("Event start date should be updated", newStartDate, testEvent.getEventStartDate());
     }
 
     @Test
     public void testSetEventEndDate() {
-        String newEndDate = "2025-12-20";
+        String newEndDate = "2025-12-31";
         testEvent.setEventEndDate(newEndDate);
         assertEquals("Event end date should be updated", newEndDate, testEvent.getEventEndDate());
     }
 
     @Test
     public void testSetRegistrationStartDate() {
-        String newRegStart = "2025-11-15";
+        String newRegStart = "2025-12-11";
         testEvent.setRegistrationStartDate(newRegStart);
         assertEquals("Registration start date should be updated", newRegStart, testEvent.getRegistrationStartDate());
     }
 
     @Test
     public void testSetRegistrationEndDate() {
-        String newRegEnd = "2025-12-10";
+        String newRegEnd = "2025-12-21";
         testEvent.setRegistrationEndDate(newRegEnd);
         assertEquals("Registration end date should be updated", newRegEnd, testEvent.getRegistrationEndDate());
     }
@@ -436,6 +436,23 @@ public class EventTest {
     }
 
     // ========================================================================================
+    // UNIT TESTS - Testing null and edge cases (Validation Tests)
+    // ========================================================================================
+    @Test(expected = IllegalArgumentException.class)
+    public void testEndDateBeforeStartDate() { testEvent.setEventEndDate("2025-12-21"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRegEndDateBeforeRegStartDate() { testEvent.setRegistrationEndDate("2026-12-09"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRegEndDateBeforeEventStartDate() { testEvent.setRegistrationEndDate("2025-12-26"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEventStartDateAfterRegEndDate() { testEvent.setEventStartDate("2025-12-19"); }
+
+
+
+    // ========================================================================================
     // INTEGRATION TEST - Combined Add, Modify, and Delete operations
     // This test would require Firebase emulator or mocking
     // ========================================================================================
@@ -498,8 +515,8 @@ public class EventTest {
         Event consistencyEvent = new Event(
                 4004, 504, "Consistency Test", "url",
                 "Location", "100", "Description", "Free",
-                "2026-01-01", "2026-01-05", "09:00", "17:00",
-                "2026-12-01", "2026-12-31"
+                "2026-12-01", "2026-12-05", "09:00", "17:00",
+                "2026-01-01", "2026-01-31"
         );
         consistencyEvent.setAutoUpdateDatabase(false);
         
