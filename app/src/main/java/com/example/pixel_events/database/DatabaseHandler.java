@@ -442,6 +442,16 @@ public class DatabaseHandler {
     }
 
     /**
+     * Alias for createWaitingList
+     * @param eventId The unique identifier of the event
+     * @param capacity The maximum number of people allowed in the waiting list
+     * @return A Task<Void> that completes when the document is successfully created or merged
+     */
+    public Task<Void> addWaitingList(String eventId, int capacity) {
+        return createWaitingList(eventId, capacity);
+    }
+
+    /**
      * Retrieves the waiting list object for a given event.
      *
      * @param eventId        The unique identifier of the event whose waiting list should be fetched.
