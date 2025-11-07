@@ -1,4 +1,4 @@
-package com.example.pixel_events;
+package com.example.pixel_events.login;
 
 import android.content.Context;
 import android.content.SharedPreferences;

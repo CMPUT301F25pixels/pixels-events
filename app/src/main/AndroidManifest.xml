@@ -16,7 +16,7 @@
         android:theme="@style/Theme.Pixelevents">
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +25,7 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".login.LoginActivity"
             android:exported="true" />
 
         <activity
@@ -33,7 +33,11 @@
             android:exported="true" />
 
         <activity
-            android:name=".EntrantSignupActivity"
+            android:name=".login.EntrantSignupActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".entrant.EventDetailsLauncherActivity"
             android:exported="false" />
 
     </application>

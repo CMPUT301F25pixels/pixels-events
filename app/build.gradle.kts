@@ -39,7 +39,6 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
-    implementation(libs.google.firebase.auth)
 
     // JUnit 4 for unit testing
     testImplementation(libs.junit)

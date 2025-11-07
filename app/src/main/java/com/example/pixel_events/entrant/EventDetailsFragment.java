@@ -1,8 +1,11 @@
 package com.example.pixel_events.entrant;
 
+import static android.content.ContentValues.TAG;
 
 import android.os.Bundle;
+import android.se.omapi.Session;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,22 +22,13 @@ import com.bumptech.glide.Glide;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.pixel_events.login.SessionManager;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.text.DateFormat;
-import java.util.Locale;
-
-
 
 public class EventDetailsFragment extends Fragment {
-
+    private String TAG = "EventDetailsFragment";
     public static final String ARG_EVENT_ID = "eventId";
 
-    private FirebaseAuth auth;
     private String eventId;
     private DocumentReference eventRef;
 
@@ -48,6 +42,8 @@ public class EventDetailsFragment extends Fragment {
     private String startTime;
     private String endTime;
     private TextView infoHeader, aboutHeader, aboutBody, lotteryHeader, lotteryStep1, lotteryStep2, lotteryStep3;
+    public static final String ARG_EVENT_IDS = "eventId";
+    private static final String HARDCODED_EVENT_ID = "1762463338";
 
     @Nullable
     @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -56,6 +52,13 @@ public class EventDetailsFragment extends Fragment {
 
     @Override public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        eventId = getArguments() != null
+                ? getArguments().getString(ARG_EVENT_ID, HARDCODED_EVENT_ID)
+                : HARDCODED_EVENT_ID;
+
+        // REMOVE the old "Missing event id; finish()" block
+        // ...then proceed as normal to load/bind the event
+
 
         DatabaseHandler db = DatabaseHandler.getInstance();
 
@@ -72,7 +75,7 @@ public class EventDetailsFragment extends Fragment {
         lotteryStep1 = v.findViewById(R.id.lottery_step1);
         lotteryStep2 = v.findViewById(R.id.lottery_step2);
         lotteryStep3 = v.findViewById(R.id.lottery_step3);
-        eventId = requireArguments().getString(ARG_EVENT_ID, null);
+//        eventId = requireArguments().getString(ARG_EVENT_ID, null);
         if (TextUtils.isEmpty(eventId)) {
             toast("Missing event id"); requireActivity().finish(); return;
         }
@@ -91,26 +94,27 @@ public class EventDetailsFragment extends Fragment {
 
         cta.setOnClickListener(view -> {
             cta.setEnabled(false);
-            String userId = FirebaseAuth.getInstance().getUid();  // or whatever user key you're using
+            String userId = "12345";  // or whatever user key you're using
+            Log.d(TAG, "User ID: " + userId);
 
             if (joined) {
                 db.leaveWaitingList(eventId, userId)
-                        .addOnSuccessListener(u -> {
-                            joined = false;
-                            if (waitingListCount > 0) waitingListCount--;
-                            renderCTA();
-                        })
-                        .addOnFailureListener(e -> toast("Error: " + e.getMessage()))
-                        .addOnCompleteListener(t -> cta.setEnabled(true));
+                    .addOnSuccessListener(u -> {
+                        joined = false;
+                        if (waitingListCount > 0) waitingListCount--;
+                        renderCTA();
+                    })
+                    .addOnFailureListener(e -> toast("Error: " + e.getMessage()))
+                    .addOnCompleteListener(t -> cta.setEnabled(true));
             } else {
                 db.joinWaitingList(eventId, userId)
-                        .addOnSuccessListener(u -> {
-                            joined = true;
-                            waitingListCount++;
-                            renderCTA();
-                        })
-                        .addOnFailureListener(e -> toast("Error: " + e.getMessage()))
-                        .addOnCompleteListener(t -> cta.setEnabled(true));
+                    .addOnSuccessListener(u -> {
+                        joined = true;
+                        waitingListCount++;
+                        renderCTA();
+                    })
+                    .addOnFailureListener(e -> toast("Error: " + e.getMessage()))
+                    .addOnCompleteListener(t -> cta.setEnabled(true));
             }
         });
     }
