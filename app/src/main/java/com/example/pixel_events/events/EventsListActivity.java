@@ -119,21 +119,32 @@ public class EventsListActivity extends AppCompatActivity {
     }
 
     private void loadEvents() {
+        Log.d(TAG, "Starting to load events from Firestore...");
+        
         firestore.collection("EventData")
-                .orderBy("eventStartDate")
-                .get()
+                .get()  // Remove orderBy temporarily to see all events
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Log.d(TAG, "Firestore query successful. Total documents: " + queryDocumentSnapshots.size());
+                    
                     upcomingEvents.clear();
                     previousEvents.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Log.d(TAG, "Processing document: " + document.getId());
+                        Log.d(TAG, "Document data: " + document.getData());
+                        
                         EventModel event = convertToEventModel(document);
                         if (event != null) {
+                            Log.d(TAG, "Converted event: " + event.getTitle() + ", Date: " + event.getDate());
                             if (isFutureEvent(event)) {
                                 upcomingEvents.add(event);
+                                Log.d(TAG, "Added to upcoming events");
                             } else {
                                 previousEvents.add(event);
+                                Log.d(TAG, "Added to previous events");
                             }
+                        } else {
+                            Log.e(TAG, "Failed to convert document to EventModel");
                         }
                     }
 
@@ -145,10 +156,11 @@ public class EventsListActivity extends AppCompatActivity {
                             previousEvents.size() + " previous events");
 
                     adapter.updateEvents(upcomingEvents);
+                    adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading events", e);
-                    Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

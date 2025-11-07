@@ -112,16 +112,22 @@ public class EventActivity extends AppCompatActivity {
                 Event newEvent = new Event(eventId, organizerId, title, imageURL, location,
                     capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
 
+                android.util.Log.d("EventActivity", "Created event: ID=" + eventId + " Title=" + title);
+                
                 // Persist to database
                 newEvent.saveToDatabase();
+                
+                android.util.Log.d("EventActivity", "Event saved to database successfully");
 
-                Toast.makeText(EventActivity.this, "Event saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EventActivity.this, "Event saved successfully!", Toast.LENGTH_SHORT).show();
                 // Close activity and return
                 finish();
             } catch (IllegalArgumentException ex) {
                 // Validation from Event constructor failed
+                android.util.Log.e("EventActivity", "Validation error: " + ex.getMessage(), ex);
                 Toast.makeText(EventActivity.this, "Invalid input: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             } catch (Exception ex) {
+                android.util.Log.e("EventActivity", "Error saving event: " + ex.getMessage(), ex);
                 Toast.makeText(EventActivity.this, "Error saving event: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
