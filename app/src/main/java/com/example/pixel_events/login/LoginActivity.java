@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class LoginActivity extends AppCompatActivity {
     // MVP access codes – change these later or hook to Firestore
+    private static final String PREFS_NAME = "pixels_prefs";
     private static final String ORGANIZER_CODE = "ORG123";
     private static final String ADMIN_CODE = "ADMIN123";
 
