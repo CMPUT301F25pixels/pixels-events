@@ -2,25 +2,38 @@ package com.example.pixel_events.events;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.os.Bundle;
 import android.widget.Button;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Calendar;
 
 public class EventActivity extends AppCompatActivity {
     private TextInputEditText startDate, endDate, startTime, endTime, regStartDate, regEndDate;
-    private Button doneButton, cancelButton;
+    private Button doneButton, cancelButton, uploadButton;
+    private ImageView imageView;
+    private Uri filePath;
+    private Bitmap bitmap;
+    private ActivityResultLauncher<String> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.eventform);
+        setContentView(R.layout.activity_event_form);
 
         startDate = findViewById(R.id.eventFormStartDate);
         endDate = findViewById(R.id.eventFormEndDate);
@@ -30,7 +43,8 @@ public class EventActivity extends AppCompatActivity {
         regEndDate = findViewById(R.id.eventFormRegEndDate);
         doneButton = findViewById(R.id.eventFormAdd);
         cancelButton = findViewById(R.id.eventFormCancel);
-
+        uploadButton = findViewById(R.id.eventFormUploadImage);
+        imageView = findViewById(R.id.eventFormPosterImage);
 
         startDate.setOnClickListener(v -> showDatePicker(startDate));
         endDate.setOnClickListener(v -> showDatePicker(endDate));
@@ -73,11 +87,13 @@ public class EventActivity extends AppCompatActivity {
             // Placeholder organizer id — replace with real user id when available
             int organizerId = 1;
 
-            // imageUrl not collected here; use empty string
-            String imageUrl = "";
+            String imageURL = "";
+            if (bitmap != null) {
+                imageURL = EventActivity.bitmapToBase64(bitmap);
+            }
 
             try {
-                Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
+                Event newEvent = new Event(eventId, organizerId, title, imageURL, location,
                     capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
 
                 // Persist to database
@@ -98,6 +114,25 @@ public class EventActivity extends AppCompatActivity {
             // Simply finish the activity and return to previous screen
             finish();
         });
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    // Handle the result from the image picker
+                    if (uri != null) {
+                        filePath = uri;
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(uri);
+                            bitmap = BitmapFactory.decodeStream(inputStream);
+                            imageView.setImageBitmap(bitmap);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(EventActivity.this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+        uploadButton.setOnClickListener(v -> imagePickerLauncher.launch("image/*"));
     }
 
     private void showDatePicker(TextInputEditText field) {
@@ -119,4 +154,17 @@ public class EventActivity extends AppCompatActivity {
                 field.setText(String.format("%02d:%02d", hourOfDay, minute)),
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
+
+    public static String bitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos); // or JPEG
+        byte[] imageBytes = baos.toByteArray();
+        return Base64.encodeToString(imageBytes, Base64.DEFAULT);
+    }
+
+    public static Bitmap base64ToBitmap(String base64Str) throws IllegalArgumentException {
+        byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+    }
+
 }
