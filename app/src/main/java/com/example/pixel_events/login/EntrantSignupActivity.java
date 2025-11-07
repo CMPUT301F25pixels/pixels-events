@@ -3,6 +3,7 @@ package com.example.pixel_events.login;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "pixels_prefs";
     private static final String KEY_ROLE = "current_role";
     private static final String KEY_PROFILE_ID = "current_profile_id";
+    private static final String KEY_ENTRANT_ID = "entrant_profile_id";
 
     private EditText nameInput;
     private EditText emailInput;
@@ -39,9 +41,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
 
         entrantId = getIntent().getIntExtra("entrant_id", -1);
         if (entrantId == -1) {
-            Toast.makeText(this, "Error: no entrant ID", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
+            entrantId = getOrCreateEntrantId();
         }
 
         nameInput = findViewById(R.id.edit_entrant_name);
@@ -97,5 +97,25 @@ public class EntrantSignupActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private int getOrCreateEntrantId() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        int existingId = prefs.getInt(KEY_ENTRANT_ID, -1);
+        if (existingId != -1) {
+            return existingId;
+        }
+
+        String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        int newId;
+        if (androidId != null) {
+            newId = androidId.hashCode();
+        } else {
+            newId = (int) (System.currentTimeMillis() & 0x7FFFFFFF);
+        }
+
+        prefs.edit().putInt(KEY_ENTRANT_ID, newId).apply();
+        return newId;
     }
 }
