@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/backButton"
+        android:id="@+id/organizerBackButton"
         android:text="Back"
         android:backgroundTint="#666666"
         android:textColor="@android:color/white"

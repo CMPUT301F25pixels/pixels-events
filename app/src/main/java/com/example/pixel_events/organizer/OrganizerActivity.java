@@ -42,8 +42,8 @@ public class OrganizerActivity extends AppCompatActivity {
         Log.d(TAG, "OrganizerActivity created");
 
         // Initialize buttons
-        addEventButton = findViewById(R.id.addEvent);
-        backButton = findViewById(R.id.backButton);
+        addEventButton = findViewById(R.id.organizerAddEvent);
+        backButton = findViewById(R.id.organizerBackButton);
 
         // Set up Add Event button click listener
         addEventButton.setOnClickListener(v -> {
