@@ -8,7 +8,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
-// import com.example.pixel_events.database.DatabaseHandler; // TODO: Uncomment when db is available
+import com.example.pixel_events.database.DatabaseHandler;
 
 public class EventDetailsActivity extends AppCompatActivity {
     private TextView titleText;
@@ -63,18 +63,6 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     private void loadEvent() {
-        // TODO: Connect to DatabaseHandler once feature/event branch is merged
-        // For now, show placeholder data for testing
-        titleText.setText("Sample Event");
-        locationText.setText("Sample Location");
-        datesText.setText("2025-12-01 to 2025-12-05");
-        timesText.setText("10:00 - 17:00");
-        descriptionText.setText("This is a sample event description. Once the database is integrated, real event data will be displayed here.");
-        capacityText.setText("Capacity: 50");
-        feeText.setText("Fee: Free");
-        
-        // Uncomment when DatabaseHandler is available:
-        /*
         DatabaseHandler db = DatabaseHandler.getInstance();
         
         db.getEvent(eventId, 
@@ -83,7 +71,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                     titleText.setText(event.getTitle());
                     locationText.setText(event.getLocation());
                     datesText.setText(event.getEventStartDate() + " to " + event.getEventEndDate());
-                    timesText.setText(event.getEventStartTime() + " - " + event.getEndTime());
+                    timesText.setText(event.getEventStartTime() + " - " + event.getEventEndTime());
                     descriptionText.setText(event.getDescription());
                     capacityText.setText("Capacity: " + event.getCapacity());
                     feeText.setText("Fee: " + event.getFee());
@@ -97,7 +85,6 @@ public class EventDetailsActivity extends AppCompatActivity {
                 finish();
             }
         );
-        */
     }
 }
 
