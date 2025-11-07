@@ -10,11 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import com.example.pixel_events.events.Event;
 
-/**
- * Adapter for displaying events with date headers
- * Handles both date headers (String) and event items (EventModel)
- */
+
 public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_DATE_HEADER = 0;
@@ -24,7 +22,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final OnEventClickListener clickListener;
 
     public interface OnEventClickListener {
-        void onEventClick(EventModel event);
+        void onEventClick(Event event);
     }
 
     public EventAdapter(List<Object> items) {
@@ -61,7 +59,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             String dateHeader = (String) items.get(position);
             ((DateHeaderViewHolder) holder).bind(dateHeader);
         } else if (holder instanceof EventViewHolder) {
-            EventModel event = (EventModel) items.get(position);
+            Event event = (Event) items.get(position);
             ((EventViewHolder) holder).bind(event, clickListener);
         }
     }
@@ -71,9 +69,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return items.size();
     }
 
-    /**
-     * ViewHolder for date headers
-     */
+
     public static class DateHeaderViewHolder extends RecyclerView.ViewHolder {
         private final TextView dateText;
 
@@ -89,9 +85,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    /**
-     * ViewHolder for event items
-     */
+
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
         private final TextView organizerName;
@@ -110,7 +104,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             location = itemView.findViewById(R.id.eventLocation);
         }
 
-        public void bind(EventModel event, OnEventClickListener listener) {
+        public void bind(Event event, OnEventClickListener listener) {
             title.setText(event.getTitle());
             organizerName.setText(event.getOrganizerName());
             type.setText(event.getType());
