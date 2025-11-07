@@ -54,9 +54,15 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
 
     public void updateEvents(List<EventModel> newEvents) {
         android.util.Log.d("EventsListAdapter", "updateEvents called with " + newEvents.size() + " events");
-        this.events.clear();
-        this.events.addAll(newEvents);
-        notifyDataSetChanged();
+        // Don't clear if they're the same reference - just notify
+        if (this.events == newEvents) {
+            android.util.Log.d("EventsListAdapter", "Same list reference, just notifying change");
+            notifyDataSetChanged();
+        } else {
+            this.events.clear();
+            this.events.addAll(newEvents);
+            notifyDataSetChanged();
+        }
         android.util.Log.d("EventsListAdapter", "Events list now has " + events.size() + " items");
     }
 

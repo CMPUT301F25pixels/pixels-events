@@ -19,9 +19,9 @@ public class EventModel {
     private int organizerId;
 
     private static final SimpleDateFormat DATE_TIME_FORMAT =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+            new SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.US);
     private static final SimpleDateFormat TIME_ONLY_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.US);
+            new SimpleDateFormat("h:mm a", Locale.US);
 
     public EventModel(String title, String date, String time, String location,
                       String type, int imageResId) {

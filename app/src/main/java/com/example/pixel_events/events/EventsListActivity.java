@@ -157,16 +157,7 @@ public class EventsListActivity extends AppCompatActivity {
                     Log.d(TAG, "Loaded " + upcomingEvents.size() + " upcoming, " +
                             previousEvents.size() + " previous events");
 
-                    // Prefer upcoming; if none, show previous by default
-                    if (!upcomingEvents.isEmpty()) {
-                        adapter.updateEvents(upcomingEvents);
-                        updateTabButtonStyles(true);
-                    } else if (!previousEvents.isEmpty()) {
-                        adapter.updateEvents(previousEvents);
-                        updateTabButtonStyles(false);
-                    } else {
-                        adapter.updateEvents(new ArrayList<>());
-                    }
+                    adapter.updateEvents(upcomingEvents);
                     Toast.makeText(this, "Loaded " + (upcomingEvents.size() + previousEvents.size()) + " events", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
@@ -177,63 +168,25 @@ public class EventsListActivity extends AppCompatActivity {
 
     private EventModel convertToEventModel(QueryDocumentSnapshot document) {
         try {
-            // Defensive conversions with logging
-            Object eventIdRaw = document.get("eventId");
-            Object organizerIdRaw = document.get("organizerId");
-            int eventId = parseIntSafely(eventIdRaw, -1);
-            int organizerId = parseIntSafely(organizerIdRaw, -1);
-
-            String title = document.getString("title");
-            String location = document.getString("location");
-            String capacity = toStringSafely(document.get("capacity"));
-            String description = document.getString("description");
-            String fee = toStringSafely(document.get("fee"));
-            String date = document.getString("eventStartDate");
-            String time = document.getString("eventStartTime");
             String organizerName = document.contains("organizerName") ?
-                    toStringSafely(document.get("organizerName")) : "Organizer";
-
-            Log.d(TAG, "Doc -> id=" + eventId + ", orgId=" + organizerId + ", title=" + title +
-                    ", date=" + date + ", time=" + time + ", location=" + location);
-
-            if (title == null || date == null || time == null) {
-                Log.w(TAG, "Skipping doc due to missing required fields: " + document.getId());
-                return null;
-            }
-
+                    (String) document.get("organizerName") : "Organizer";
+            
             return new EventModel(
-                    eventId,
-                    organizerId,
-                    title,
+                    Math.toIntExact((Long) document.get("eventId")),
+                    Math.toIntExact((Long) document.get("organizerId")),
+                    (String) document.get("title"),
                     R.drawable.sample_image,
-                    location != null ? location : "",
-                    capacity,
-                    description != null ? description : "",
-                    fee,
-                    date,
-                    time,
+                    (String) document.get("location"),
+                    (String) document.get("capacity"),
+                    (String) document.get("description"),
+                    (String) document.get("fee"),
+                    (String) document.get("eventStartDate"),
+                    (String) document.get("eventStartTime"),
                     organizerName
             );
         } catch (Exception e) {
             Log.e(TAG, "Error converting document", e);
             return null;
-        }
-    }
-
-    private String toStringSafely(Object value) {
-        return value == null ? "" : String.valueOf(value);
-    }
-
-    private int parseIntSafely(Object value, int fallback) {
-        if (value == null) return fallback;
-        try {
-            if (value instanceof Number) {
-                return ((Number) value).intValue();
-            }
-            return Integer.parseInt(String.valueOf(value));
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to parse int from value: " + value);
-            return fallback;
         }
     }
 
