@@ -52,7 +52,6 @@ public class Profile {
         this.eventsUpcoming = new ArrayList<>();
         this.eventsPart = new ArrayList<>();
         this.eventsNPart = new ArrayList<>();
-        this.createProfile(DatabaseHandler.getInstance());
     }
 
     // Getters
