@@ -29,9 +29,12 @@ import java.util.List;
  * All roles are routed to MainActivity for now. Role + profileId are stored
  * in SharedPreferences so the app can remember who is logged in.
  */
-public class LoginActivity extends AppCompatActivity {
-    // MVP access codes – change these later or hook to Firestore
+class LoginActivity extends AppCompatActivity {
+    // Local prefs for device → entrant mapping
     private static final String PREFS_NAME = "pixels_prefs";
+    private static final String KEY_ENTRANT_ID = "entrant_profile_id";
+
+    // MVP access codes – change these later or hook to Firestore
     private static final String ORGANIZER_CODE = "ORG123";
     private static final String ADMIN_CODE = "ADMIN123";
 
@@ -41,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText accessCodeEditText;
 
     private DatabaseHandler db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,6 +228,10 @@ public class LoginActivity extends AppCompatActivity {
      * Get or create a stable entrant ID tied to this device.
      * Uses ANDROID_ID -> int hash, cached in SharedPreferences.
      */
+    /**
+     * Get or create a stable entrant ID tied to this device.
+     * Uses a local SharedPreferences entry so the same device gets the same entrant ID.
+     */
     private int getOrCreateEntrantId() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         int existingId = prefs.getInt(KEY_ENTRANT_ID, -1);
@@ -231,7 +239,10 @@ public class LoginActivity extends AppCompatActivity {
             return existingId;
         }
 
-        String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        String androidId = Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
 
         int newId;
         if (androidId != null) {
