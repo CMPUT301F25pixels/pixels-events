@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/addEvent"
+        android:id="@+id/organizerAddEvent"
         android:text="Add Event"
         android:backgroundTint="#333333"
         android:textColor="@android:color/white"

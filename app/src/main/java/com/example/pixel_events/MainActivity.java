@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.events.EventActivity;
 import com.example.pixel_events.events.EventsListActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -19,7 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private DatabaseHandler db;
-    private Button entrantButton, organizerButton, adminButton;
+    private Button addFormButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +49,10 @@ public class MainActivity extends AppCompatActivity {
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
-        // Initialize buttons
-        entrantButton = findViewById(R.id.EntrantButton);
-        organizerButton = findViewById(R.id.OrganizerButton);
-        adminButton = findViewById(R.id.AdminButton);
+        addFormButton = findViewById(R.id.addEvent);
 
         addFormButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventsListActivity.class);
+            Intent intent = new Intent(MainActivity.this, EventActivity.class);
             startActivity(intent);
         });
     }
