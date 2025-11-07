@@ -18,11 +18,12 @@ public class EventModel {
     private int eventId;
     private int organizerId;
 
-    private static final SimpleDateFormat DATE_TIME_FORMAT =
+    private static final SimpleDateFormat DATE_TIME_FORMAT_12HR =
             new SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.US);
+    private static final SimpleDateFormat DATE_TIME_FORMAT_24HR =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
     private static final SimpleDateFormat TIME_ONLY_FORMAT =
             new SimpleDateFormat("h:mm a", Locale.US);
-
 
     public EventModel(String title, String date, String time, String location,
                       String type, int imageResId) {
@@ -33,13 +34,17 @@ public class EventModel {
         this.organizerName = "ABC Company";
 
         try {
-            this.dateTime = DATE_TIME_FORMAT.parse(date + " " + time);
+            // Try 24-hour format first (HH:mm), then 12-hour (h:mm a)
+            try {
+                this.dateTime = DATE_TIME_FORMAT_24HR.parse(date + " " + time);
+            } catch (ParseException e1) {
+                this.dateTime = DATE_TIME_FORMAT_12HR.parse(date + " " + time);
+            }
         } catch (ParseException e) {
             e.printStackTrace();
             this.dateTime = new Date(0);
         }
     }
-
 
     public EventModel(int eventId, int organizerId, String title, int imageResId,
                       String location, String capacity, String description,
@@ -53,11 +58,15 @@ public class EventModel {
         this.description = description;
         this.fee = fee;
         this.organizerName = organizerName;
-
         this.type = (fee == null || fee.equalsIgnoreCase("free")) ? "Free" : "Paid";
 
         try {
-            this.dateTime = DATE_TIME_FORMAT.parse(date + " " + time);
+            // Try 24-hour format first (HH:mm), then 12-hour (h:mm a)
+            try {
+                this.dateTime = DATE_TIME_FORMAT_24HR.parse(date + " " + time);
+            } catch (ParseException e1) {
+                this.dateTime = DATE_TIME_FORMAT_12HR.parse(date + " " + time);
+            }
         } catch (ParseException e) {
             e.printStackTrace();
             this.dateTime = new Date(0);
@@ -114,7 +123,6 @@ public class EventModel {
         return displayFormat.format(dateTime);
     }
 
-
     public String getFormattedTime() {
         return TIME_ONLY_FORMAT.format(dateTime);
     }
@@ -158,3 +166,4 @@ public class EventModel {
         this.imageResId = imageResId;
     }
 }
+

@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@color/dark_bg"
+    android:padding="24dp"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,11 +18,12 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
             android:text="Create Event"
-            android:textColor="@android:color/black"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold" />
 
         <!-- Event Image -->
         <ImageView
@@ -33,6 +36,13 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ic_photo_placeholder" />
 
+        <Button
+            android:id="@+id/eventFormUploadImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Upload Image" />
+
         <!-- Event Title -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -44,7 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Location -->
@@ -59,7 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Dates -->
@@ -81,8 +91,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Space
@@ -100,8 +110,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -112,7 +122,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Registrations are from 00:00am to 11:59pm"
-            android:textColor="@android:color/black"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp"
             android:textStyle="italic" />
 
@@ -135,8 +145,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Space
@@ -154,8 +164,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -178,8 +188,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Space
@@ -197,8 +207,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:inputType="none"
-                    android:textColor="@android:color/black" />
+                android:inputType="none"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -215,7 +225,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:minLines="3"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Fee and Capacity -->
@@ -236,8 +246,8 @@
                     android:id="@+id/eventFormFee"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/black" />
+                android:inputType="numberDecimal"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Space
@@ -254,8 +264,8 @@
                     android:id="@+id/eventFormCapacity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:textColor="@android:color/black" />
+                android:inputType="number"
+                android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -266,7 +276,74 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Enable Geolocation"
-            android:textColor="@android:color/black" />
+            android:textColor="@color/white" />
+
+        <!-- Tags    -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/eventFormTagGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:singleSelection="false"
+            app:selectionRequired="false"
+            app:chipSpacing="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagAdventure"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Adventure"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagCultural"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Cultural"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagReligious"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Religious"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagEducational"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Educational"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagWorkshop"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Workshop"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagNetworking"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Networking"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.chip.ChipGroup>
+
 
         <!-- Buttons -->
         <LinearLayout
@@ -283,7 +360,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#333333"
                 android:text="Cancel"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/white" />
 
             <Space
                 android:layout_width="8dp"
@@ -296,7 +373,7 @@
                 android:layout_weight="1"
                 android:backgroundTint="#1D9BF0"
                 android:text="Done"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

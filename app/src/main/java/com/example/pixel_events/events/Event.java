@@ -3,8 +3,10 @@ package com.example.pixel_events.events;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.qr.QRCode;
 import com.example.pixel_events.waitingList.WaitingList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.text.ParseException;
@@ -29,6 +31,7 @@ public class Event {
     private String eventEndTime;
     private String fee;
     private WaitingList waitingList;
+    private ArrayList<String> tags;
 
     // Flag to control whether setters should automatically update database
     private boolean autoUpdateDatabase = true;
@@ -63,7 +66,8 @@ public class Event {
             String eventStartTime,
             String eventEndTime,
             String registrationStartDate,
-            String registrationEndDate
+            String registrationEndDate,
+            ArrayList<String> tags
     ) {
         // Validate required fields
         validateNotEmpty(title, "Title");
@@ -92,6 +96,7 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.description = description;
+        this.tags = tags;
 
         // Validate dates and times
         validateDateRelations(eventStartDate, eventEndDate,
@@ -115,6 +120,7 @@ public class Event {
         this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
+        this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
         this.waitingList = new WaitingList(String.valueOf(eventId));
     }
 
@@ -140,7 +146,7 @@ public class Event {
             db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
                     this.location, this.capacity, this.description, this.fee, this.eventStartDate,
                     this.eventEndDate, this.eventStartTime, this.eventEndTime,
-                    this.registrationStartDate, this.registrationEndDate);
+                    this.registrationStartDate, this.registrationEndDate, this.tags);
             db.addWaitingList(this.waitingList.getEventId(), this.waitingList.getMaxWaitlistSize());
         } catch (Exception e) {
             Log.e("Event", "Failed to save event to database", e);
@@ -201,6 +207,68 @@ public class Event {
     }
     public String getRegistrationEndDate() {
         return registrationEndDate;
+    }
+    public ArrayList<String> getTags() {
+        return tags;
+    }
+    
+    /**
+     * Get formatted time for display (h:mm a format)
+     * @return formatted time string
+     */
+    public String getFormattedTime() {
+        if (eventStartTime == null || eventStartTime.isEmpty()) {
+            return "";
+        }
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm", Locale.US);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("h:mm a", Locale.US);
+            Date time = inputFormat.parse(eventStartTime);
+            return time != null ? outputFormat.format(time) : eventStartTime;
+        } catch (ParseException e) {
+            return eventStartTime;
+        }
+    }
+    
+    /**
+     * Get image resource ID (returns default sample image)
+     * @return image resource ID
+     */
+    public int getImageResId() {
+        return com.example.pixel_events.R.drawable.sample_image;
+    }
+    
+    /**
+     * Get organizer name (placeholder for now)
+     * @return organizer name
+     */
+    public String getOrganizerName() {
+        return "Organizer"; // Can be extended to fetch from database
+    }
+    
+    /**
+     * Get event type (Free or Paid)
+     * @return event type string
+     */
+    public String getType() {
+        return (fee == null || fee.equalsIgnoreCase("free") || fee.isEmpty()) ? "Free" : "Paid";
+    }
+    
+    /**
+     * Get event start date as Date object
+     * @return Date object or null if parsing fails
+     */
+    public Date getDate() {
+        if (eventStartDate == null || eventStartTime == null) {
+            return null;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+            return sdf.parse(eventStartDate + " " + eventStartTime);
+        } catch (ParseException e) {
+            Log.e("Event", "Error parsing date: " + e.getMessage());
+            return null;
+        }
     }
 
     // Setters - These update both the local field and the database

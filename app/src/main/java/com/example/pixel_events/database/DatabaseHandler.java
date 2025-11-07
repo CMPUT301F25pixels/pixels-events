@@ -18,6 +18,12 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -276,18 +282,35 @@ public class DatabaseHandler {
     public void addEvent(int eventId, int organizerId, String title, String imageUrl,
                          String location, String capacity, String description, String fee,
                          String eventStartDate, String eventEndDate, String eventStartTime, String eventEndTime,
-                         String registrationStartDate, String registrationEndDate) {
+                         String registrationStartDate, String registrationEndDate, ArrayList<String> tags) {
 
-        // Create a new Event (includes fee)
-        Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
-            capacity, description, fee, eventStartDate, eventEndDate,
-            eventStartTime, eventEndTime, registrationStartDate, registrationEndDate);
+        // Create a map of event data for Firestore
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("eventId", eventId);
+        eventData.put("organizerId", organizerId);
+        eventData.put("title", title);
+        eventData.put("imageUrl", imageUrl);
+        eventData.put("location", location);
+        eventData.put("capacity", capacity);
+        eventData.put("description", description);
+        eventData.put("fee", fee);
+        eventData.put("eventStartDate", eventStartDate);
+        eventData.put("eventEndDate", eventEndDate);
+        eventData.put("eventStartTime", eventStartTime);
+        eventData.put("eventEndTime", eventEndTime);
+        eventData.put("registrationStartDate", registrationStartDate);
+        eventData.put("registrationEndDate", registrationEndDate);
+        eventData.put("tags", tags);
 
         // Add the event to DB
-        eventRef.document(String.valueOf(newEvent.getEventId()))
-                .set(newEvent)
-                .addOnSuccessListener(unused -> Log.d("DB", "Added Event: " + newEvent.getEventId()))
-                .addOnFailureListener(e -> Log.w("DB", "Error adding event!", e));
+        eventRef.document(String.valueOf(eventId))
+                .set(eventData)
+                .addOnSuccessListener(unused -> {
+                    Log.d("DB", "Successfully added Event: " + eventId + " - " + title);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error adding event " + eventId, e);
+                });
     }
 
     /**
@@ -321,6 +344,24 @@ public class DatabaseHandler {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("DB", "Error getting event", e);
+                    errorListener.onFailure(e);
+                });
+    }
+
+    public void getAllEvents(OnSuccessListener<java.util.List<Event>> listener, OnFailureListener errorListener) {
+        eventRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Event> events = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot document : querySnapshot) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null) {
+                            events.add(event);
+                        }
+                    }
+                    listener.onSuccess(events);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting all events", e);
                     errorListener.onFailure(e);
                 });
     }
@@ -401,6 +442,23 @@ public class DatabaseHandler {
                         Log.e("DB", "Error deleting event " + eventID, e));
     }
 
+    public void deleteEvent(String eventID, Runnable onSuccess, OnFailureListener onFailure) {
+        eventRef.document(eventID)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Log.d("DB", "Deleted event: " + eventID);
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error deleting event " + eventID, e);
+                    if (onFailure != null) {
+                        onFailure.onFailure(e);
+                    }
+                });
+    }
+
     // WAITING LIST FUNCTIONS ------------------------------------------------------------------------
     /**
      * Creates a new waiting list document for an event if it doesn't already exist.
@@ -421,7 +479,7 @@ public class DatabaseHandler {
      * The method uses {@link com.google.firebase.firestore.SetOptions#merge()} to ensure that
      * existing fields are preserved if the document already exists.
      */
-    public Task<Void> addWaitingList(String eventId, int capacity) {
+    public Task<Void> createWaitingList(String eventId, int capacity) {
         DocumentReference doc = waitListRef.document(eventId);
 
         Map<String, Object> init = new HashMap<>();
@@ -433,6 +491,16 @@ public class DatabaseHandler {
         init.put("selected", new ArrayList<String>());
 
         return doc.set(init, SetOptions.merge());
+    }
+
+    /**
+     * Alias for createWaitingList
+     * @param eventId The unique identifier of the event
+     * @param capacity The maximum number of people allowed in the waiting list
+     * @return A Task<Void> that completes when the document is successfully created or merged
+     */
+    public Task<Void> addWaitingList(String eventId, int capacity) {
+        return createWaitingList(eventId, capacity);
     }
 
     /**

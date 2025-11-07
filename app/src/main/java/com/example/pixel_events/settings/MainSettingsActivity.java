@@ -23,7 +23,6 @@ import java.util.List;
 public class MainSettingsActivity extends AppCompatActivity {
     // Setup buttons
     private Button viewProfileButton, regHistButton, notifPrefButton, logoutButton, delAccButton;
-    private ImageButton homeButton, QRButton, myEventsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +35,6 @@ public class MainSettingsActivity extends AppCompatActivity {
         notifPrefButton = findViewById(R.id.settingsNotiPrefButton);
         logoutButton = findViewById(R.id.settingsLogOutButton);
         delAccButton = findViewById(R.id.settingsDelAccButton);
-
-        homeButton = findViewById(R.id.settingsHomeButton);
-        QRButton = findViewById(R.id.settingsQRButton);
-        myEventsButton = findViewById(R.id.settingsMyEventsButton);
 
         // Set onClickListeners for all buttons
 
@@ -57,17 +52,32 @@ public class MainSettingsActivity extends AppCompatActivity {
 
         // Show Delete Account Popup
         delAccButton.setOnClickListener(v -> showDeleteDialogue());
+        
+        setupBottomNav();
+    }
+    
+    private void setupBottomNav() {
+        android.widget.LinearLayout navHome = findViewById(R.id.nav_home);
+        android.widget.LinearLayout navEvents = findViewById(R.id.nav_events);
+        android.widget.LinearLayout navScanner = findViewById(R.id.nav_scanner);
+        android.widget.LinearLayout navProfile = findViewById(R.id.nav_profile);
 
-        // Go to Home Page Activity
-        homeButton.setOnClickListener(v -> startActivity((new Intent(MainSettingsActivity.this, MainActivity.class))));
+        navHome.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        });
 
-        // Go to QR Scanner Activity
-        QRButton.setOnClickListener(v -> startActivity(new Intent(MainSettingsActivity.this, QRCode.class)));
+        navEvents.setOnClickListener(v -> {
+            // TODO: Add EventsListActivity intent
+        });
 
-        // Go to My Events Activity TODO
-//        myEventsButton.setOnClickListener(v -> startActivity(new Intent(MainSettingsActivity.this, )));
+        navScanner.setOnClickListener(v -> {
+            // TODO: Add QR Scanner intent
+        });
 
-        // DO nothing for Settings
+        navProfile.setOnClickListener(v -> {
+            android.widget.Toast.makeText(this, "Already on Profile", android.widget.Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**

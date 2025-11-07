@@ -1,9 +1,12 @@
 package com.example.pixel_events.events;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,14 +14,19 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.qr.QRScannerActivity;
+import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class EventsListActivity extends AppCompatActivity {
     private static final String TAG = "EventsListActivity";
@@ -42,6 +50,7 @@ public class EventsListActivity extends AppCompatActivity {
         initViews();
         setupTabButtons();
         setupRecyclerView();
+        setupBottomNav();
         loadEvents();
     }
 
@@ -49,6 +58,32 @@ public class EventsListActivity extends AppCompatActivity {
         upcomingButton = findViewById(R.id.upcomingButton);
         previousButton = findViewById(R.id.previousButton);
         eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
+    }
+    
+    private void setupBottomNav() {
+        LinearLayout navHome = findViewById(R.id.nav_home);
+        LinearLayout navEvents = findViewById(R.id.nav_events);
+        LinearLayout navScanner = findViewById(R.id.nav_scanner);
+        LinearLayout navProfile = findViewById(R.id.nav_profile);
+
+        navHome.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
+
+        navEvents.setOnClickListener(v -> {
+            Toast.makeText(this, "Already on Events", Toast.LENGTH_SHORT).show();
+        });
+
+        navScanner.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, QRScannerActivity.class);
+            startActivity(intent);
+        });
+
+        navProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void setupTabButtons() {
@@ -81,15 +116,26 @@ public class EventsListActivity extends AppCompatActivity {
         previousEvents = new ArrayList<>();
 
         adapter = new EventsListAdapter(upcomingEvents, this::onEventClick);
-        eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        eventsRecyclerView.setLayoutManager(layoutManager);
         eventsRecyclerView.setAdapter(adapter);
+        eventsRecyclerView.setHasFixedSize(true);
+        
+        Log.d(TAG, "RecyclerView setup complete with adapter: " + adapter);
+        Log.d(TAG, "RecyclerView visibility: " + eventsRecyclerView.getVisibility());
+        Log.d(TAG, "RecyclerView height: " + eventsRecyclerView.getHeight());
     }
 
     private void loadEvents() {
-        firestore.collection("events")
+        Log.d(TAG, "Loading events from EventData collection...");
+        
+        firestore.collection("EventData")
                 .orderBy("eventStartDate")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Log.d(TAG, "Query successful. Documents: " + queryDocumentSnapshots.size());
+                    
                     upcomingEvents.clear();
                     previousEvents.clear();
 
@@ -112,6 +158,7 @@ public class EventsListActivity extends AppCompatActivity {
                             previousEvents.size() + " previous events");
 
                     adapter.updateEvents(upcomingEvents);
+                    Toast.makeText(this, "Loaded " + (upcomingEvents.size() + previousEvents.size()) + " events", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading events", e);
@@ -121,6 +168,9 @@ public class EventsListActivity extends AppCompatActivity {
 
     private EventModel convertToEventModel(QueryDocumentSnapshot document) {
         try {
+            String organizerName = document.contains("organizerName") ?
+                    (String) document.get("organizerName") : "Organizer";
+            
             return new EventModel(
                     Math.toIntExact((Long) document.get("eventId")),
                     Math.toIntExact((Long) document.get("organizerId")),
@@ -132,14 +182,13 @@ public class EventsListActivity extends AppCompatActivity {
                     (String) document.get("fee"),
                     (String) document.get("eventStartDate"),
                     (String) document.get("eventStartTime"),
-                    (String) document.get("organizerName")
+                    organizerName
             );
         } catch (Exception e) {
             Log.e(TAG, "Error converting document", e);
             return null;
         }
     }
-
 
     private void showUpcomingEvents() {
         adapter.updateEvents(upcomingEvents);
@@ -154,7 +203,9 @@ public class EventsListActivity extends AppCompatActivity {
     }
 
     private void onEventClick(EventModel event) {
-        Toast.makeText(this, "Clicked: " + event.getTitle(), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, EventDetailsActivity.class);
+        intent.putExtra("eventId", String.valueOf(event.getEventId()));
+        startActivity(intent);
     }
 
     @Override

@@ -41,18 +41,29 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
     @Override
     public void onBindViewHolder(@NonNull EventListViewHolder holder, int position) {
         EventModel event = events.get(position);
+        android.util.Log.d("EventsListAdapter", "Binding event at position " + position + ": " + event.getTitle());
         holder.bind(event, clickListener);
     }
 
     @Override
     public int getItemCount() {
-        return events.size();
+        int count = events.size();
+        android.util.Log.d("EventsListAdapter", "getItemCount: " + count);
+        return count;
     }
 
     public void updateEvents(List<EventModel> newEvents) {
-        this.events.clear();
-        this.events.addAll(newEvents);
-        notifyDataSetChanged();
+        android.util.Log.d("EventsListAdapter", "updateEvents called with " + newEvents.size() + " events");
+        // Don't clear if they're the same reference - just notify
+        if (this.events == newEvents) {
+            android.util.Log.d("EventsListAdapter", "Same list reference, just notifying change");
+            notifyDataSetChanged();
+        } else {
+            this.events.clear();
+            this.events.addAll(newEvents);
+            notifyDataSetChanged();
+        }
+        android.util.Log.d("EventsListAdapter", "Events list now has " + events.size() + " items");
     }
 
     public static class EventListViewHolder extends RecyclerView.ViewHolder {
@@ -72,20 +83,28 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
         }
 
         public void bind(EventModel event, OnEventClickListener listener) {
-            eventImage.setImageResource(event.getImageResId());
-            eventTitle.setText(event.getTitle());
-            eventLocation.setText(event.getLocation());
+            android.util.Log.d("EventsListAdapter", "bind() called for: " + event.getTitle());
+            android.util.Log.d("EventsListAdapter", "View IDs - Image: " + (eventImage != null) + ", Title: " + (eventTitle != null) + ", Location: " + (eventLocation != null));
+            
+            if (eventImage != null) {
+                eventImage.setImageResource(R.drawable.sample_image);
+            }
+            if (eventTitle != null) {
+                eventTitle.setText(event.getTitle());
+            }
+            if (eventLocation != null) {
+                eventLocation.setText(event.getLocation());
+            }
 
-            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
-            eventTime.setText(timeFormat.format(event.getDate()));
+            eventTime.setText(event.getFormattedTime());
 
             String status;
-            Date now = new Date();
             Date eventDate = event.getDate();
+            Date now = new Date();
 
-            if (eventDate.after(now)) {
+            if (eventDate != null && eventDate.after(now)) {
                 status = "Upcoming";
-            } else if (Math.abs(eventDate.getTime() - now.getTime()) < 3600000) {
+            } else if (eventDate != null && Math.abs(eventDate.getTime() - now.getTime()) < 3600000) {
                 status = "Ongoing";
             } else {
                 status = "Past";

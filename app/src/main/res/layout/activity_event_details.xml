@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:padding="24dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/event_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Title"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/event_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/event_dates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dates"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/event_times"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Times"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/event_capacity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Capacity"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/event_fee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fee"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/event_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Description"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="32dp" />
+
+        <Button
+            android:id="@+id/join_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Join Waiting List"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/leave_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Leave Waiting List"
+            android:backgroundTint="@color/card_bg"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/edit_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Edit Event"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Delete Event"
+            android:backgroundTint="#D32F2F"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/view_qr_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="View Event QR Code"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/test_notification_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Test Lottery Notification"
+            android:backgroundTint="@color/card_bg"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Back"
+            android:backgroundTint="#333333"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="24dp" />
+
+    </LinearLayout>
+</ScrollView>
+

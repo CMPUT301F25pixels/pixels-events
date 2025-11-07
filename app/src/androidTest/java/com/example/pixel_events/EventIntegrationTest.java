@@ -7,6 +7,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -43,6 +45,7 @@ public class EventIntegrationTest {
     private static final String TEST_EVENT_END_TIME = "14:00";
     private static final String TEST_REG_START = "2026-01-01";
     private static final String TEST_REG_END = "2026-01-30";
+    private static final ArrayList<String> TEST_TAGS = new ArrayList<String>(Arrays.asList("Adventure", "Cultural"));
 
     @Before
     public void setUp() {
@@ -96,22 +99,23 @@ public class EventIntegrationTest {
         AtomicReference<Event> modifiedEvent = new AtomicReference<>();
 
         // Step 1: ADD EVENT
-    databaseHandler.addEvent(
-        TEST_EVENT_ID,
-        TEST_ORGANIZER_ID,
-        TEST_TITLE,
-        TEST_IMAGE_URL,
-        TEST_LOCATION,
-        TEST_CAPACITY,
-        TEST_DESCRIPTION,
-        "Free",
-        TEST_EVENT_START,
-        TEST_EVENT_END,
-        TEST_EVENT_START_TIME,
-        TEST_EVENT_END_TIME,
-        TEST_REG_START,
-        TEST_REG_END
-    );
+        databaseHandler.addEvent(
+            TEST_EVENT_ID,
+            TEST_ORGANIZER_ID,
+            TEST_TITLE,
+            TEST_IMAGE_URL,
+            TEST_LOCATION,
+            TEST_CAPACITY,
+            TEST_DESCRIPTION,
+            "Free",
+            TEST_EVENT_START,
+            TEST_EVENT_END,
+            TEST_EVENT_START_TIME,
+            TEST_EVENT_END_TIME,
+            TEST_REG_START,
+            TEST_REG_END,
+            TEST_TAGS
+        );
         
         // Wait for add operation
         Thread.sleep(2000);
@@ -120,18 +124,18 @@ public class EventIntegrationTest {
 
         // Step 2: GET EVENT (verify it was added)
         databaseHandler.getEvent(
-                String.valueOf(TEST_EVENT_ID),
-                event -> {
-                    if (event != null) {
-                        retrievedEvent.set(event);
-                        getSuccess.set(true);
-                    }
-                    getLatch.countDown();
-                },
-                e -> {
-                    System.err.println("Failed to get event: " + e.getMessage());
-                    getLatch.countDown();
+            String.valueOf(TEST_EVENT_ID),
+            event -> {
+                if (event != null) {
+                    retrievedEvent.set(event);
+                    getSuccess.set(true);
                 }
+                getLatch.countDown();
+            },
+            e -> {
+                System.err.println("Failed to get event: " + e.getMessage());
+                getLatch.countDown();
+            }
         );
 
         assertTrue("Get operation should complete", getLatch.await(5, TimeUnit.SECONDS));
@@ -167,18 +171,18 @@ public class EventIntegrationTest {
 
         // Step 4: GET MODIFIED EVENT (verify modifications)
         databaseHandler.getEvent(
-                String.valueOf(TEST_EVENT_ID),
-                event -> {
-                    if (event != null) {
-                        modifiedEvent.set(event);
-                        getModifiedSuccess.set(true);
-                    }
-                    getModifiedLatch.countDown();
-                },
-                e -> {
-                    System.err.println("Failed to get modified event: " + e.getMessage());
-                    getModifiedLatch.countDown();
+            String.valueOf(TEST_EVENT_ID),
+            event -> {
+                if (event != null) {
+                    modifiedEvent.set(event);
+                    getModifiedSuccess.set(true);
                 }
+                getModifiedLatch.countDown();
+            },
+            e -> {
+                System.err.println("Failed to get modified event: " + e.getMessage());
+                getModifiedLatch.countDown();
+            }
         );
 
         assertTrue("Get modified event should complete", getModifiedLatch.await(5, TimeUnit.SECONDS));
@@ -204,14 +208,14 @@ public class EventIntegrationTest {
         AtomicBoolean eventNotFound = new AtomicBoolean(false);
 
         databaseHandler.getEvent(
-                String.valueOf(TEST_EVENT_ID),
-                event -> {
-                    if (event == null) {
-                        eventNotFound.set(true);
-                    }
-                    verifyDeleteLatch.countDown();
-                },
-                e -> verifyDeleteLatch.countDown()
+            String.valueOf(TEST_EVENT_ID),
+            event -> {
+                if (event == null) {
+                    eventNotFound.set(true);
+                }
+                verifyDeleteLatch.countDown();
+            },
+            e -> verifyDeleteLatch.countDown()
         );
 
         assertTrue("Verify delete should complete", verifyDeleteLatch.await(5, TimeUnit.SECONDS));
@@ -227,33 +231,34 @@ public class EventIntegrationTest {
         AtomicReference<Event> retrievedEvent = new AtomicReference<>();
 
         // Add event
-    databaseHandler.addEvent(
-        TEST_EVENT_ID,
-        TEST_ORGANIZER_ID,
-        TEST_TITLE,
-        TEST_IMAGE_URL,
-        TEST_LOCATION,
-        TEST_CAPACITY,
-        TEST_DESCRIPTION,
-        "Free",
-        TEST_EVENT_START,
-        TEST_EVENT_END,
-        TEST_EVENT_START_TIME,
-        TEST_EVENT_END_TIME,
-        TEST_REG_START,
-        TEST_REG_END
-    );
+        databaseHandler.addEvent(
+            TEST_EVENT_ID,
+            TEST_ORGANIZER_ID,
+            TEST_TITLE,
+            TEST_IMAGE_URL,
+            TEST_LOCATION,
+            TEST_CAPACITY,
+            TEST_DESCRIPTION,
+            "Free",
+            TEST_EVENT_START,
+            TEST_EVENT_END,
+            TEST_EVENT_START_TIME,
+            TEST_EVENT_END_TIME,
+            TEST_REG_START,
+            TEST_REG_END,
+            TEST_TAGS
+        );
 
         Thread.sleep(2000);
 
         // Retrieve and verify
         databaseHandler.getEvent(
-                String.valueOf(TEST_EVENT_ID),
-                event -> {
-                    retrievedEvent.set(event);
-                    latch.countDown();
-                },
-                e -> latch.countDown()
+            String.valueOf(TEST_EVENT_ID),
+            event -> {
+                retrievedEvent.set(event);
+                latch.countDown();
+            },
+            e -> latch.countDown()
         );
 
         assertTrue("Operation should complete", latch.await(5, TimeUnit.SECONDS));
@@ -269,8 +274,8 @@ public class EventIntegrationTest {
         assertEquals("Description should match", TEST_DESCRIPTION, event.getDescription());
         assertEquals("Event start date should match", TEST_EVENT_START, event.getEventStartDate());
         assertEquals("Event end date should match", TEST_EVENT_END, event.getEventEndDate());
-    assertEquals("Event start time should match", TEST_EVENT_START_TIME, event.getEventStartTime());
-    assertEquals("Event end time should match", TEST_EVENT_END_TIME, event.getEventEndTime());
+        assertEquals("Event start time should match", TEST_EVENT_START_TIME, event.getEventStartTime());
+        assertEquals("Event end time should match", TEST_EVENT_END_TIME, event.getEventEndTime());
         assertEquals("Registration start date should match", TEST_REG_START, event.getRegistrationStartDate());
         assertEquals("Registration end date should match", TEST_REG_END, event.getRegistrationEndDate());
     }
@@ -281,22 +286,23 @@ public class EventIntegrationTest {
     @Test
     public void testModifyMultipleFields() throws InterruptedException {
         // First add the event
-    databaseHandler.addEvent(
-        TEST_EVENT_ID,
-        TEST_ORGANIZER_ID,
-        TEST_TITLE,
-        TEST_IMAGE_URL,
-        TEST_LOCATION,
-        TEST_CAPACITY,
-        TEST_DESCRIPTION,
-        "Free",
-        TEST_EVENT_START,
-        TEST_EVENT_END,
-        TEST_EVENT_START_TIME,
-        TEST_EVENT_END_TIME,
-        TEST_REG_START,
-        TEST_REG_END
-    );
+        databaseHandler.addEvent(
+            TEST_EVENT_ID,
+            TEST_ORGANIZER_ID,
+            TEST_TITLE,
+            TEST_IMAGE_URL,
+            TEST_LOCATION,
+            TEST_CAPACITY,
+            TEST_DESCRIPTION,
+            "free",
+            TEST_EVENT_START,
+            TEST_EVENT_END,
+            TEST_EVENT_START_TIME,
+            TEST_EVENT_END_TIME,
+            TEST_REG_START,
+            TEST_REG_END,
+            TEST_TAGS
+        );
 
         Thread.sleep(2000);
 
@@ -325,12 +331,12 @@ public class EventIntegrationTest {
         AtomicReference<Event> modifiedEvent = new AtomicReference<>();
 
         databaseHandler.getEvent(
-                String.valueOf(TEST_EVENT_ID),
-                event -> {
-                    modifiedEvent.set(event);
-                    getLatch.countDown();
-                },
-                e -> getLatch.countDown()
+            String.valueOf(TEST_EVENT_ID),
+            event -> {
+                modifiedEvent.set(event);
+                getLatch.countDown();
+            },
+            e -> getLatch.countDown()
         );
 
         assertTrue("Get should complete", getLatch.await(5, TimeUnit.SECONDS));
