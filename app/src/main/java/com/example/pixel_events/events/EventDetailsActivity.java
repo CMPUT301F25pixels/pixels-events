@@ -76,7 +76,11 @@ public class EventDetailsActivity extends AppCompatActivity {
         // Button listeners
         joinButton.setOnClickListener(v -> joinWaitlist());
         leaveButton.setOnClickListener(v -> leaveWaitlist());
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void checkWaitlistStatus() {

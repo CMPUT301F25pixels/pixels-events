@@ -21,10 +21,12 @@ import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class EventsListActivity extends AppCompatActivity {
     private static final String TAG = "EventsListActivity";
@@ -35,8 +37,8 @@ public class EventsListActivity extends AppCompatActivity {
     private RecyclerView eventsRecyclerView;
 
     private EventsListAdapter adapter;
-    private List<EventModel> upcomingEvents;
-    private List<EventModel> previousEvents;
+    private List<Event> upcomingEvents;
+    private List<Event> previousEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,9 +135,9 @@ public class EventsListActivity extends AppCompatActivity {
                         Log.d(TAG, "Processing document: " + document.getId());
                         Log.d(TAG, "Document data: " + document.getData());
                         
-                        EventModel event = convertToEventModel(document);
+                        Event event = document.toObject(Event.class);
                         if (event != null) {
-                            Log.d(TAG, "Converted event: " + event.getTitle() + ", Date: " + event.getDate());
+                            Log.d(TAG, "Converted event: " + event.getTitle());
                             if (isFutureEvent(event)) {
                                 upcomingEvents.add(event);
                                 Log.d(TAG, "Added to upcoming events");
@@ -144,13 +146,13 @@ public class EventsListActivity extends AppCompatActivity {
                                 Log.d(TAG, "Added to previous events");
                             }
                         } else {
-                            Log.e(TAG, "Failed to convert document to EventModel");
+                            Log.e(TAG, "Failed to convert document to Event");
                         }
                     }
 
-                    // Sort upcoming (earliest first), previous (latest first)
-                    Collections.sort(upcomingEvents, (e1, e2) -> e1.getDate().compareTo(e2.getDate()));
-                    Collections.sort(previousEvents, (e1, e2) -> e2.getDate().compareTo(e1.getDate()));
+                    // Sort by event start date
+                    Collections.sort(upcomingEvents, (e1, e2) -> e1.getEventStartDate().compareTo(e2.getEventStartDate()));
+                    Collections.sort(previousEvents, (e1, e2) -> e2.getEventStartDate().compareTo(e1.getEventStartDate()));
 
                     Log.d(TAG, "Loaded " + upcomingEvents.size() + " upcoming, " +
                             previousEvents.size() + " previous events");
@@ -164,31 +166,6 @@ public class EventsListActivity extends AppCompatActivity {
                 });
     }
 
-    private EventModel convertToEventModel(QueryDocumentSnapshot document) {
-        try {
-            String organizerName = document.contains("organizerName") ? 
-                (String) document.get("organizerName") : "Organizer";
-            
-            return new EventModel(
-                    Math.toIntExact((Long) document.get("eventId")),
-                    Math.toIntExact((Long) document.get("organizerId")),
-                    (String) document.get("title"),
-                    R.drawable.sample_image,
-                    (String) document.get("location"),
-                    (String) document.get("capacity"),
-                    (String) document.get("description"),
-                    (String) document.get("fee"),
-                    (String) document.get("eventStartDate"),
-                    (String) document.get("eventStartTime"),
-                    organizerName
-            );
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting document: " + e.getMessage(), e);
-            return null;
-        }
-    }
-
-
     private void showUpcomingEvents() {
         adapter.updateEvents(upcomingEvents);
     }
@@ -197,12 +174,21 @@ public class EventsListActivity extends AppCompatActivity {
         adapter.updateEvents(previousEvents);
     }
 
-    private boolean isFutureEvent(EventModel event) {
-        return event.getDate().after(new Date());
+    private boolean isFutureEvent(Event event) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date eventDate = sdf.parse(event.getEventStartDate());
+            return eventDate != null && eventDate.after(new Date());
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing date", e);
+            return true; // Default to upcoming if parsing fails
+        }
     }
 
-    private void onEventClick(EventModel event) {
-        Toast.makeText(this, "Clicked: " + event.getTitle(), Toast.LENGTH_SHORT).show();
+    private void onEventClick(Event event) {
+        Intent intent = new Intent(this, EventDetailsActivity.class);
+        intent.putExtra("eventId", String.valueOf(event.getEventId()));
+        startActivity(intent);
     }
 
     @Override

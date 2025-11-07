@@ -2,6 +2,7 @@ package com.example.pixel_events.events;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -120,7 +121,13 @@ public class EventActivity extends AppCompatActivity {
                 android.util.Log.d("EventActivity", "Event saved to database successfully");
 
                 Toast.makeText(EventActivity.this, "Event saved successfully!", Toast.LENGTH_SHORT).show();
-                // Close activity and return
+                
+                // Navigate to event details page
+                Intent intent = new Intent(EventActivity.this, EventDetailsActivity.class);
+                intent.putExtra("eventId", String.valueOf(eventId));
+                startActivity(intent);
+                
+                // Close this activity
                 finish();
             } catch (IllegalArgumentException ex) {
                 // Validation from Event constructor failed

@@ -18,14 +18,14 @@ import java.util.Locale;
 
 public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.EventListViewHolder> {
 
-    private final List<EventModel> events;
+    private final List<Event> events;
     private final OnEventClickListener clickListener;
 
     public interface OnEventClickListener {
-        void onEventClick(EventModel event);
+        void onEventClick(Event event);
     }
 
-    public EventsListAdapter(List<EventModel> events, OnEventClickListener clickListener) {
+    public EventsListAdapter(List<Event> events, OnEventClickListener clickListener) {
         this.events = events;
         this.clickListener = clickListener;
     }
@@ -40,7 +40,7 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
 
     @Override
     public void onBindViewHolder(@NonNull EventListViewHolder holder, int position) {
-        EventModel event = events.get(position);
+        Event event = events.get(position);
         holder.bind(event, clickListener);
     }
 
@@ -49,7 +49,7 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
         return events.size();
     }
 
-    public void updateEvents(List<EventModel> newEvents) {
+    public void updateEvents(List<Event> newEvents) {
         this.events.clear();
         this.events.addAll(newEvents);
         notifyDataSetChanged();
@@ -71,24 +71,28 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
             eventStatus = itemView.findViewById(R.id.eventListStatus);
         }
 
-        public void bind(EventModel event, OnEventClickListener listener) {
-            eventImage.setImageResource(event.getImageResId());
+        public void bind(Event event, OnEventClickListener listener) {
+            eventImage.setImageResource(R.drawable.sample_image);
             eventTitle.setText(event.getTitle());
             eventLocation.setText(event.getLocation());
 
-            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
-            eventTime.setText(timeFormat.format(event.getDate()));
+            eventTime.setText(event.getEventStartTime());
 
             String status;
-            Date now = new Date();
-            Date eventDate = event.getDate();
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                Date eventDate = sdf.parse(event.getEventStartDate());
+                Date now = new Date();
 
-            if (eventDate.after(now)) {
+                if (eventDate != null && eventDate.after(now)) {
+                    status = "Upcoming";
+                } else if (eventDate != null && Math.abs(eventDate.getTime() - now.getTime()) < 3600000) {
+                    status = "Ongoing";
+                } else {
+                    status = "Past";
+                }
+            } catch (Exception e) {
                 status = "Upcoming";
-            } else if (Math.abs(eventDate.getTime() - now.getTime()) < 3600000) {
-                status = "Ongoing";
-            } else {
-                status = "Past";
             }
 
             eventStatus.setText(status);
