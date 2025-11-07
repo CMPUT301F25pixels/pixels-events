@@ -19,7 +19,7 @@ public class Profile {
     private String email;                        // e-mail address
     private String city;                         // city of residence
     private String province;                     // province of residence
-    private int phoneNum;                        // user's phone number
+    private String phoneNum;                     // user's phone number
     private List<Integer> eventsUpcoming;        // list of upcoming eventID
     private List<Integer> eventsPart;            // list of past eventID that user participated in
     private List<Integer> eventsNPart;           // list of past eventID that user did not participate in
@@ -34,7 +34,7 @@ public class Profile {
      * Initialize
      */
     public Profile(int id, String accType, String userName, Date DOB, String gender,
-                   String email, String city, String province, int phoneNum,
+                   String email, String city, String province, String phoneNum,
                    List<Boolean> notify) {
         // Assign all variables
         this.id = id;
@@ -64,7 +64,7 @@ public class Profile {
     public String getEmail() { return email; }
     public String getCity() { return city; }
     public String getProvince() { return province; }
-    public int getPhoneNum() { return phoneNum; }
+    public String getPhoneNum() { return phoneNum; }
     public List<Integer> getEventsUpcoming() { return eventsUpcoming; }
     public List<Integer> getEventsPart() { return eventsPart; }
     public List<Integer> getEventsNPart() { return eventsNPart; }
@@ -111,7 +111,7 @@ public class Profile {
         updateDatabase("province", province);
     }
     
-    public void setPhoneNum(int phoneNum) { 
+    public void setPhoneNum(String phoneNum) { 
         this.phoneNum = phoneNum; 
         updateDatabase("phoneNum", phoneNum);
     }

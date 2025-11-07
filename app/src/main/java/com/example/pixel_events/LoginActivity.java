@@ -179,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = "";
         String city = "";
         String province = "";
-        int phoneNum = 0;
+        String phoneNum = "";
 
         List<Boolean> notifyPrefs = new ArrayList<>();
         // [All Notif, Win notif, Lose Notif] – default all true for MVP
@@ -204,7 +204,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = "";
         String city = "";
         String province = "";
-        int phoneNum = 0;
+        String phoneNum = "";
 
         List<Boolean> notifyPrefs = new ArrayList<>();
         notifyPrefs.add(true);

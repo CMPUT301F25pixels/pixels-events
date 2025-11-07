@@ -137,7 +137,7 @@ public class DatabaseHandler {
      * @param notify Notification preferences
      */
     public void addAcc(int id, String accType, String userName, Date DOB, String gender,
-                       String email, String city, String province, int phoneNum,
+                       String email, String city, String province, String phoneNum,
                        List<Boolean> notify) {
 
         // Create a new Profile

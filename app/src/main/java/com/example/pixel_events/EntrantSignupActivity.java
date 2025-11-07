@@ -65,15 +65,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
             return;
         }
 
-        int phoneNum = 0;
-        if (!phoneStr.isEmpty()) {
-            try {
-                phoneNum = Integer.parseInt(phoneStr);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Phone must be digits only", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
+        String phoneNum = phoneStr;
 
         String accType = "user";
         Date dob = new Date();     // placeholder for now
