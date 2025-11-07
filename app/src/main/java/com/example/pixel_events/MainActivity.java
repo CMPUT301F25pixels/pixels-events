@@ -12,8 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.events.EventActivity;
-import com.example.pixel_events.organizer.OrganizerActivity;
+import com.example.pixel_events.events.EventsListActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -54,9 +53,8 @@ public class MainActivity extends AppCompatActivity {
         organizerButton = findViewById(R.id.OrganizerButton);
         adminButton = findViewById(R.id.AdminButton);
 
-        organizerButton.setOnClickListener(v -> {
-            Log.d(TAG, "Organizer button clicked");
-            Intent intent = new Intent(MainActivity.this, OrganizerActivity.class);
+        addFormButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EventsListActivity.class);
             startActivity(intent);
         });
     }

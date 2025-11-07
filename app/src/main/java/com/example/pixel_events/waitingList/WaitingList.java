@@ -5,7 +5,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 public class WaitingList {
-    private String waitlistId; // Unique identifier for the waitlist entry
     private String eventId;    // Identifier of the event associated with this waitlist
     private String status;     // Status of the entrant in the waitlist (e.g., "waiting", "selected")
     private ArrayList<String> waitList = new ArrayList<>(); // The WaitingList
@@ -20,16 +19,14 @@ public class WaitingList {
     }
 
     // Constructor with waitlist max size
-    public WaitingList(String waitlistId, String eventId, int maxWaitlistSize) {
-        this.waitlistId = waitlistId;
+    public WaitingList(String eventId, int maxWaitlistSize) {
         this.eventId = eventId;
         this.status = "waiting";
         this.maxWaitlistSize = maxWaitlistSize;
     }
 
     // Constructor without waitlist max size
-    public WaitingList(String waitlistId, String eventId) {
-        this.waitlistId = waitlistId;
+    public WaitingList(String eventId) {
         this.eventId = eventId;
         this.status = "waiting";
     }
@@ -42,9 +39,6 @@ public class WaitingList {
         return status;
     }
 
-    public String getWaitlistId() {
-        return waitlistId;
-    }
 
     public ArrayList<String> getSelected() {
         return selected;
