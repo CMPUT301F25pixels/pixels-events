@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Adapter for displaying events with date headers
- * Handles both date headers (String) and event items (EventModel)
+ * Handles both date headers (String) and event items (Event)
  */
 public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -26,7 +26,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final OnEventClickListener clickListener;
 
     public interface OnEventClickListener {
-        void onEventClick(EventModel event);
+        void onEventClick(Event event);
     }
 
     public EventAdapter(List<Object> items) {
@@ -63,7 +63,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             String dateHeader = (String) items.get(position);
             ((DateHeaderViewHolder) holder).bind(dateHeader);
         } else if (holder instanceof EventViewHolder) {
-            EventModel event = (EventModel) items.get(position);
+            Event event = (Event) items.get(position);
             ((EventViewHolder) holder).bind(event, clickListener);
         }
     }
@@ -112,12 +112,15 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             location = itemView.findViewById(R.id.eventLocation);
         }
 
-        public void bind(EventModel event, OnEventClickListener listener) {
+        public void bind(Event event, OnEventClickListener listener) {
             title.setText(event.getTitle());
-            organizerName.setText(event.getOrganizerName());
-            type.setText(event.getType());
-            image.setImageResource(event.getImageResId());
-            time.setText(event.getFormattedTime());
+            organizerName.setText("Organizer"); // Can be extended with organizer name lookup
+            
+            String eventType = (event.getFee() == null || event.getFee().equalsIgnoreCase("free")) ? "Free" : "Paid";
+            type.setText(eventType);
+            
+            image.setImageResource(R.drawable.sample_image);
+            time.setText(event.getEventStartTime());
             location.setText(event.getLocation());
 
             // Set click listener if provided
