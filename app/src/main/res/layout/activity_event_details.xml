@@ -97,11 +97,24 @@
             android:layout_marginBottom="12dp" />
 
         <Button
+            android:id="@+id/leave_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Leave Waiting List"
+            android:backgroundTint="@color/card_bg"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/back_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Back"
-            android:backgroundTint="@color/card_bg"
+            android:backgroundTint="#333333"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:fontFamily="@font/poppins"

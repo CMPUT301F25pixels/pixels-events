@@ -1,6 +1,8 @@
 package com.example.pixel_events.events;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.waitingList.WaitingList;
 
 /**
  * EventDetailsActivity
@@ -19,6 +22,10 @@ import com.example.pixel_events.database.DatabaseHandler;
  * Implements US 01.06.01 (view event details) and US 01.06.02 (signup from details).
  */
 public class EventDetailsActivity extends AppCompatActivity {
+    private static final String TAG = "EventDetailsActivity";
+    private static final String PREFS_NAME = "pixels_prefs";
+    private static final String KEY_PROFILE_ID = "current_profile_id";
+    
     private TextView titleText;
     private TextView locationText;
     private TextView datesText;
@@ -27,19 +34,30 @@ public class EventDetailsActivity extends AppCompatActivity {
     private TextView capacityText;
     private TextView feeText;
     private Button joinButton;
+    private Button leaveButton;
     private Button backButton;
 
     private String eventId;
+    private String currentUserId;
+    private WaitingList waitingList;
+    private boolean isOnWaitlist = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details);
 
-        // get event id from intent
+        // Get event id from intent
         eventId = getIntent().getStringExtra("eventId");
 
-        // find views
+        // Get current user ID
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        currentUserId = prefs.getString(KEY_PROFILE_ID, "0");
+
+        // Initialize waiting list
+        waitingList = new WaitingList(eventId);
+
+        // Find views
         titleText = findViewById(R.id.event_title);
         locationText = findViewById(R.id.event_location);
         datesText = findViewById(R.id.event_dates);
@@ -48,26 +66,59 @@ public class EventDetailsActivity extends AppCompatActivity {
         capacityText = findViewById(R.id.event_capacity);
         feeText = findViewById(R.id.event_fee);
         joinButton = findViewById(R.id.join_button);
+        leaveButton = findViewById(R.id.leave_button);
         backButton = findViewById(R.id.back_button);
 
-        // load event from database
+        // Load event from database
         loadEvent();
+        checkWaitlistStatus();
 
-        // button listeners
-        joinButton.setOnClickListener(v -> {
-            // TODO: Implement actual waitlist joining once WaitingList class is available
-            // For now, show confirmation message
-            Toast.makeText(this, "Successfully joined waiting list for event: " + eventId, Toast.LENGTH_LONG).show();
-            
-            // Uncomment when WaitingList integration is ready:
-            /*
-            WaitingList waitingList = new WaitingList(eventId);
-            waitingList.addEntrant(currentUserId);
-            Toast.makeText(this, "Successfully joined waiting list!", Toast.LENGTH_SHORT).show();
-            */
-        });
-
+        // Button listeners
+        joinButton.setOnClickListener(v -> joinWaitlist());
+        leaveButton.setOnClickListener(v -> leaveWaitlist());
         backButton.setOnClickListener(v -> finish());
+    }
+
+    private void checkWaitlistStatus() {
+        DatabaseHandler db = DatabaseHandler.getInstance();
+        db.getWaitingList(eventId, 
+            retrievedWaitlist -> {
+                if (retrievedWaitlist != null) {
+                    waitingList = retrievedWaitlist;
+                    isOnWaitlist = waitingList.isEntrantOnList(currentUserId);
+                    updateButtonVisibility();
+                }
+            },
+            error -> {
+                Log.e(TAG, "Error checking waitlist status", error);
+            }
+        );
+    }
+
+    private void updateButtonVisibility() {
+        if (isOnWaitlist) {
+            joinButton.setVisibility(Button.GONE);
+            leaveButton.setVisibility(Button.VISIBLE);
+        } else {
+            joinButton.setVisibility(Button.VISIBLE);
+            leaveButton.setVisibility(Button.GONE);
+        }
+    }
+
+    private void joinWaitlist() {
+        waitingList.addEntrant(currentUserId);
+        isOnWaitlist = true;
+        updateButtonVisibility();
+        Toast.makeText(this, "Successfully joined waiting list!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "User " + currentUserId + " joined waitlist for event " + eventId);
+    }
+
+    private void leaveWaitlist() {
+        waitingList.removeEntrant(currentUserId);
+        isOnWaitlist = false;
+        updateButtonVisibility();
+        Toast.makeText(this, "Left waiting list", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "User " + currentUserId + " left waitlist for event " + eventId);
     }
 
     /**

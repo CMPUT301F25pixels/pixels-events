@@ -284,16 +284,33 @@ public class DatabaseHandler {
                          String eventStartDate, String eventEndDate, String eventStartTime, String eventEndTime,
                          String registrationStartDate, String registrationEndDate, ArrayList<String> tags) {
 
-        // Create a new Event (includes fee)
-        Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
-            capacity, description, fee, eventStartDate, eventEndDate,
-            eventStartTime, eventEndTime, registrationStartDate, registrationEndDate, tags);
+        // Create a map of event data for Firestore
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("eventId", eventId);
+        eventData.put("organizerId", organizerId);
+        eventData.put("title", title);
+        eventData.put("imageUrl", imageUrl);
+        eventData.put("location", location);
+        eventData.put("capacity", capacity);
+        eventData.put("description", description);
+        eventData.put("fee", fee);
+        eventData.put("eventStartDate", eventStartDate);
+        eventData.put("eventEndDate", eventEndDate);
+        eventData.put("eventStartTime", eventStartTime);
+        eventData.put("eventEndTime", eventEndTime);
+        eventData.put("registrationStartDate", registrationStartDate);
+        eventData.put("registrationEndDate", registrationEndDate);
+        eventData.put("tags", tags);
 
         // Add the event to DB
-        eventRef.document(String.valueOf(newEvent.getEventId()))
-                .set(newEvent)
-                .addOnSuccessListener(unused -> Log.d("DB", "Added Event: " + newEvent.getEventId()))
-                .addOnFailureListener(e -> Log.w("DB", "Error adding event!", e));
+        eventRef.document(String.valueOf(eventId))
+                .set(eventData)
+                .addOnSuccessListener(unused -> {
+                    Log.d("DB", "Successfully added Event: " + eventId + " - " + title);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error adding event " + eventId, e);
+                });
     }
 
     /**
