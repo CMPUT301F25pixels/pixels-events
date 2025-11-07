@@ -18,14 +18,14 @@ import java.util.Locale;
 
 public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.EventListViewHolder> {
 
-    private final List<EventModel> events;
+    private final List<Event> events;
     private final OnEventClickListener clickListener;
 
     public interface OnEventClickListener {
-        void onEventClick(EventModel event);
+        void onEventClick(Event event);
     }
 
-    public EventsListAdapter(List<EventModel> events, OnEventClickListener clickListener) {
+    public EventsListAdapter(List<Event> events, OnEventClickListener clickListener) {
         this.events = events;
         this.clickListener = clickListener;
     }
@@ -40,7 +40,7 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
 
     @Override
     public void onBindViewHolder(@NonNull EventListViewHolder holder, int position) {
-        EventModel event = events.get(position);
+        Event event = events.get(position);
         holder.bind(event, clickListener);
     }
 
@@ -49,7 +49,7 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
         return events.size();
     }
 
-    public void updateEvents(List<EventModel> newEvents) {
+    public void updateEvents(List<Event> newEvents) {
         this.events.clear();
         this.events.addAll(newEvents);
         notifyDataSetChanged();
@@ -71,7 +71,7 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
             eventStatus = itemView.findViewById(R.id.eventListStatus);
         }
 
-        public void bind(EventModel event, OnEventClickListener listener) {
+        public void bind(Event event, OnEventClickListener listener) {
             eventImage.setImageResource(event.getImageResId());
             eventTitle.setText(event.getTitle());
             eventLocation.setText(event.getLocation());
