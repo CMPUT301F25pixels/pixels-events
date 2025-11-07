@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -36,6 +38,7 @@ public class OrganizerIntegrationTest {
     private static final String TEST_EVENT_END_TIME = "14:00";
     private static final String TEST_REG_START = "2026-01-01";
     private static final String TEST_REG_END = "2026-01-30";
+    private static final ArrayList<String> TEST_TAGS = new ArrayList<String>(Arrays.asList("Adventure", "Cultural"));
     private Bitmap TEST_BITMAP;
 
     @Before
@@ -122,7 +125,8 @@ public class OrganizerIntegrationTest {
                 TEST_EVENT_START_TIME,
                 TEST_EVENT_END_TIME,
                 TEST_REG_START,
-                TEST_REG_END
+                TEST_REG_END,
+                TEST_TAGS
         );
 
         // Wait for add operation

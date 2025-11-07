@@ -16,18 +16,23 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class EventActivity extends AppCompatActivity {
     private TextInputEditText startDate, endDate, startTime, endTime, regStartDate, regEndDate;
     private Button doneButton, cancelButton, uploadButton;
     private ImageView imageView;
+    private ChipGroup tagGroup;
     private Uri filePath;
     private Bitmap bitmap;
+    private ArrayList<String> selectedTags = new ArrayList<>();
     private ActivityResultLauncher<String> imagePickerLauncher;
 
     @Override
@@ -45,6 +50,7 @@ public class EventActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.eventFormCancel);
         uploadButton = findViewById(R.id.eventFormUploadImage);
         imageView = findViewById(R.id.eventFormPosterImage);
+        tagGroup = findViewById(R.id.eventFormTagGroup);
 
         startDate.setOnClickListener(v -> showDatePicker(startDate));
         endDate.setOnClickListener(v -> showDatePicker(endDate));
@@ -52,6 +58,16 @@ public class EventActivity extends AppCompatActivity {
         endTime.setOnClickListener(v -> showTimePicker(endTime));
         regStartDate.setOnClickListener(v -> showDatePicker(regStartDate));
         regEndDate.setOnClickListener(v -> showDatePicker(regEndDate));
+
+        tagGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            selectedTags.clear(); // Clear old selections
+            for (int id : checkedIds) {
+                Chip chip = group.findViewById(id);
+                if (chip != null) {
+                    selectedTags.add(chip.getText().toString());
+                }
+            }
+        });
 
         doneButton.setOnClickListener(v -> {
             // Extract details from form fields
@@ -94,7 +110,7 @@ public class EventActivity extends AppCompatActivity {
 
             try {
                 Event newEvent = new Event(eventId, organizerId, title, imageURL, location,
-                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd);
+                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
 
                 // Persist to database
                 newEvent.saveToDatabase();
