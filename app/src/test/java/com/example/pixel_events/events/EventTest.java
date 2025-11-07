@@ -25,28 +25,34 @@ public class EventTest {
     private static final String TEST_LOCATION = "Edmonton Convention Center";
     private static final String TEST_CAPACITY = "500";
     private static final String TEST_DESCRIPTION = "Annual tech conference";
-    private static final String TEST_EVENT_START = "2025-12-01";
-    private static final String TEST_EVENT_END = "2025-12-03";
-    private static final String TEST_REG_START = "2025-11-01";
-    private static final String TEST_REG_END = "2025-11-30";
+    private static final String TEST_FEE = "Free";
+    private static final String TEST_EVENT_START = "2025-12-24";
+    private static final String TEST_EVENT_END = "2025-12-30";
+    private static final String TEST_EVENT_START_TIME = "12:00";
+    private static final String TEST_EVENT_END_TIME = "14:00";
+    private static final String TEST_REG_START = "2025-12-10";
+    private static final String TEST_REG_END = "2025-12-20";
 
     @Before
     public void setUp() {
         // Create event using parameterized constructor
         // This will validate fields but NOT save to database automatically
-        testEvent = new Event(
-                TEST_EVENT_ID,
-                TEST_ORGANIZER_ID,
-                TEST_TITLE,
-                TEST_IMAGE_URL,
-                TEST_LOCATION,
-                TEST_CAPACITY,
-                TEST_DESCRIPTION,
-                TEST_EVENT_START,
-                TEST_EVENT_END,
-                TEST_REG_START,
-                TEST_REG_END
-        );
+    testEvent = new Event(
+        TEST_EVENT_ID,
+        TEST_ORGANIZER_ID,
+        TEST_TITLE,
+        TEST_IMAGE_URL,
+        TEST_LOCATION,
+        TEST_CAPACITY,
+        TEST_DESCRIPTION,
+        TEST_FEE,
+        TEST_EVENT_START,
+        TEST_EVENT_END,
+        TEST_EVENT_START_TIME,
+        TEST_EVENT_END_TIME,
+        TEST_REG_START,
+        TEST_REG_END
+    );
         
         // Disable automatic database updates for testing
         testEvent.setAutoUpdateDatabase(false);
@@ -152,28 +158,28 @@ public class EventTest {
 
     @Test
     public void testSetEventStartDate() {
-        String newStartDate = "2025-12-15";
+        String newStartDate = "2025-12-25";
         testEvent.setEventStartDate(newStartDate);
         assertEquals("Event start date should be updated", newStartDate, testEvent.getEventStartDate());
     }
 
     @Test
     public void testSetEventEndDate() {
-        String newEndDate = "2025-12-20";
+        String newEndDate = "2025-12-31";
         testEvent.setEventEndDate(newEndDate);
         assertEquals("Event end date should be updated", newEndDate, testEvent.getEventEndDate());
     }
 
     @Test
     public void testSetRegistrationStartDate() {
-        String newRegStart = "2025-11-15";
+        String newRegStart = "2025-12-11";
         testEvent.setRegistrationStartDate(newRegStart);
         assertEquals("Registration start date should be updated", newRegStart, testEvent.getRegistrationStartDate());
     }
 
     @Test
     public void testSetRegistrationEndDate() {
-        String newRegEnd = "2025-12-10";
+        String newRegEnd = "2025-12-21";
         testEvent.setRegistrationEndDate(newRegEnd);
         assertEquals("Registration end date should be updated", newRegEnd, testEvent.getRegistrationEndDate());
     }
@@ -186,11 +192,12 @@ public class EventTest {
     @Test
     public void testEventConstructorWithAllParameters() {
         Event newEvent = new Event(
-                2002, 502, "Music Festival", "https://example.com/music.jpg",
-                "Vancouver", "2000", "Annual music festival",
-                "2025-08-01", "2025-08-05",
-                "2025-06-01", "2025-07-31"
-        );
+        2002, 502, "Music Festival", "https://example.com/music.jpg",
+        "Vancouver", "2000", "Annual music festival",
+        "Free",
+        "2026-08-01", "2026-08-05", "10:00", "22:00",
+        "2026-06-01", "2026-07-31"
+    );
 
         assertEquals("Event ID should match", 2002, newEvent.getEventId());
         assertEquals("Organizer ID should match", 502, newEvent.getOrganizerId());
@@ -199,10 +206,10 @@ public class EventTest {
         assertEquals("Location should match", "Vancouver", newEvent.getLocation());
         assertEquals("Capacity should match", "2000", newEvent.getCapacity());
         assertEquals("Description should match", "Annual music festival", newEvent.getDescription());
-        assertEquals("Event start date should match", "2025-08-01", newEvent.getEventStartDate());
-        assertEquals("Event end date should match", "2025-08-05", newEvent.getEventEndDate());
-        assertEquals("Registration start date should match", "2025-06-01", newEvent.getRegistrationStartDate());
-        assertEquals("Registration end date should match", "2025-07-31", newEvent.getRegistrationEndDate());
+        assertEquals("Event start date should match", "2026-08-01", newEvent.getEventStartDate());
+        assertEquals("Event end date should match", "2026-08-05", newEvent.getEventEndDate());
+        assertEquals("Registration start date should match", "2026-06-01", newEvent.getRegistrationStartDate());
+        assertEquals("Registration end date should match", "2026-07-31", newEvent.getRegistrationEndDate());
     }
 
     @Test
@@ -219,114 +226,114 @@ public class EventTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullTitle() {
-        new Event(1, 1, null, "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, null, "url", "location", "100", 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyTitle() {
-        new Event(1, 1, "", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "", "url", "location", "100", 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullLocation() {
-        new Event(1, 1, "title", "url", null, "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "title", "url", null, "100", 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyLocation() {
-        new Event(1, 1, "title", "url", "", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "title", "url", "", "100", 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullCapacity() {
-        new Event(1, 1, "title", "url", "location", null, 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "title", "url", "location", null, 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyCapacity() {
-        new Event(1, 1, "title", "url", "location", "", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "title", "url", "location", "", 
+      "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullDescription() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                null, "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+      new Event(1, 1, "title", "url", "location", "100", 
+          null, "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+          "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyDescription() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                "", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(1, 1, "title", "url", "location", "100", 
+        "", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroEventId() {
-        new Event(0, 1, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(0, 1, "title", "url", "location", "100", 
+    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeEventId() {
-        new Event(-1, 1, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(-1, 1, "title", "url", "location", "100", 
+    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroOrganizerId() {
-        new Event(1, 0, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(1, 0, "title", "url", "location", "100", 
+        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeOrganizerId() {
-        new Event(1, -1, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(1, -1, "title", "url", "location", "100", 
+        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventStartDate() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                "description", null, "2025-01-05", 
-                "2024-12-01", "2024-12-31");
+    new Event(1, 1, "title", "url", "location", "100", 
+        "description", "Free", null, "2025-01-05", "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventEndDate() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                "description", "2025-01-01", null, 
-                "2024-12-01", "2024-12-31");
+    new Event(1, 1, "title", "url", "location", "100", 
+        "description", "Free", "2025-01-01", null, "09:00", "17:00",
+        "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationStartDate() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                null, "2024-12-31");
+    new Event(1, 1, "title", "url", "location", "100", 
+        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        null, "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationEndDate() {
-        new Event(1, 1, "title", "url", "location", "100", 
-                "description", "2025-01-01", "2025-01-05", 
-                "2024-12-01", null);
+    new Event(1, 1, "title", "url", "location", "100", 
+        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+        "2024-12-01", null);
     }
 
     // ========================================================================================
@@ -429,48 +436,55 @@ public class EventTest {
     }
 
     // ========================================================================================
+    // UNIT TESTS - Testing null and edge cases (Validation Tests)
+    // ========================================================================================
+    @Test(expected = IllegalArgumentException.class)
+    public void testEndDateBeforeStartDate() { testEvent.setEventEndDate("2025-12-21"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRegEndDateBeforeRegStartDate() { testEvent.setRegistrationEndDate("2026-12-09"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testRegEndDateBeforeEventStartDate() { testEvent.setRegistrationEndDate("2025-12-26"); }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEventStartDateAfterRegEndDate() { testEvent.setEventStartDate("2025-12-19"); }
+
+
+
+    // ========================================================================================
     // INTEGRATION TEST - Combined Add, Modify, and Delete operations
     // This test would require Firebase emulator or mocking
     // ========================================================================================
 
     @Test
-    public void testCombinedAddModifyDeleteOperations() throws InterruptedException {
-        // This is a mock-based test showing the flow
-        // In a real scenario, you'd use Firebase emulator
-        
-        CountDownLatch latch = new CountDownLatch(3);
-        
-        // 1. ADD - Create and add event
-        Event newEvent = new Event();
+    public void testCombinedAddModifyDeleteOperations() {
+        // Create event (no DB interactions)
+        Event newEvent = new Event(
+                2002, 502, "Music Festival", "https://example.com/music.jpg",
+                "Vancouver", "2000", "Annual music festival",
+                "Free",
+                "2026-08-01", "2026-08-05", "10:00", "22:00",
+                "2026-06-01", "2026-07-31"
+        );
         newEvent.setAutoUpdateDatabase(false);
 
         int eventId = 3003;
         newEvent.setEventId(eventId);
-        newEvent.setTitle("Integration Test Event");
-        newEvent.setLocation("Test Location");
-        newEvent.setCapacity("100");
-        
-        // Verify initial state
-        assertEquals("Initial title should be set", "Integration Test Event", newEvent.getTitle());
-        latch.countDown();
-        
-        // 2. MODIFY - Update event properties
+
+        // MODIFY - Update event properties
         newEvent.setTitle("Modified Test Event");
         newEvent.setCapacity("200");
-        
+
         // Verify modifications
         assertEquals("Title should be modified", "Modified Test Event", newEvent.getTitle());
         assertEquals("Capacity should be modified", "200", newEvent.getCapacity());
-        latch.countDown();
-        
-        // 3. DELETE - Verify event can be prepared for deletion
+
+        // DELETE preparation - verify id is correct before deletion
         int deletedEventId = newEvent.getEventId();
         assertEquals("Event ID should match before deletion", eventId, deletedEventId);
-        latch.countDown();
-        
-        // Wait for all operations
-        assertTrue("All operations should complete", latch.await(5, TimeUnit.SECONDS));
     }
+
 
     // ========================================================================================
     // INTEGRATION TEST - Multiple field updates
@@ -500,9 +514,9 @@ public class EventTest {
         // Create event with specific data
         Event consistencyEvent = new Event(
                 4004, 504, "Consistency Test", "url",
-                "Location", "100", "Description",
-                "2025-01-01", "2025-01-05",
-                "2024-12-01", "2024-12-31"
+                "Location", "100", "Description", "Free",
+                "2026-12-01", "2026-12-05", "09:00", "17:00",
+                "2026-01-01", "2026-01-31"
         );
         consistencyEvent.setAutoUpdateDatabase(false);
         
@@ -516,6 +530,34 @@ public class EventTest {
         consistencyEvent.setTitle("Updated Consistency Test");
         assertEquals("Updated Consistency Test", consistencyEvent.getTitle());
         assertEquals(4004, consistencyEvent.getEventId()); // ID should remain unchanged
+    }
+
+    // ========================================================================================
+    // NEW VALIDATION TESTS - Date/time validation
+    // ========================================================================================
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithEndDateBeforeStartDate() {
+        // end date earlier than start date
+        new Event(5005, 505, "Bad Dates", "url", "Somewhere", "50",
+                "Info", "Free", "2025-12-10", "2025-12-01", "10:00", "12:00",
+                "2025-11-01", "2025-11-30");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithDatesInPast() {
+        // dates clearly in the past should be rejected
+        new Event(5006, 506, "Past Event", "url", "Somewhere", "50",
+                "Info", "Free", "2000-01-01", "2000-01-02", "10:00", "12:00",
+                "1999-12-01", "1999-12-31");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructorWithEndTimeBeforeStartTimeOnSameDay() {
+        // same start and end date but end time before start time
+        new Event(5007, 507, "Bad Times", "url", "Somewhere", "50",
+                "Info", "Free", "2026-01-01", "2026-01-01", "18:00", "09:00",
+                "2025-12-01", "2025-12-31");
     }
 
     // ========================================================================================
