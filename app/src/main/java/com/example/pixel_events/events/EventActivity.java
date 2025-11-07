@@ -2,14 +2,12 @@ package com.example.pixel_events.events;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.widget.Toast;
 import android.os.Bundle;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
 import com.google.android.material.textfield.TextInputEditText;
 
