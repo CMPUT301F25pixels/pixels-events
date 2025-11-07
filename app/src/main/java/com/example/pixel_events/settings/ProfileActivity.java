@@ -38,7 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
         prov = findViewById(R.id.profileProvinceText);
         role = findViewById(R.id.profileRoleText);
 
-        String userID = "0";            // TODO temp val
+        String userID = "1593347960";            // TODO temp val
         DatabaseHandler.getInstance().getAcc(userID, profile -> {
             if (profile != null) {
                  usn.setText(profile.getUserName());

@@ -116,7 +116,7 @@ public class MainSettingsActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(v -> {
             // TODO: getProfileId will return userID
             // String a = SessionManager.getProfileId(this);
-            int userID = 0;                 // TEMP VALUE
+            int userID = 1593347960;                 // TEMP VALUE
             DatabaseHandler.getInstance().deleteAcc(userID);
             startActivity(new Intent(MainSettingsActivity.this, LoginActivity.class));
             dialog.dismiss();

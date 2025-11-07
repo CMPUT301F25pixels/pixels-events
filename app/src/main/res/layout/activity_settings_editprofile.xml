@@ -129,7 +129,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF" />
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Username"/>
 
                 <EditText
                     android:id="@+id/profileInputDOBText"
@@ -141,7 +142,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Date of Birth"/>
 
                 <EditText
                     android:id="@+id/profileInputGenderText"
@@ -153,7 +155,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Gender"/>
 
                 <EditText
                     android:id="@+id/profileInputEmailText"
@@ -165,7 +168,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Email Address"/>
 
                 <EditText
                     android:id="@+id/profileInputPhoneText"
@@ -177,7 +181,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Phone Number"/>
 
                 <EditText
                     android:id="@+id/profileInputCityText"
@@ -189,7 +194,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="City Name"/>
 
                 <EditText
                     android:id="@+id/profileInputProvinceText"
@@ -201,7 +207,8 @@
                     android:fontFamily="@font/poppins"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
+                    android:textColorHint="#62FFFFFF"
+                    android:hint="Province Name"/>
 
             </LinearLayout>
         </FrameLayout>

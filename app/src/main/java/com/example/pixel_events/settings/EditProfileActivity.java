@@ -24,7 +24,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private Button confirmButton, cancelButton;
     private EditText usn, dob, gender, email, num, city, prov;
     private TextView role;
-    private String userID = "0"; // Make it a class member so it's accessible in all methods
+    private String userID = "1593347960"; // Make it a class member so it's accessible in all methods
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,16 +56,12 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void loadProfileData() {
         DatabaseHandler.getInstance().getAcc(userID, profile -> {
-            // Check if activity is still valid
-            if (isFinishing() || isDestroyed()) {
-                return;
-            }
-
             if (profile != null) {
                 runOnUiThread(() -> {
                     try {
                         usn.setHint(profile.getUserName());
-                        role.setText((profile.getAccType()));
+                        role.setText(profile.getAccType());
+
                         Date date = profile.getDOB();
                         if (date != null) {
                             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -75,7 +71,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                         gender.setHint(profile.getGender());
                         email.setHint(profile.getEmail());
-                        num.setHint(profile.getPhoneNum());
+                        num.setHint(String.valueOf(profile.getPhoneNum())); // ← FIXED: Convert int to String
                         city.setHint(profile.getCity());
                         prov.setHint(profile.getProvince());
                     } catch (Exception e) {
@@ -103,72 +99,118 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void setupButtonListeners() {
         confirmButton.setOnClickListener(v -> {
+            Log.d("EditProfileActivity", "Confirm button clicked");
             Map<String, Object> updates = new HashMap<>();
 
-            // Only include non-empty fields
-            if (!usn.getText().toString().trim().isEmpty()) {
-                updates.put("userName", usn.getText().toString().trim());
-            }
-
-            if (!dob.getText().toString().trim().isEmpty()) {
-                String dobInput = dob.getText().toString().trim();
-                try {
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                    formatter.setLenient(false);
-                    Date parsedDate = formatter.parse(dobInput);
-                    updates.put("DOB", parsedDate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    dob.setError("Invalid date format. Use dd/MM/yyyy");
-                    return;
+            try {
+                // Username
+                if (!usn.getText().toString().trim().isEmpty()) {
+                    String userName = usn.getText().toString().trim();
+                    updates.put("userName", userName);
+                    Log.d("EditProfileActivity", "Adding userName: " + userName);
                 }
-            }
 
-            if (!gender.getText().toString().trim().isEmpty()) {
-                updates.put("gender", gender.getText().toString().trim());
-            }
+                // Date of Birth
+                if (!dob.getText().toString().trim().isEmpty()) {
+                    String dobInput = dob.getText().toString().trim();
+                    Log.d("EditProfileActivity", "Processing DOB: " + dobInput);
+                    try {
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                        formatter.setLenient(false);
+                        Date parsedDate = formatter.parse(dobInput);
+                        updates.put("DOB", parsedDate);
+                        Log.d("EditProfileActivity", "Added DOB: " + parsedDate);
+                    } catch (ParseException e) {
+                        Log.e("EditProfileActivity", "Date parse error", e);
+                        dob.setError("Invalid date format. Use dd/MM/yyyy");
+                        return;
+                    }
+                }
 
-            if (!email.getText().toString().trim().isEmpty()) {
-                updates.put("email", email.getText().toString().trim());
-            }
+                // Gender
+                if (!gender.getText().toString().trim().isEmpty()) {
+                    String genderValue = gender.getText().toString().trim();
+                    updates.put("gender", genderValue);
+                    Log.d("EditProfileActivity", "Adding gender: " + genderValue);
+                }
 
-            if (!num.getText().toString().trim().isEmpty()) {
-                updates.put("phoneNum", num.getText().toString().trim());
-            }
+                // Email
+                if (!email.getText().toString().trim().isEmpty()) {
+                    String emailValue = email.getText().toString().trim();
+                    updates.put("email", emailValue);
+                    Log.d("EditProfileActivity", "Adding email: " + emailValue);
+                }
 
-            if (!city.getText().toString().trim().isEmpty()) {
-                updates.put("city", city.getText().toString().trim());
-            }
+                // Phone Number
+                if (!num.getText().toString().trim().isEmpty()) {
+                    String numText = num.getText().toString().trim();
+                    Log.d("EditProfileActivity", "Processing phone: " + numText);
+                    try {
+                        int phoneNumber = Integer.parseInt(numText);
+                        updates.put("phoneNum", phoneNumber);
+                        Log.d("EditProfileActivity", "Added phoneNum: " + phoneNumber);
+                    } catch (NumberFormatException e) {
+                        Log.e("EditProfileActivity", "Phone parse error", e);
+                        num.setError("Invalid phone number");
+                        Toast.makeText(EditProfileActivity.this,
+                                "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
 
-            if (!prov.getText().toString().trim().isEmpty()) {
-                updates.put("province", prov.getText().toString().trim());
-            }
+                // City
+                if (!city.getText().toString().trim().isEmpty()) {
+                    String cityValue = city.getText().toString().trim();
+                    updates.put("city", cityValue);
+                    Log.d("EditProfileActivity", "Adding city: " + cityValue);
+                }
 
-            // If there are updates, push to Firebase
-            if (!updates.isEmpty()) {
-                DatabaseHandler.getInstance().modifyAcc(
-                        Integer.parseInt(userID),
-                        updates,
-                        error -> {
-                            if (!isFinishing() && !isDestroyed()) {
-                                runOnUiThread(() -> {
-                                    if (error != null) {
-                                        Toast.makeText(EditProfileActivity.this,
-                                                "Error updating profile", Toast.LENGTH_SHORT).show();
-                                        Log.e("EditProfileActivity", "Update error: " + error);
-                                    } else {
-                                        Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                });
+                // Province
+                if (!prov.getText().toString().trim().isEmpty()) {
+                    String provValue = prov.getText().toString().trim();
+                    updates.put("province", provValue);
+                    Log.d("EditProfileActivity", "Adding province: " + provValue);
+                }
+
+                // Log all updates
+                Log.d("EditProfileActivity", "Total updates to send: " + updates.size());
+                Log.d("EditProfileActivity", "Updates map: " + updates.toString());
+
+                // If there are updates, push to Firebase
+                if (!updates.isEmpty()) {
+                    Log.d("EditProfileActivity", "Calling modifyAcc with userID: " + userID);
+                    DatabaseHandler.getInstance().modifyAcc(
+                            Integer.parseInt(userID),
+                            updates,
+                            error -> {
+                                Log.d("EditProfileActivity", "modifyAcc callback received");
+                                if (!isFinishing() && !isDestroyed()) {
+                                    runOnUiThread(() -> {
+                                        if (error != null) {
+                                            Log.e("EditProfileActivity", "Update error: " + error);
+                                            Toast.makeText(EditProfileActivity.this,
+                                                    "Error updating profile: " + error, Toast.LENGTH_LONG).show();
+                                        } else {
+                                            Log.d("EditProfileActivity", "Update successful");
+                                            Toast.makeText(EditProfileActivity.this,
+                                                    "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    });
+                                }
                             }
-                        }
-                );
-            } else {
-                // No updates made, just go back
-                finish();
+                    );
+                } else {
+                    Log.d("EditProfileActivity", "No updates to send, finishing");
+                    finish();
+                }
+            } catch (Exception e) {
+                Log.e("EditProfileActivity", "Unexpected error in setupButtonListeners", e);
+                Toast.makeText(EditProfileActivity.this,
+                        "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
