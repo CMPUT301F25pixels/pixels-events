@@ -13,7 +13,7 @@ public class QRCodeTest {
         String eventId = "123";
         int size = 200;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("qr code should not be null", qr);
         assertEquals("qr width should match", size, qr.getWidth());
@@ -24,8 +24,8 @@ public class QRCodeTest {
     public void testGenerateQRCodeWithDifferentSizes() {
         String eventId = "456";
         
-        Bitmap qr100 = QRCode.generateQRCode(eventId, 100);
-        Bitmap qr300 = QRCode.generateQRCode(eventId, 300);
+        Bitmap qr100 = QRCode.generateQRCodeBitmap(eventId, 100, 100);
+        Bitmap qr300 = QRCode.generateQRCodeBitmap(eventId, 300, 300);
         
         assertNotNull("small qr should not be null", qr100);
         assertNotNull("large qr should not be null", qr300);
@@ -38,7 +38,7 @@ public class QRCodeTest {
         String eventId = "";
         int size = 200;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("qr code should still generate", qr);
     }
@@ -48,7 +48,7 @@ public class QRCodeTest {
         String eventId = "event_12345_very_long_id_string";
         int size = 250;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("qr code should handle long ids", qr);
         assertEquals("qr size should match", size, qr.getWidth());
@@ -59,7 +59,7 @@ public class QRCodeTest {
         String eventId = "789";
         int size = 150;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertEquals("qr should be square", qr.getWidth(), qr.getHeight());
     }
@@ -70,8 +70,8 @@ public class QRCodeTest {
         String eventId2 = "event2";
         int size = 200;
         
-        Bitmap qr1 = QRCode.generateQRCode(eventId1, size);
-        Bitmap qr2 = QRCode.generateQRCode(eventId2, size);
+        Bitmap qr1 = QRCode.generateQRCodeBitmap(eventId1, size, size);
+        Bitmap qr2 = QRCode.generateQRCodeBitmap(eventId2, size, size);
         
         assertNotNull("first qr should not be null", qr1);
         assertNotNull("second qr should not be null", qr2);
@@ -83,7 +83,7 @@ public class QRCodeTest {
         String eventId = "small";
         int size = 50;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("small qr should generate", qr);
         assertEquals("small size should match", size, qr.getWidth());
@@ -94,7 +94,7 @@ public class QRCodeTest {
         String eventId = "large";
         int size = 500;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("large qr should generate", qr);
         assertEquals("large size should match", size, qr.getWidth());
@@ -105,7 +105,7 @@ public class QRCodeTest {
         String eventId = "999";
         int size = 200;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("numeric id should work", qr);
     }
@@ -115,7 +115,7 @@ public class QRCodeTest {
         String eventId = "ABC123xyz";
         int size = 200;
         
-        Bitmap qr = QRCode.generateQRCode(eventId, size);
+        Bitmap qr = QRCode.generateQRCodeBitmap(eventId, size, size);
         
         assertNotNull("alphanumeric id should work", qr);
     }
