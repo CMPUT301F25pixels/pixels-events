@@ -39,6 +39,7 @@ public class WaitingList {
         return status;
     }
 
+
     public ArrayList<String> getSelected() {
         return selected;
     }

@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.entrant.EventDetailsLauncherActivity;
 import com.example.pixel_events.events.EventActivity;
+import com.example.pixel_events.events.EventsListActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
