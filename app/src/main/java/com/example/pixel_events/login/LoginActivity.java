@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.SessionManager;
 import com.example.pixel_events.database.DatabaseHandler;
 
 import java.util.ArrayList;
@@ -22,14 +23,15 @@ import java.util.List;
  * LoginActivity
  *
  * MVP login screen for:
- *  - Entrant (device-based, no password)
- *  - Organizer (access code)
- *  - Admin (access code)
+ * - Entrant (device-based, no password)
+ * - Organizer (access code)
+ * - Admin (access code)
  *
- * All roles are routed to MainActivity for now. Role + profileId are stored
- * in SharedPreferences so the app can remember who is logged in.
+ * All roles are routed to MainActivity for now.
+ * Role + profileId are stored in SessionManager so the app can remember who is logged in.
  */
-class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
+
     // Local prefs for device → entrant mapping
     private static final String PREFS_NAME = "pixels_prefs";
     private static final String KEY_ENTRANT_ID = "entrant_profile_id";
@@ -44,7 +46,6 @@ class LoginActivity extends AppCompatActivity {
     private EditText accessCodeEditText;
 
     private DatabaseHandler db;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,13 +83,12 @@ class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-
     /**
      * Entrant login: device-based identification, no password.
      * - Use ANDROID_ID as a base
      * - Derive an int ID for Profile
      * - Check Firestore for an existing account
-     * - If none, create a new Profile with accType "user"
+     * - If none, go to signup screen to collect details
      */
     private void handleEntrantLogin() {
         setButtonsEnabled(false);
@@ -100,7 +100,6 @@ class LoginActivity extends AppCompatActivity {
             if (profile != null) {
                 // Existing entrant profile: just log in
                 onLoginSuccess(SessionManager.ROLE_ENTRANT, entrantId);
-
             } else {
                 // First-time entrant: go to signup screen
                 Intent intent = new Intent(LoginActivity.this, EntrantSignupActivity.class);
@@ -110,9 +109,7 @@ class LoginActivity extends AppCompatActivity {
             }
             setButtonsEnabled(true);
         }, e -> {
-            Toast.makeText(LoginActivity.this,
-                    "Error checking entrant account: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Error checking entrant account: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             setButtonsEnabled(true);
         });
     }
@@ -121,8 +118,8 @@ class LoginActivity extends AppCompatActivity {
      * Organizer/Admin login using simple access codes.
      *
      * For MVP:
-     *  - Organizer code: ORG123
-     *  - Admin code: ADMIN123
+     * - Organizer code: ORG123
+     * - Admin code: ADMIN123
      *
      * On success, creates or reuses a Profile with accType "org" or "admin".
      */
@@ -163,37 +160,10 @@ class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Create a simple entrant profile in Firestore and then complete login.
-     */
-    private void createEntrantProfile(int entrantId) {
-        // Dummy data for now – can be edited later from Profile screen
-        String accType = "user";
-        String userName = "Entrant " + entrantId;
-        Date dob = new Date(); // placeholder
-        String gender = "";
-        String email = "";
-        String city = "";
-        String province = "";
-        int phoneNum = 0;
-
-        List<Boolean> notifyPrefs = new ArrayList<>();
-        // [All Notif, Win notif, Lose Notif] – default all true for MVP
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
-
-        // This constructor automatically calls db.addAcc(...) via createProfile()
-        db.addAcc(entrantId, accType, userName, dob, gender,
-                email, city, province, phoneNum, notifyPrefs);
-
-        onLoginSuccess(accType, entrantId);
-    }
-
-    /**
      * Create a simple Organizer/Admin profile in Firestore and then complete login.
      */
     private void createStaffProfile(int id, String role) {
-        String name = role.equals("admin") ? "Admin User" : "Organizer User";
+        String name = role.equals(SessionManager.ROLE_ADMIN) ? "Admin User" : "Organizer User";
         Date dob = new Date();
         String gender = "";
         String email = "";
@@ -202,9 +172,9 @@ class LoginActivity extends AppCompatActivity {
         int phoneNum = 0;
 
         List<Boolean> notifyPrefs = new ArrayList<>();
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
+        notifyPrefs.add(true); // all notif
+        notifyPrefs.add(true); // win notif
+        notifyPrefs.add(true); // lose notif
 
         db.addAcc(id, role, name, dob, gender, email, city, province, phoneNum, notifyPrefs);
         onLoginSuccess(role, id);
@@ -215,7 +185,6 @@ class LoginActivity extends AppCompatActivity {
      */
     private void onLoginSuccess(String role, int profileId) {
         SessionManager.startSession(this, role, profileId);
-
         Toast.makeText(this, "Logged in as " + role, Toast.LENGTH_SHORT).show();
 
         Intent intent = new Intent(this, MainActivity.class);
@@ -223,14 +192,9 @@ class LoginActivity extends AppCompatActivity {
         finish();
     }
 
-
     /**
      * Get or create a stable entrant ID tied to this device.
      * Uses ANDROID_ID -> int hash, cached in SharedPreferences.
-     */
-    /**
-     * Get or create a stable entrant ID tied to this device.
-     * Uses a local SharedPreferences entry so the same device gets the same entrant ID.
      */
     private int getOrCreateEntrantId() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);

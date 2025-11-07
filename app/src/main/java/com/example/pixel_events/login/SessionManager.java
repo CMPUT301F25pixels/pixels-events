@@ -1,4 +1,4 @@
-package com.example.pixel_events.login;
+package com.example.pixel_events;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,9 +8,10 @@ public class SessionManager {
     private static final String PREFS_NAME = "pixels_prefs";
     private static final String KEY_ROLE = "current_role";
     private static final String KEY_PROFILE_ID = "current_profile_id";
+    private static final String KEY_ENTRANT_ID = "entrant_profile_id";
 
     // Roles from spec
-    public static final String ROLE_ENTRANT = "user";  // entrant
+    public static final String ROLE_ENTRANT = "user";   // entrant
     public static final String ROLE_ORGANIZER = "org";
     public static final String ROLE_ADMIN = "admin";
 
@@ -25,6 +26,12 @@ public class SessionManager {
         SharedPreferences.Editor editor = prefs(context).edit();
         editor.putString(KEY_ROLE, role);
         editor.putString(KEY_PROFILE_ID, String.valueOf(profileId));
+
+        // Track entrant id separately when role is entrant
+        if (ROLE_ENTRANT.equals(role)) {
+            editor.putString(KEY_ENTRANT_ID, String.valueOf(profileId));
+        }
+
         editor.apply();
     }
 
@@ -43,8 +50,12 @@ public class SessionManager {
         return prefs(context).getString(KEY_PROFILE_ID, null);
     }
 
+    public static String getEntrantId(Context context) {
+        return prefs(context).getString(KEY_ENTRANT_ID, null);
+    }
+
     /**
-     * Clear the current session (role + profile).
+     * Clear the current session (role + profile). Entrant ID is kept as a device mapping.
      */
     public static void clearSession(Context context) {
         prefs(context).edit()

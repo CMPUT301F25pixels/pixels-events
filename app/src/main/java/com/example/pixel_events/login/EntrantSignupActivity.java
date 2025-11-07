@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.SessionManager;
 import com.example.pixel_events.database.DatabaseHandler;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
     private EditText nameInput;
     private EditText emailInput;
     private EditText phoneInput;
+
     private Button saveButton;
     private Button cancelButton;
 
@@ -72,8 +74,8 @@ public class EntrantSignupActivity extends AppCompatActivity {
             }
         }
 
-        String accType = "user";
-        Date dob = new Date();     // placeholder for now
+        String accType = SessionManager.ROLE_ENTRANT;
+        Date dob = new Date(); // placeholder for now
         String gender = "";
         String city = "";
         String province = "";
@@ -85,8 +87,8 @@ public class EntrantSignupActivity extends AppCompatActivity {
 
         db.addAcc(entrantId, accType, name, dob, gender, email, city, province, phoneNum, notifyPrefs);
 
-// Save session so we don't ask again
-        SessionManager.startSession(this, SessionManager.ROLE_ENTRANT, entrantId);
+        // Save session so we don't ask again
+        SessionManager.startSession(this, accType, entrantId);
 
         Toast.makeText(this, "Welcome, " + name + "!", Toast.LENGTH_SHORT).show();
 
@@ -97,7 +99,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
     }
 
     private void onCancel() {
-        // Just go back to login men no profile created
+        // Just go back to login menu, no profile created
         finish();
     }
 }
