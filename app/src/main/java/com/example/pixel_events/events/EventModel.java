@@ -1,4 +1,4 @@
-package com.example.pixel_events;
+package com.example.pixel_events.events;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

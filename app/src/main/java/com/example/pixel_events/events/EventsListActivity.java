@@ -1,4 +1,4 @@
-package com.example.pixel_events;
+package com.example.pixel_events.events;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pixel_events.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -26,7 +27,6 @@ public class EventsListActivity extends AppCompatActivity {
     private Button upcomingButton;
     private Button previousButton;
     private RecyclerView eventsRecyclerView;
-    private ImageView backButton;
 
     private EventsListAdapter adapter;
     private List<EventModel> upcomingEvents;
@@ -49,8 +49,6 @@ public class EventsListActivity extends AppCompatActivity {
         upcomingButton = findViewById(R.id.upcomingButton);
         previousButton = findViewById(R.id.previousButton);
         eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
-
-        backButton.setOnClickListener(v -> finish());
     }
 
     private void setupTabButtons() {
