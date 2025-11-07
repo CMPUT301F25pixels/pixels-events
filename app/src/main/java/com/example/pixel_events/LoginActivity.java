@@ -122,7 +122,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-
     /**
      * Organizer/Admin login using simple access codes.
      *
@@ -167,7 +166,6 @@ public class LoginActivity extends AppCompatActivity {
             setButtonsEnabled(true);
         });
     }
-
 
     /**
      * Create a simple entrant profile in Firestore and then complete login.
