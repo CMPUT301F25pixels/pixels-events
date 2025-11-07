@@ -74,7 +74,11 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         // Go back to main settings
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, MainSettingsActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         // Go to edit Page
         editButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class)));

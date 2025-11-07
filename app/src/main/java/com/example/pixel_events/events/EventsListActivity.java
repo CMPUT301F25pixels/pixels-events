@@ -154,6 +154,9 @@ public class EventsListActivity extends AppCompatActivity {
 
     private EventModel convertToEventModel(QueryDocumentSnapshot document) {
         try {
+            String organizerName = document.contains("organizerName") ? 
+                (String) document.get("organizerName") : "Organizer";
+            
             return new EventModel(
                     Math.toIntExact((Long) document.get("eventId")),
                     Math.toIntExact((Long) document.get("organizerId")),
@@ -165,10 +168,10 @@ public class EventsListActivity extends AppCompatActivity {
                     (String) document.get("fee"),
                     (String) document.get("eventStartDate"),
                     (String) document.get("eventStartTime"),
-                    (String) document.get("organizerName")
+                    organizerName
             );
         } catch (Exception e) {
-            Log.e(TAG, "Error converting document", e);
+            Log.e(TAG, "Error converting document: " + e.getMessage(), e);
             return null;
         }
     }
