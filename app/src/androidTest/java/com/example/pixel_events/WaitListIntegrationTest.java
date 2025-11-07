@@ -34,11 +34,11 @@ public class WaitListIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
-        db = DatabaseHandler.getInstance(false); // emulator mode
+        db = DatabaseHandler.getInstance(true); // emulator mode
         fs = db.getFirestore();
 
         // Ensure the document exists and starts empty
-        await(db.createWaitingList(EVENT_ID, 10));
+        await(db.addWaitingList(EVENT_ID, 10));
         await(db.leaveWaitingList(EVENT_ID, USER_1));
         await(db.leaveWaitingList(EVENT_ID, USER_2));
     }
