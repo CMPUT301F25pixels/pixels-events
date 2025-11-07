@@ -87,6 +87,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         testNotificationButton.setOnClickListener(v -> testNotification());
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
             finish();
         });

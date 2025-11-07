@@ -262,13 +262,16 @@ public class EventActivity extends AppCompatActivity {
 
             Toast.makeText(EventActivity.this, "Event " + (isEditMode ? "updated" : "saved") + " successfully!", Toast.LENGTH_SHORT).show();
             
-            // Navigate to event details page
-            Intent intent = new Intent(EventActivity.this, EventDetailsActivity.class);
-            intent.putExtra("eventId", String.valueOf(eventId));
-            startActivity(intent);
-            
-            // Close this activity
-            finish();
+            // Add a small delay to ensure Firebase write completes
+            new android.os.Handler().postDelayed(() -> {
+                // Navigate to event details page
+                Intent intent = new Intent(EventActivity.this, EventDetailsActivity.class);
+                intent.putExtra("eventId", String.valueOf(eventId));
+                startActivity(intent);
+                
+                // Close this activity
+                finish();
+            }, 500); // 500ms delay
         } catch (IllegalArgumentException ex) {
             // Validation from Event constructor failed
             android.util.Log.e("EventActivity", "Validation error: " + ex.getMessage(), ex);

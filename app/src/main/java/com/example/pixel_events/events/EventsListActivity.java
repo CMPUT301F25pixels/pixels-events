@@ -124,7 +124,7 @@ public class EventsListActivity extends AppCompatActivity {
         Log.d(TAG, "Starting to load events from Firestore...");
         
         firestore.collection("EventData")
-                .get()  // Remove orderBy temporarily to see all events
+                .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     Log.d(TAG, "Firestore query successful. Total documents: " + queryDocumentSnapshots.size());
                     
@@ -135,30 +135,50 @@ public class EventsListActivity extends AppCompatActivity {
                         Log.d(TAG, "Processing document: " + document.getId());
                         Log.d(TAG, "Document data: " + document.getData());
                         
-                        Event event = document.toObject(Event.class);
-                        if (event != null) {
-                            Log.d(TAG, "Converted event: " + event.getTitle());
-                            if (isFutureEvent(event)) {
-                                upcomingEvents.add(event);
-                                Log.d(TAG, "Added to upcoming events");
+                        try {
+                            Event event = document.toObject(Event.class);
+                            if (event != null && event.getTitle() != null) {
+                                Log.d(TAG, "Converted event: " + event.getTitle() + ", Date: " + event.getEventStartDate());
+                                if (isFutureEvent(event)) {
+                                    upcomingEvents.add(event);
+                                    Log.d(TAG, "Added to upcoming events");
+                                } else {
+                                    previousEvents.add(event);
+                                    Log.d(TAG, "Added to previous events");
+                                }
                             } else {
-                                previousEvents.add(event);
-                                Log.d(TAG, "Added to previous events");
+                                Log.e(TAG, "Event is null or has no title");
                             }
-                        } else {
-                            Log.e(TAG, "Failed to convert document to Event");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error converting document to Event: " + e.getMessage(), e);
                         }
                     }
 
                     // Sort by event start date
-                    Collections.sort(upcomingEvents, (e1, e2) -> e1.getEventStartDate().compareTo(e2.getEventStartDate()));
-                    Collections.sort(previousEvents, (e1, e2) -> e2.getEventStartDate().compareTo(e1.getEventStartDate()));
+                    try {
+                        Collections.sort(upcomingEvents, (e1, e2) -> {
+                            if (e1.getEventStartDate() == null) return 1;
+                            if (e2.getEventStartDate() == null) return -1;
+                            return e1.getEventStartDate().compareTo(e2.getEventStartDate());
+                        });
+                        Collections.sort(previousEvents, (e1, e2) -> {
+                            if (e1.getEventStartDate() == null) return 1;
+                            if (e2.getEventStartDate() == null) return -1;
+                            return e2.getEventStartDate().compareTo(e1.getEventStartDate());
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error sorting events: " + e.getMessage(), e);
+                    }
 
                     Log.d(TAG, "Loaded " + upcomingEvents.size() + " upcoming, " +
                             previousEvents.size() + " previous events");
 
-                    adapter.updateEvents(upcomingEvents);
-                    adapter.notifyDataSetChanged();
+                    // Update adapter based on current tab
+                    runOnUiThread(() -> {
+                        adapter.updateEvents(upcomingEvents);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(this, "Loaded " + (upcomingEvents.size() + previousEvents.size()) + " events", Toast.LENGTH_SHORT).show();
+                    });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading events", e);
