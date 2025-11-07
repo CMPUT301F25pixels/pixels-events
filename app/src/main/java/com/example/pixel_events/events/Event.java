@@ -19,7 +19,6 @@ public class Event {
     private String location;
     private String capacity;
     private String description;
-    private int waitlistId;
     private int organizerId;
     private String qrCode;
     private String eventStartDate;
@@ -30,7 +29,7 @@ public class Event {
     private String eventEndTime;
     private String fee;
     private WaitingList waitingList;
-    
+
     // Flag to control whether setters should automatically update database
     private boolean autoUpdateDatabase = true;
 
@@ -166,9 +165,6 @@ public class Event {
     }
     public String getDescription() {
         return description;
-    }
-    public int getWaitlistId() {
-        return waitlistId;
     }
     public int getOrganizerId() {
         return organizerId;
