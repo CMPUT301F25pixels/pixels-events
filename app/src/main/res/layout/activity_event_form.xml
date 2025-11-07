@@ -33,6 +33,13 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ic_photo_placeholder" />
 
+        <Button
+            android:id="@+id/eventFormUploadImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Upload Image" />
+
         <!-- Event Title -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"

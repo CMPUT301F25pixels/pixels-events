@@ -3,6 +3,7 @@ package com.example.pixel_events.events;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.qr.QRCode;
 import com.example.pixel_events.waitingList.WaitingList;
 
 import java.util.HashMap;
@@ -115,6 +116,7 @@ public class Event {
         this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
+        this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
         this.waitingList = new WaitingList(String.valueOf(eventId));
     }
 
