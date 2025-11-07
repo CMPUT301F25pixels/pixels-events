@@ -106,13 +106,15 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         public void bind(Event event, OnEventClickListener listener) {
             title.setText(event.getTitle());
-            organizerName.setText(event.getOrganizerName());
-            type.setText(event.getType());
-            image.setImageResource(event.getImageResId());
-            time.setText(event.getFormattedTime());
+            organizerName.setText("ABC Company");
+            //organizerName.setText(event.getOrganizerName());
+            type.setText("Free");
+            //type.setText(event.getType());
+            //image.setImageResource(event.getImageUrl());
+            //
+            time.setText(event.getEventStartTime());
             location.setText(event.getLocation());
 
-            // Set click listener if provided
             if (listener != null) {
                 itemView.setOnClickListener(v -> listener.onEventClick(event));
             }
