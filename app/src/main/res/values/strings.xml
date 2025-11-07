@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">pixel-events</string>
+    <string name="event_poster">event_poster_url\n</string>
 </resources>
