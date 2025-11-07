@@ -1,6 +1,7 @@
 package com.example.pixel_events.settings;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -21,15 +22,24 @@ import java.util.Locale;
 import java.util.Map;
 
 public class EditProfileActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "pixels_prefs";
+    private static final String KEY_PROFILE_ID = "current_profile_id";
+    
     private Button confirmButton, cancelButton;
     private EditText usn, dob, gender, email, num, city, prov;
     private TextView role;
-    private String userID = "0"; // Make it a class member so it's accessible in all methods
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings_editprofile);
+
+        // Get current user ID from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        userID = prefs.getString(KEY_PROFILE_ID, "0");
+        
+        Log.d("EditProfileActivity", "Loading profile for user ID: " + userID);
 
         // Setup Buttons
         confirmButton = findViewById(R.id.profileEditConfirmButton);

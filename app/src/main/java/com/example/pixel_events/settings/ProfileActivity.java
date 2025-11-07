@@ -95,16 +95,19 @@ public class ProfileActivity extends AppCompatActivity {
         navHome.setOnClickListener(v -> {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            finish();
         });
 
         navEvents.setOnClickListener(v -> {
             Intent intent = new Intent(this, EventsListActivity.class);
             startActivity(intent);
+            finish();
         });
 
         navScanner.setOnClickListener(v -> {
             Intent intent = new Intent(this, QRScannerActivity.class);
             startActivity(intent);
+            finish();
         });
 
         navProfile.setOnClickListener(v -> {

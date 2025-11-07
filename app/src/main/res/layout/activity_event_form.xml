@@ -91,7 +91,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -110,7 +110,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -145,7 +145,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,7 +164,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -188,7 +188,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -207,7 +207,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                android:inputType="none"
+                    android:inputType="none"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -246,7 +246,7 @@
                     android:id="@+id/eventFormFee"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
+                    android:inputType="numberDecimal"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -264,7 +264,7 @@
                     android:id="@+id/eventFormCapacity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                android:inputType="number"
+                    android:inputType="number"
                 android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
