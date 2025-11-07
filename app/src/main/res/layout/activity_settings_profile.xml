@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#09101D">
+    android:background="@color/dark_bg"
+    android:padding="16dp">
 
     <FrameLayout
         android:id="@+id/profileBottomBar"
@@ -58,9 +59,10 @@
         app:layout_constraintBottom_toTopOf="@id/profileBottomBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_width="409dp"
-        android:layout_height="669dp"
-        android:orientation="vertical">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -124,10 +126,10 @@
             android:textColor="#3679F7"
             android:textSize="12sp" />
 
-        <FrameLayout
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#7F223E80">
+            android:layout_marginTop="16dp">
 
 
             <LinearLayout
@@ -137,78 +139,91 @@
 
                 <TextView
                     android:id="@+id/profileDOBText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:textColor="@color/white"
                     android:text="dd/mm/yyyy"
-                    android:paddingLeft="20dp"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
                 <TextView
                     android:id="@+id/profileGenderText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:textColor="@color/white"
                     android:text="Gender"
-                    android:paddingLeft="20dp"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
                 <TextView
                     android:id="@+id/profileEmailText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:textColor="@color/white"
                     android:text="Email"
-                    android:paddingLeft="20dp"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
                 <TextView
                     android:id="@+id/profilePhoneText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:textColor="@color/white"
                     android:text="Phone Number"
-                    android:paddingLeft="20dp"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
                 <TextView
                     android:id="@+id/profileCityText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:textColor="@color/white"
                     android:text="City"
-                    android:paddingLeft="20dp"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
                 <TextView
                     android:id="@+id/profileProvinceText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="24dp"
                     android:textColor="@color/white"
-                    android:text="Provnice"
-                    android:paddingLeft="20dp"
+                    android:text="Province"
+                    android:padding="16dp"
+                    android:gravity="center_vertical"
                     android:fontFamily="@font/poppins"
                     android:background="@drawable/rounded_textview"/>
 
             </LinearLayout>
-        </FrameLayout>
+        </ScrollView>
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

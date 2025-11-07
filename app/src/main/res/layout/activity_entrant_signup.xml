@@ -1,55 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/entrant_signup_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="24dp">
+    android:background="@color/dark_bg"
+    android:padding="32dp">
 
     <TextView
-        android:id="@+id/text_entrant_signup_title"
+        android:id="@+id/text_signup_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Entrant Sign Up"
-        android:textSize="22sp"
+        android:text="Sign Up"
+        android:textColor="@color/white"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:layout_marginBottom="24dp" />
+        android:fontFamily="@font/poppins_bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="80dp" />
 
     <EditText
         android:id="@+id/edit_entrant_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:hint="Full name"
-        android:layout_marginBottom="12dp" />
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/white"
+        android:background="@drawable/rounded_textview"
+        android:padding="16dp"
+        android:inputType="textPersonName"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/text_signup_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp" />
 
     <EditText
         android:id="@+id/edit_entrant_email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Email"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:hint="Email address"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/white"
+        android:background="@drawable/rounded_textview"
+        android:padding="16dp"
         android:inputType="textEmailAddress"
-        android:layout_marginBottom="12dp" />
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/edit_entrant_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
     <EditText
-        android:id="@+id/edit_entrant_phone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Phone (optional)"
-        android:inputType="phone"
-        android:layout_marginBottom="24dp" />
+        android:id="@+id/edit_entrant_password"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:hint="Password"
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/white"
+        android:background="@drawable/rounded_textview"
+        android:padding="16dp"
+        android:inputType="textPassword"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/edit_entrant_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
     <Button
         android:id="@+id/button_entrant_save"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save and continue"
-        android:layout_marginBottom="8dp" />
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Create account"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/accent_blue"
+        android:fontFamily="@font/poppins_bold"
+        app:layout_constraintTop_toBottomOf="@id/edit_entrant_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
 
-    <Button
-        android:id="@+id/button_entrant_cancel"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/layout_signin"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/button_entrant_save"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="You have account? "
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins" />
+
+        <TextView
+            android:id="@+id/text_signin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign in"
+            android:textColor="@color/accent_blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,9 +25,8 @@ public class EntrantSignupActivity extends AppCompatActivity {
 
     private EditText nameInput;
     private EditText emailInput;
-    private EditText phoneInput;
+    private EditText passwordInput;
     private Button saveButton;
-    private Button cancelButton;
     private DatabaseHandler db;
     private int entrantId;
 
@@ -38,7 +37,6 @@ public class EntrantSignupActivity extends AppCompatActivity {
 
         db = DatabaseHandler.getInstance();
 
-        // Get the entrantId passed from LoginActivity
         entrantId = getIntent().getIntExtra("entrant_id", -1);
         if (entrantId == -1) {
             Toast.makeText(this, "Error: no entrant ID", Toast.LENGTH_SHORT).show();
@@ -48,65 +46,56 @@ public class EntrantSignupActivity extends AppCompatActivity {
 
         nameInput = findViewById(R.id.edit_entrant_name);
         emailInput = findViewById(R.id.edit_entrant_email);
-        phoneInput = findViewById(R.id.edit_entrant_phone);
+        passwordInput = findViewById(R.id.edit_entrant_password);
         saveButton = findViewById(R.id.button_entrant_save);
-        cancelButton = findViewById(R.id.button_entrant_cancel);
 
         saveButton.setOnClickListener(v -> onSave());
-        cancelButton.setOnClickListener(v -> onCancel());
+        
+        findViewById(R.id.text_signin).setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void onSave() {
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
-        String phoneStr = phoneInput.getText().toString().trim();
+        String password = passwordInput.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Please enter name and email", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        int phoneNum = 0;
-        if (!phoneStr.isEmpty()) {
-            try {
-                phoneNum = Integer.parseInt(phoneStr);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Phone must be digits only", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (password.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         String accType = "user";
-        Date dob = new Date();     // placeholder for now
+        Date dob = new Date();
         String gender = "";
         String city = "";
         String province = "";
+        int phoneNum = 0;
 
         List<Boolean> notifyPrefs = new ArrayList<>();
-        notifyPrefs.add(true); // all notif
-        notifyPrefs.add(true); // win notif
-        notifyPrefs.add(true); // lose notif
+        notifyPrefs.add(true);
+        notifyPrefs.add(true);
+        notifyPrefs.add(true);
 
         db.addAcc(entrantId, accType, name, dob, gender,
                 email, city, province, phoneNum, notifyPrefs);
 
-        // Save session so we don't ask again
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         prefs.edit()
                 .putString(KEY_ROLE, accType)
                 .putString(KEY_PROFILE_ID, String.valueOf(entrantId))
                 .apply();
 
-        Toast.makeText(this, "Welcome, " + name + "!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
 
-        // Go to main entrant screen
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        finish();
-    }
-
-    private void onCancel() {
-        // Just go back to login men no profile created
         finish();
     }
 }

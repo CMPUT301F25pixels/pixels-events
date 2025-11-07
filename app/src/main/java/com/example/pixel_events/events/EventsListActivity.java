@@ -119,7 +119,7 @@ public class EventsListActivity extends AppCompatActivity {
     }
 
     private void loadEvents() {
-        firestore.collection("events")
+        firestore.collection("EventData")
                 .orderBy("eventStartDate")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
