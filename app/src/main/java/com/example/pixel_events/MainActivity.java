@@ -24,6 +24,7 @@ import com.example.pixel_events.events.EventActivity;
 import com.example.pixel_events.events.EventsListActivity;
 import com.example.pixel_events.notifications.LotteryNotificationService;
 import com.example.pixel_events.qr.QRScannerActivity;
+import com.example.pixel_events.settings.MainSettingsActivity;
 import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         navProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainSettingsActivity.class);
             startActivity(intent);
         });
     }

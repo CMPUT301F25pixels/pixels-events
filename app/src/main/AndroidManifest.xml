@@ -63,6 +63,7 @@
             android:name=".settings.ProfileActivity" />
         <activity
             android:name=".settings.EditProfileActivity" />
+        <activity android:name=".settings.NotifPrefActivity"/>
         
         <activity
             android:name=".qr.QRScannerActivity"
