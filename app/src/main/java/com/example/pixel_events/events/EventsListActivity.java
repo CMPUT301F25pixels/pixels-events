@@ -37,8 +37,8 @@ public class EventsListActivity extends AppCompatActivity {
     private RecyclerView eventsRecyclerView;
 
     private EventsListAdapter adapter;
-    private List<Event> upcomingEvents;
-    private List<Event> previousEvents;
+    private List<EventModel> upcomingEvents;
+    private List<EventModel> previousEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,7 @@ public class EventsListActivity extends AppCompatActivity {
         initViews();
         setupTabButtons();
         setupRecyclerView();
+        setupBottomNav();
         loadEvents();
     }
 
@@ -57,7 +58,6 @@ public class EventsListActivity extends AppCompatActivity {
         upcomingButton = findViewById(R.id.upcomingButton);
         previousButton = findViewById(R.id.previousButton);
         eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
-        setupBottomNav();
     }
     
     private void setupBottomNav() {
@@ -116,74 +116,78 @@ public class EventsListActivity extends AppCompatActivity {
         previousEvents = new ArrayList<>();
 
         adapter = new EventsListAdapter(upcomingEvents, this::onEventClick);
-        eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        eventsRecyclerView.setLayoutManager(layoutManager);
         eventsRecyclerView.setAdapter(adapter);
+        eventsRecyclerView.setHasFixedSize(true);
+        
+        Log.d(TAG, "RecyclerView setup complete with adapter: " + adapter);
+        Log.d(TAG, "RecyclerView visibility: " + eventsRecyclerView.getVisibility());
+        Log.d(TAG, "RecyclerView height: " + eventsRecyclerView.getHeight());
     }
 
     private void loadEvents() {
-        Log.d(TAG, "Starting to load events from Firestore...");
+        Log.d(TAG, "Loading events from EventData collection...");
         
         firestore.collection("EventData")
+                .orderBy("eventStartDate")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Log.d(TAG, "Firestore query successful. Total documents: " + queryDocumentSnapshots.size());
+                    Log.d(TAG, "Query successful. Documents: " + queryDocumentSnapshots.size());
                     
                     upcomingEvents.clear();
                     previousEvents.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Log.d(TAG, "Processing document: " + document.getId());
-                        Log.d(TAG, "Document data: " + document.getData());
-                        
-                        try {
-                            Event event = document.toObject(Event.class);
-                            if (event != null && event.getTitle() != null) {
-                                Log.d(TAG, "Converted event: " + event.getTitle() + ", Date: " + event.getEventStartDate());
-                                if (isFutureEvent(event)) {
-                                    upcomingEvents.add(event);
-                                    Log.d(TAG, "Added to upcoming events");
-                                } else {
-                                    previousEvents.add(event);
-                                    Log.d(TAG, "Added to previous events");
-                                }
+                        EventModel event = convertToEventModel(document);
+                        if (event != null) {
+                            if (isFutureEvent(event)) {
+                                upcomingEvents.add(event);
                             } else {
-                                Log.e(TAG, "Event is null or has no title");
+                                previousEvents.add(event);
                             }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error converting document to Event: " + e.getMessage(), e);
                         }
                     }
 
-                    // Sort by event start date
-                    try {
-                        Collections.sort(upcomingEvents, (e1, e2) -> {
-                            if (e1.getEventStartDate() == null) return 1;
-                            if (e2.getEventStartDate() == null) return -1;
-                            return e1.getEventStartDate().compareTo(e2.getEventStartDate());
-                        });
-                        Collections.sort(previousEvents, (e1, e2) -> {
-                            if (e1.getEventStartDate() == null) return 1;
-                            if (e2.getEventStartDate() == null) return -1;
-                            return e2.getEventStartDate().compareTo(e1.getEventStartDate());
-                        });
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error sorting events: " + e.getMessage(), e);
-                    }
+                    // Sort upcoming (earliest first), previous (latest first)
+                    Collections.sort(upcomingEvents, (e1, e2) -> e1.getDate().compareTo(e2.getDate()));
+                    Collections.sort(previousEvents, (e1, e2) -> e2.getDate().compareTo(e1.getDate()));
 
                     Log.d(TAG, "Loaded " + upcomingEvents.size() + " upcoming, " +
                             previousEvents.size() + " previous events");
 
-                    // Update adapter based on current tab
-                    runOnUiThread(() -> {
-                        adapter.updateEvents(upcomingEvents);
-                        adapter.notifyDataSetChanged();
-                        Toast.makeText(this, "Loaded " + (upcomingEvents.size() + previousEvents.size()) + " events", Toast.LENGTH_SHORT).show();
-                    });
+                    adapter.updateEvents(upcomingEvents);
+                    Toast.makeText(this, "Loaded " + (upcomingEvents.size() + previousEvents.size()) + " events", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading events", e);
-                    Toast.makeText(this, "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private EventModel convertToEventModel(QueryDocumentSnapshot document) {
+        try {
+            String organizerName = document.contains("organizerName") ?
+                    (String) document.get("organizerName") : "Organizer";
+            
+            return new EventModel(
+                    Math.toIntExact((Long) document.get("eventId")),
+                    Math.toIntExact((Long) document.get("organizerId")),
+                    (String) document.get("title"),
+                    R.drawable.sample_image,
+                    (String) document.get("location"),
+                    (String) document.get("capacity"),
+                    (String) document.get("description"),
+                    (String) document.get("fee"),
+                    (String) document.get("eventStartDate"),
+                    (String) document.get("eventStartTime"),
+                    organizerName
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting document", e);
+            return null;
+        }
     }
 
     private void showUpcomingEvents() {
@@ -194,18 +198,11 @@ public class EventsListActivity extends AppCompatActivity {
         adapter.updateEvents(previousEvents);
     }
 
-    private boolean isFutureEvent(Event event) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            Date eventDate = sdf.parse(event.getEventStartDate());
-            return eventDate != null && eventDate.after(new Date());
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing date", e);
-            return true; // Default to upcoming if parsing fails
-        }
+    private boolean isFutureEvent(EventModel event) {
+        return event.getDate().after(new Date());
     }
 
-    private void onEventClick(Event event) {
+    private void onEventClick(EventModel event) {
         Intent intent = new Intent(this, EventDetailsActivity.class);
         intent.putExtra("eventId", String.valueOf(event.getEventId()));
         startActivity(intent);

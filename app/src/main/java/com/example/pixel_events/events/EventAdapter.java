@@ -113,15 +113,22 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
 
         public void bind(Event event, OnEventClickListener listener) {
-            title.setText(event.getTitle());
-            organizerName.setText("Organizer"); // Can be extended with organizer name lookup
+            if (event == null) {
+                return;
+            }
             
-            String eventType = (event.getFee() == null || event.getFee().equalsIgnoreCase("free")) ? "Free" : "Paid";
-            type.setText(eventType);
+            title.setText(event.getTitle() != null ? event.getTitle() : "Untitled Event");
+            organizerName.setText(event.getOrganizerName() != null ? event.getOrganizerName() : "Organizer");
+            type.setText(event.getType() != null ? event.getType() : "Free");
             
-            image.setImageResource(R.drawable.sample_image);
-            time.setText(event.getEventStartTime());
-            location.setText(event.getLocation());
+            if (event.getImageResId() > 0) {
+                image.setImageResource(event.getImageResId());
+            } else {
+                image.setImageResource(R.drawable.sample_image);
+            }
+            
+            time.setText(event.getFormattedTime() != null ? event.getFormattedTime() : "");
+            location.setText(event.getLocation() != null ? event.getLocation() : "");
 
             // Set click listener if provided
             if (listener != null) {

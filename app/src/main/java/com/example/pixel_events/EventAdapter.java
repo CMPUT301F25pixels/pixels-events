@@ -9,9 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-import com.example.pixel_events.events.Event;
+import com.example.pixel_events.events.EventModel;
 
+import java.util.List;
 
 public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -22,7 +22,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final OnEventClickListener clickListener;
 
     public interface OnEventClickListener {
-        void onEventClick(Event event);
+        void onEventClick(EventModel event);
     }
 
     public EventAdapter(List<Object> items) {
@@ -59,7 +59,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             String dateHeader = (String) items.get(position);
             ((DateHeaderViewHolder) holder).bind(dateHeader);
         } else if (holder instanceof EventViewHolder) {
-            Event event = (Event) items.get(position);
+            EventModel event = (EventModel) items.get(position);
             ((EventViewHolder) holder).bind(event, clickListener);
         }
     }
@@ -68,7 +68,6 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemCount() {
         return items.size();
     }
-
 
     public static class DateHeaderViewHolder extends RecyclerView.ViewHolder {
         private final TextView dateText;
@@ -84,7 +83,6 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             dateText.setText(dateHeader);
         }
     }
-
 
     public static class EventViewHolder extends RecyclerView.ViewHolder {
         private final TextView title;
@@ -104,16 +102,21 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             location = itemView.findViewById(R.id.eventLocation);
         }
 
-        public void bind(Event event, OnEventClickListener listener) {
-            title.setText(event.getTitle());
-            organizerName.setText("ABC Company");
-            //organizerName.setText(event.getOrganizerName());
-            type.setText("Free");
-            //type.setText(event.getType());
-            //image.setImageResource(event.getImageUrl());
-            //
-            time.setText(event.getEventStartTime());
-            location.setText(event.getLocation());
+        public void bind(EventModel event, OnEventClickListener listener) {
+            if (event == null) {
+                return;
+            }
+
+            title.setText(event.getTitle() != null ? event.getTitle() : "");
+            organizerName.setText(event.getOrganizerName() != null ? event.getOrganizerName() : "");
+            type.setText(event.getType() != null ? event.getType() : "");
+
+            if (event.getImageResId() > 0) {
+                image.setImageResource(event.getImageResId());
+            }
+
+            time.setText(event.getFormattedTime() != null ? event.getFormattedTime() : "");
+            location.setText(event.getLocation() != null ? event.getLocation() : "");
 
             if (listener != null) {
                 itemView.setOnClickListener(v -> listener.onEventClick(event));

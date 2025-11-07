@@ -211,6 +211,65 @@ public class Event {
     public ArrayList<String> getTags() {
         return tags;
     }
+    
+    /**
+     * Get formatted time for display (h:mm a format)
+     * @return formatted time string
+     */
+    public String getFormattedTime() {
+        if (eventStartTime == null || eventStartTime.isEmpty()) {
+            return "";
+        }
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("HH:mm", Locale.US);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("h:mm a", Locale.US);
+            Date time = inputFormat.parse(eventStartTime);
+            return time != null ? outputFormat.format(time) : eventStartTime;
+        } catch (ParseException e) {
+            return eventStartTime;
+        }
+    }
+    
+    /**
+     * Get image resource ID (returns default sample image)
+     * @return image resource ID
+     */
+    public int getImageResId() {
+        return com.example.pixel_events.R.drawable.sample_image;
+    }
+    
+    /**
+     * Get organizer name (placeholder for now)
+     * @return organizer name
+     */
+    public String getOrganizerName() {
+        return "Organizer"; // Can be extended to fetch from database
+    }
+    
+    /**
+     * Get event type (Free or Paid)
+     * @return event type string
+     */
+    public String getType() {
+        return (fee == null || fee.equalsIgnoreCase("free") || fee.isEmpty()) ? "Free" : "Paid";
+    }
+    
+    /**
+     * Get event start date as Date object
+     * @return Date object or null if parsing fails
+     */
+    public Date getDate() {
+        if (eventStartDate == null || eventStartTime == null) {
+            return null;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+            return sdf.parse(eventStartDate + " " + eventStartTime);
+        } catch (ParseException e) {
+            Log.e("Event", "Error parsing date: " + e.getMessage());
+            return null;
+        }
+    }
 
     // Setters - These update both the local field and the database
     public void setEventId(int eventId) {
