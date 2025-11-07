@@ -1,6 +1,7 @@
-# Ignore IntelliJ project files
+# Ignore
 *.iml
 .idea/
+.vscode/
 
 # Ignore Gradle files
 .gradle
