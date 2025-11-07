@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,7 +19,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.entrant.EventDetailsLauncherActivity;
+import com.example.pixel_events.events.EventsListActivity;
 import com.example.pixel_events.qr.QRScannerActivity;
+import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -66,6 +69,37 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 requestCameraPermission();
             }
+        });
+        
+        setupBottomNav();
+    }
+    
+    private void setupBottomNav() {
+        LinearLayout navHome = findViewById(R.id.nav_home);
+        LinearLayout navEvents = findViewById(R.id.nav_events);
+        LinearLayout navScanner = findViewById(R.id.nav_scanner);
+        LinearLayout navProfile = findViewById(R.id.nav_profile);
+
+        navHome.setOnClickListener(v -> {
+            Toast.makeText(this, "Already on Home", Toast.LENGTH_SHORT).show();
+        });
+
+        navEvents.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, EventsListActivity.class);
+            startActivity(intent);
+        });
+
+        navScanner.setOnClickListener(v -> {
+            if (checkCameraPermission()) {
+                openQRScanner();
+            } else {
+                requestCameraPermission();
+            }
+        });
+
+        navProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
         });
     }
 

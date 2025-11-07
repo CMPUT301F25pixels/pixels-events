@@ -1,61 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
+    android:background="@color/dark_bg"
     android:padding="24dp">
 
-    <!-- App title -->
     <TextView
-        android:id="@+id/text_app_title"
+        android:id="@+id/text_hello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="28sp"
+        android:text="Hello!"
+        android:textColor="@color/white"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:layout_marginBottom="24dp" />
+        android:fontFamily="@font/poppins_bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="100dp" />
 
-    <!-- Subtitle -->
     <TextView
-        android:id="@+id/text_login_subtitle"
+        android:id="@+id/text_welcome_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome back."
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/text_hello"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp" />
+
+    <TextView
+        android:id="@+id/text_role_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Continue as"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@color/text_secondary"
+        android:textSize="16sp"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/text_welcome_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp" />
 
-    <!-- Entrant button -->
     <Button
         android:id="@+id/button_entrant"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:text="Entrant"
-        android:layout_marginBottom="12dp" />
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/accent_blue"
+        android:fontFamily="@font/poppins_bold"
+        app:layout_constraintTop_toBottomOf="@id/text_role_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
-    <!-- Organizer button -->
     <Button
         android:id="@+id/button_organizer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:text="Organizer"
-        android:layout_marginBottom="8dp" />
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:backgroundTint="@color/card_bg"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/button_entrant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
 
-    <!-- Admin button -->
     <Button
         android:id="@+id/button_admin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:text="Admin"
-        android:layout_marginBottom="24dp" />
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:backgroundTint="@color/card_bg"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/button_organizer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
 
-    <!-- Access code field used for Organizer/Admin -->
     <EditText
         android:id="@+id/edit_access_code"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
         android:hint="Access code (Organizer/Admin)"
-        android:inputType="textPassword" />
+        android:textColorHint="@color/text_secondary"
+        android:textColor="@color/white"
+        android:background="@drawable/rounded_textview"
+        android:padding="16dp"
+        android:inputType="textPassword"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/button_admin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

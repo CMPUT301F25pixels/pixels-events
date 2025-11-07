@@ -1,9 +1,12 @@
 package com.example.pixel_events.events;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,7 +14,10 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.qr.QRScannerActivity;
+import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -49,6 +55,33 @@ public class EventsListActivity extends AppCompatActivity {
         upcomingButton = findViewById(R.id.upcomingButton);
         previousButton = findViewById(R.id.previousButton);
         eventsRecyclerView = findViewById(R.id.eventsRecyclerView);
+        setupBottomNav();
+    }
+    
+    private void setupBottomNav() {
+        LinearLayout navHome = findViewById(R.id.nav_home);
+        LinearLayout navEvents = findViewById(R.id.nav_events);
+        LinearLayout navScanner = findViewById(R.id.nav_scanner);
+        LinearLayout navProfile = findViewById(R.id.nav_profile);
+
+        navHome.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
+
+        navEvents.setOnClickListener(v -> {
+            Toast.makeText(this, "Already on Events", Toast.LENGTH_SHORT).show();
+        });
+
+        navScanner.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, QRScannerActivity.class);
+            startActivity(intent);
+        });
+
+        navProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(EventsListActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void setupTabButtons() {
