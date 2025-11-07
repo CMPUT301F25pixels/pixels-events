@@ -84,11 +84,28 @@ public class EventsListAdapter extends RecyclerView.Adapter<EventsListAdapter.Ev
 
         public void bind(EventModel event, OnEventClickListener listener) {
             android.util.Log.d("EventsListAdapter", "bind() called for: " + event.getTitle());
-            android.util.Log.d("EventsListAdapter", "View IDs - Image: " + (eventImage != null) + ", Title: " + (eventTitle != null) + ", Location: " + (eventLocation != null));
             
-            if (eventImage != null) {
-                eventImage.setImageResource(R.drawable.sample_image);
+            // Load poster image if available
+            if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+                try {
+                    android.graphics.Bitmap posterBitmap = com.example.pixel_events.events.EventActivity.base64ToBitmap(event.getImageUrl());
+                    if (posterBitmap != null && eventImage != null) {
+                        eventImage.setImageBitmap(posterBitmap);
+                    } else {
+                        eventImage.setImageResource(R.drawable.sample_image);
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("EventsListAdapter", "Error loading poster image", e);
+                    if (eventImage != null) {
+                        eventImage.setImageResource(R.drawable.sample_image);
+                    }
+                }
+            } else {
+                if (eventImage != null) {
+                    eventImage.setImageResource(R.drawable.sample_image);
+                }
             }
+            
             if (eventTitle != null) {
                 eventTitle.setText(event.getTitle());
             }

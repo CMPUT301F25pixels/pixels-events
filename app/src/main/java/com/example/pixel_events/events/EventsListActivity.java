@@ -170,6 +170,8 @@ public class EventsListActivity extends AppCompatActivity {
         try {
             String organizerName = document.contains("organizerName") ?
                     (String) document.get("organizerName") : "Organizer";
+            String imageUrl = document.contains("imageUrl") ?
+                    (String) document.get("imageUrl") : null;
             
             return new EventModel(
                     Math.toIntExact((Long) document.get("eventId")),
@@ -182,7 +184,8 @@ public class EventsListActivity extends AppCompatActivity {
                     (String) document.get("fee"),
                     (String) document.get("eventStartDate"),
                     (String) document.get("eventStartTime"),
-                    organizerName
+                    organizerName,
+                    imageUrl
             );
         } catch (Exception e) {
             Log.e(TAG, "Error converting document", e);

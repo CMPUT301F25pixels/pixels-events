@@ -10,6 +10,7 @@ public class EventModel {
     private String location;
     private String type;
     private int imageResId;
+    private String imageUrl;  // Base64 encoded image
     private Date dateTime;
     private String capacity;
     private String description;
@@ -49,10 +50,18 @@ public class EventModel {
     public EventModel(int eventId, int organizerId, String title, int imageResId,
                       String location, String capacity, String description,
                       String fee, String date, String time, String organizerName) {
+        this(eventId, organizerId, title, imageResId, location, capacity, description,
+             fee, date, time, organizerName, null);
+    }
+
+    public EventModel(int eventId, int organizerId, String title, int imageResId,
+                      String location, String capacity, String description,
+                      String fee, String date, String time, String organizerName, String imageUrl) {
         this.eventId = eventId;
         this.organizerId = organizerId;
         this.title = title;
         this.imageResId = imageResId;
+        this.imageUrl = imageUrl;
         this.location = location;
         this.capacity = capacity;
         this.description = description;
@@ -116,6 +125,10 @@ public class EventModel {
 
     public int getOrganizerId() {
         return organizerId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public String getFormattedDate() {

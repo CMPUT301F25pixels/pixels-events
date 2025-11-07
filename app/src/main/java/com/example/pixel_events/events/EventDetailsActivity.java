@@ -41,6 +41,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private TextView descriptionText;
     private TextView capacityText;
     private TextView feeText;
+    private ImageView posterImage;
     private Button joinButton;
     private Button leaveButton;
     private Button editButton;
@@ -80,6 +81,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         descriptionText = findViewById(R.id.event_description);
         capacityText = findViewById(R.id.event_capacity);
         feeText = findViewById(R.id.event_fee);
+        posterImage = findViewById(R.id.event_poster);
         joinButton = findViewById(R.id.join_button);
         leaveButton = findViewById(R.id.leave_button);
         editButton = findViewById(R.id.edit_button);
@@ -283,6 +285,27 @@ public class EventDetailsActivity extends AppCompatActivity {
                     descriptionText.setText(event.getDescription());
                     capacityText.setText("Capacity: " + event.getCapacity());
                     feeText.setText("Fee: " + event.getFee());
+                    
+                    // Load poster image if available
+                    if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+                        try {
+                            android.graphics.Bitmap posterBitmap = EventActivity.base64ToBitmap(event.getImageUrl());
+                            if (posterBitmap != null) {
+                                posterImage.setImageBitmap(posterBitmap);
+                                Log.d(TAG, "Poster image loaded successfully");
+                            } else {
+                                posterImage.setImageResource(R.drawable.sample_image);
+                                Log.d(TAG, "Failed to decode poster, using default");
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error loading poster image", e);
+                            posterImage.setImageResource(R.drawable.sample_image);
+                        }
+                    } else {
+                        posterImage.setImageResource(R.drawable.sample_image);
+                        Log.d(TAG, "No poster uploaded for this event");
+                    }
+                    
                     updateButtonVisibility();
                 } else {
                     Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
