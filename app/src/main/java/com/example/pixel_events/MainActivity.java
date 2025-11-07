@@ -2,6 +2,7 @@ package com.example.pixel_events;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,9 +31,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final String PREFS_NAME = "pixels_prefs";
+    private static final String KEY_ROLE = "current_role";
+    
     private DatabaseHandler db;
     private Button addFormButton;
     private Button scanButton;
+    private String userRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +57,17 @@ public class MainActivity extends AppCompatActivity {
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
+        // Get user role from SharedPreferences
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        userRole = prefs.getString(KEY_ROLE, "user");
+        Log.d(TAG, "User role: " + userRole);
+
         // Check for lottery notifications
         checkLotteryNotifications();
 
+        // Setup add event / join event button based on role
         addFormButton = findViewById(R.id.addEvent);
-        addFormButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventActivity.class);
-            startActivity(intent);
-        });
+        setupAddEventButton();
 
         scanButton = findViewById(R.id.scan_qr_button);
         scanButton.setOnClickListener(v -> {
@@ -128,6 +136,31 @@ public class MainActivity extends AppCompatActivity {
     private void openQRScanner() {
         Intent intent = new Intent(this, QRScannerActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Setup the add event button based on user role
+     * Organizers and admins see "Create Event" button
+     * Entrants see "Join Event" button
+     */
+    private void setupAddEventButton() {
+        if ("org".equals(userRole) || "admin".equals(userRole)) {
+            // Organizer or admin - show "Create Event"
+            addFormButton.setText("Create Event");
+            addFormButton.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, EventActivity.class);
+                startActivity(intent);
+            });
+            Log.d(TAG, "Setup: Create Event button for organizer/admin");
+        } else {
+            // Entrant - show "Join Event"
+            addFormButton.setText("Join Event");
+            addFormButton.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, EventsListActivity.class);
+                startActivity(intent);
+            });
+            Log.d(TAG, "Setup: Join Event button for entrant");
+        }
     }
 
     /**
