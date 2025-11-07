@@ -1,11 +1,16 @@
 package com.example.pixel_events.qr;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
+import com.example.pixel_events.events.EventActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * QRCode class for generating QR codes from any text data
@@ -98,6 +103,11 @@ public class QRCode {
      */
     public static Bitmap generateQRCodeBitmap(String text) {
         return new QRCode(text).getBitmap();
+    }
+
+    public static String generateQRCodeBase64(String text) {
+        QRCode qrcode = new QRCode(text);
+        return EventActivity.bitmapToBase64(qrcode.getBitmap());
     }
 
     /**

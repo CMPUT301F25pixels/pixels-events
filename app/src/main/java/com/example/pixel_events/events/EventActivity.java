@@ -89,7 +89,7 @@ public class EventActivity extends AppCompatActivity {
 
             String imageURL = "";
             if (bitmap != null) {
-                imageURL = bitmapToBase64(bitmap);
+                imageURL = EventActivity.bitmapToBase64(bitmap);
             }
 
             try {
@@ -155,14 +155,14 @@ public class EventActivity extends AppCompatActivity {
                 c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
 
-    private String bitmapToBase64(Bitmap bitmap) {
+    public static String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos); // or JPEG
         byte[] imageBytes = baos.toByteArray();
         return Base64.encodeToString(imageBytes, Base64.DEFAULT);
     }
 
-    private Bitmap base64ToBitmap(String base64Str) throws IllegalArgumentException {
+    public static Bitmap base64ToBitmap(String base64Str) throws IllegalArgumentException {
         byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }

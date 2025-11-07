@@ -116,7 +116,7 @@ public class Event {
         this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
-        this.qrCode = QRCode.generateQRCodeBitmap("Event-" + this.eventId + "-" + this.organizerId).toString();
+        this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
         this.waitingList = new WaitingList(String.valueOf(eventId));
     }
 
