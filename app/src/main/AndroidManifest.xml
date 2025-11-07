@@ -14,9 +14,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pixelevents">
-
         <activity
             android:name=".MainActivity"
+            android:name=".settings.MainSettingsActivity"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +25,9 @@
             </intent-filter>
         </activity>
 
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
         <activity
             android:name=".login.LoginActivity"
             android:exported="true" />
@@ -41,6 +45,10 @@
         <activity
             android:name=".entrant.EventDetailsLauncherActivity"
             android:exported="false" />
+        <activity
+            android:name=".settings.ProfileActivity" />
+        <activity
+            android:name=".settings.EditProfileActivity" />
 
     </application>
 
