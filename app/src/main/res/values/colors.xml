@@ -24,7 +24,6 @@
     <color name="status_not_selected">#F44336</color>
     <color name="status_pending">#FF9800</color>
 
-
     <!-- Background Colors -->
     <color name="search_bg">#1A1F2E</color>
     <color name="dropdown_bg">#1A1F2E</color>

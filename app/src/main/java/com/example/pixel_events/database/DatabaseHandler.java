@@ -276,12 +276,12 @@ public class DatabaseHandler {
     public void addEvent(int eventId, int organizerId, String title, String imageUrl,
                          String location, String capacity, String description, String fee,
                          String eventStartDate, String eventEndDate, String eventStartTime, String eventEndTime,
-                         String registrationStartDate, String registrationEndDate) {
+                         String registrationStartDate, String registrationEndDate, ArrayList<String> tags) {
 
         // Create a new Event (includes fee)
         Event newEvent = new Event(eventId, organizerId, title, imageUrl, location,
             capacity, description, fee, eventStartDate, eventEndDate,
-            eventStartTime, eventEndTime, registrationStartDate, registrationEndDate);
+            eventStartTime, eventEndTime, registrationStartDate, registrationEndDate, tags);
 
         // Add the event to DB
         eventRef.document(String.valueOf(newEvent.getEventId()))

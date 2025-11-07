@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         addFormButton = findViewById(R.id.addEvent);
 
         addFormButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventDetailsLauncherActivity.class);
+            Intent intent = new Intent(MainActivity.this, EventActivity.class);
             startActivity(intent);
         });
     }
