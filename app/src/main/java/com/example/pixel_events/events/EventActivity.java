@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
+import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
@@ -28,6 +29,7 @@ import java.util.Calendar;
 
 public class EventActivity extends AppCompatActivity {
     private TextInputEditText startDate, endDate, startTime, endTime, regStartDate, regEndDate;
+    private TextInputEditText titleField, locationField, capacityField, descriptionField, feeField;
     private Button doneButton, cancelButton, uploadButton;
     private ImageView imageView;
     private ChipGroup tagGroup;
@@ -35,12 +37,25 @@ public class EventActivity extends AppCompatActivity {
     private Bitmap bitmap;
     private ArrayList<String> selectedTags = new ArrayList<>();
     private ActivityResultLauncher<String> imagePickerLauncher;
+    
+    private boolean isEditMode = false;
+    private String editEventId;
+    private Event existingEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_form);
 
+        // Check if we're in edit mode
+        isEditMode = getIntent().getBooleanExtra("isEditMode", false);
+        editEventId = getIntent().getStringExtra("eventId");
+
+        titleField = findViewById(R.id.eventFormTitle);
+        locationField = findViewById(R.id.eventFormLocation);
+        capacityField = findViewById(R.id.eventFormCapacity);
+        descriptionField = findViewById(R.id.eventFormDescription);
+        feeField = findViewById(R.id.eventFormFee);
         startDate = findViewById(R.id.eventFormStartDate);
         endDate = findViewById(R.id.eventFormEndDate);
         startTime = findViewById(R.id.eventFormStartTime);
@@ -52,6 +67,12 @@ public class EventActivity extends AppCompatActivity {
         uploadButton = findViewById(R.id.eventFormUploadImage);
         imageView = findViewById(R.id.eventFormPosterImage);
         tagGroup = findViewById(R.id.eventFormTagGroup);
+
+        // Load existing event if in edit mode
+        if (isEditMode && editEventId != null) {
+            doneButton.setText("Update Event");
+            loadExistingEvent();
+        }
 
         startDate.setOnClickListener(v -> showDatePicker(startDate));
         endDate.setOnClickListener(v -> showDatePicker(endDate));
@@ -70,74 +91,7 @@ public class EventActivity extends AppCompatActivity {
             }
         });
 
-        doneButton.setOnClickListener(v -> {
-            // Extract details from form fields
-            TextInputEditText titleField = findViewById(R.id.eventFormTitle);
-            TextInputEditText locationField = findViewById(R.id.eventFormLocation);
-            TextInputEditText capacityField = findViewById(R.id.eventFormCapacity);
-            TextInputEditText descriptionField = findViewById(R.id.eventFormDescription);
-            TextInputEditText feeField = findViewById(R.id.eventFormFee);
-
-            String title = titleField.getText() != null ? titleField.getText().toString().trim() : "";
-            String location = locationField.getText() != null ? locationField.getText().toString().trim() : "";
-            String capacity = capacityField.getText() != null ? capacityField.getText().toString().trim() : "";
-            String description = descriptionField.getText() != null ? descriptionField.getText().toString().trim() : "";
-            String fee = feeField.getText() != null ? feeField.getText().toString().trim() : "";
-
-            String sDate = startDate.getText() != null ? startDate.getText().toString().trim() : "";
-            String eDate = endDate.getText() != null ? endDate.getText().toString().trim() : "";
-            String sTime = startTime.getText() != null ? startTime.getText().toString().trim() : "";
-            String eTime = endTime.getText() != null ? endTime.getText().toString().trim() : "";
-            String rStart = regStartDate.getText() != null ? regStartDate.getText().toString().trim() : "";
-            String rEnd = regEndDate.getText() != null ? regEndDate.getText().toString().trim() : "";
-
-            // Basic validation
-            if (title.isEmpty() || location.isEmpty() || capacity.isEmpty() || description.isEmpty()
-                    || sDate.isEmpty() || eDate.isEmpty() || sTime.isEmpty() || eTime.isEmpty()
-                    || rStart.isEmpty() || rEnd.isEmpty()) {
-                Toast.makeText(EventActivity.this, "Please fill all required fields (dates & times included)", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            // Generate a simple positive event ID (seconds since epoch truncated)
-            int eventId = (int) ((System.currentTimeMillis() / 1000L) % Integer.MAX_VALUE);
-            // Placeholder organizer id — replace with real user id when available
-            int organizerId = 1;
-
-            String imageURL = "";
-            if (bitmap != null) {
-                imageURL = EventActivity.bitmapToBase64(bitmap);
-            }
-
-            try {
-                Event newEvent = new Event(eventId, organizerId, title, imageURL, location,
-                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
-
-                android.util.Log.d("EventActivity", "Created event: ID=" + eventId + " Title=" + title);
-                
-                // Persist to database
-                newEvent.saveToDatabase();
-                
-                android.util.Log.d("EventActivity", "Event saved to database successfully");
-
-                Toast.makeText(EventActivity.this, "Event saved successfully!", Toast.LENGTH_SHORT).show();
-                
-                // Navigate to event details page
-                Intent intent = new Intent(EventActivity.this, EventDetailsActivity.class);
-                intent.putExtra("eventId", String.valueOf(eventId));
-                startActivity(intent);
-                
-                // Close this activity
-                finish();
-            } catch (IllegalArgumentException ex) {
-                // Validation from Event constructor failed
-                android.util.Log.e("EventActivity", "Validation error: " + ex.getMessage(), ex);
-                Toast.makeText(EventActivity.this, "Invalid input: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-            } catch (Exception ex) {
-                android.util.Log.e("EventActivity", "Error saving event: " + ex.getMessage(), ex);
-                Toast.makeText(EventActivity.this, "Error saving event: " + ex.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        doneButton.setOnClickListener(v -> saveEvent());
 
         cancelButton.setOnClickListener(v -> {
             // Simply finish the activity and return to previous screen
@@ -194,6 +148,135 @@ public class EventActivity extends AppCompatActivity {
     public static Bitmap base64ToBitmap(String base64Str) throws IllegalArgumentException {
         byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+    }
+
+    private void loadExistingEvent() {
+        DatabaseHandler db = DatabaseHandler.getInstance();
+        db.getEvent(editEventId,
+            event -> {
+                if (event != null) {
+                    existingEvent = event;
+                    populateFormFields(event);
+                } else {
+                    Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            },
+            error -> {
+                Toast.makeText(this, "Error loading event", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        );
+    }
+
+    private void populateFormFields(Event event) {
+        titleField.setText(event.getTitle());
+        locationField.setText(event.getLocation());
+        capacityField.setText(event.getCapacity());
+        descriptionField.setText(event.getDescription());
+        feeField.setText(event.getFee());
+        startDate.setText(event.getEventStartDate());
+        endDate.setText(event.getEventEndDate());
+        startTime.setText(event.getEventStartTime());
+        endTime.setText(event.getEventEndTime());
+        regStartDate.setText(event.getRegistrationStartDate());
+        regEndDate.setText(event.getRegistrationEndDate());
+
+        // Load image if available
+        if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+            try {
+                bitmap = base64ToBitmap(event.getImageUrl());
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                android.util.Log.e("EventActivity", "Error loading image", e);
+            }
+        }
+
+        // Select tags
+        if (event.getTags() != null) {
+            selectedTags.addAll(event.getTags());
+            for (String tag : event.getTags()) {
+                for (int i = 0; i < tagGroup.getChildCount(); i++) {
+                    Chip chip = (Chip) tagGroup.getChildAt(i);
+                    if (chip.getText().toString().equals(tag)) {
+                        chip.setChecked(true);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void saveEvent() {
+        String title = titleField.getText() != null ? titleField.getText().toString().trim() : "";
+        String location = locationField.getText() != null ? locationField.getText().toString().trim() : "";
+        String capacity = capacityField.getText() != null ? capacityField.getText().toString().trim() : "";
+        String description = descriptionField.getText() != null ? descriptionField.getText().toString().trim() : "";
+        String fee = feeField.getText() != null ? feeField.getText().toString().trim() : "";
+
+        String sDate = startDate.getText() != null ? startDate.getText().toString().trim() : "";
+        String eDate = endDate.getText() != null ? endDate.getText().toString().trim() : "";
+        String sTime = startTime.getText() != null ? startTime.getText().toString().trim() : "";
+        String eTime = endTime.getText() != null ? endTime.getText().toString().trim() : "";
+        String rStart = regStartDate.getText() != null ? regStartDate.getText().toString().trim() : "";
+        String rEnd = regEndDate.getText() != null ? regEndDate.getText().toString().trim() : "";
+
+        // Basic validation
+        if (title.isEmpty() || location.isEmpty() || capacity.isEmpty() || description.isEmpty()
+                || sDate.isEmpty() || eDate.isEmpty() || sTime.isEmpty() || eTime.isEmpty()
+                || rStart.isEmpty() || rEnd.isEmpty()) {
+            Toast.makeText(EventActivity.this, "Please fill all required fields (dates & times included)", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String imageURL = "";
+        if (bitmap != null) {
+            imageURL = EventActivity.bitmapToBase64(bitmap);
+        } else if (isEditMode && existingEvent != null && existingEvent.getImageUrl() != null) {
+            imageURL = existingEvent.getImageUrl();
+        }
+
+        try {
+            int eventId;
+            int organizerId;
+
+            if (isEditMode && existingEvent != null) {
+                // Update existing event
+                eventId = existingEvent.getEventId();
+                organizerId = existingEvent.getOrganizerId();
+            } else {
+                // Create new event
+                eventId = (int) ((System.currentTimeMillis() / 1000L) % Integer.MAX_VALUE);
+                organizerId = 1; // Placeholder
+            }
+
+            Event event = new Event(eventId, organizerId, title, imageURL, location,
+                capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
+
+            android.util.Log.d("EventActivity", (isEditMode ? "Updated" : "Created") + " event: ID=" + eventId + " Title=" + title);
+            
+            // Persist to database
+            event.saveToDatabase();
+            
+            android.util.Log.d("EventActivity", "Event saved to database successfully");
+
+            Toast.makeText(EventActivity.this, "Event " + (isEditMode ? "updated" : "saved") + " successfully!", Toast.LENGTH_SHORT).show();
+            
+            // Navigate to event details page
+            Intent intent = new Intent(EventActivity.this, EventDetailsActivity.class);
+            intent.putExtra("eventId", String.valueOf(eventId));
+            startActivity(intent);
+            
+            // Close this activity
+            finish();
+        } catch (IllegalArgumentException ex) {
+            // Validation from Event constructor failed
+            android.util.Log.e("EventActivity", "Validation error: " + ex.getMessage(), ex);
+            Toast.makeText(EventActivity.this, "Invalid input: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception ex) {
+            android.util.Log.e("EventActivity", "Error saving event: " + ex.getMessage(), ex);
+            Toast.makeText(EventActivity.this, "Error saving event: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
 }

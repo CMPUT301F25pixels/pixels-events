@@ -1,5 +1,6 @@
 package com.example.pixel_events.events;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,10 +36,12 @@ public class EventDetailsActivity extends AppCompatActivity {
     private TextView feeText;
     private Button joinButton;
     private Button leaveButton;
+    private Button editButton;
     private Button backButton;
 
     private String eventId;
     private String currentUserId;
+    private Event currentEvent;
     private WaitingList waitingList;
     private boolean isOnWaitlist = false;
 
@@ -67,6 +70,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         feeText = findViewById(R.id.event_fee);
         joinButton = findViewById(R.id.join_button);
         leaveButton = findViewById(R.id.leave_button);
+        editButton = findViewById(R.id.edit_button);
         backButton = findViewById(R.id.back_button);
 
         // Load event from database
@@ -76,6 +80,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         // Button listeners
         joinButton.setOnClickListener(v -> joinWaitlist());
         leaveButton.setOnClickListener(v -> leaveWaitlist());
+        editButton.setOnClickListener(v -> openEditEvent());
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
             startActivity(intent);
@@ -100,13 +105,34 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     private void updateButtonVisibility() {
-        if (isOnWaitlist) {
+        // Check if current user is the organizer
+        boolean isOrganizer = currentEvent != null && 
+                              String.valueOf(currentEvent.getOrganizerId()).equals(currentUserId);
+        
+        if (isOrganizer) {
+            // Organizer sees edit button, not join/leave buttons
             joinButton.setVisibility(Button.GONE);
-            leaveButton.setVisibility(Button.VISIBLE);
-        } else {
-            joinButton.setVisibility(Button.VISIBLE);
             leaveButton.setVisibility(Button.GONE);
+            editButton.setVisibility(Button.VISIBLE);
+        } else {
+            // Regular users see join/leave buttons based on waitlist status
+            editButton.setVisibility(Button.GONE);
+            if (isOnWaitlist) {
+                joinButton.setVisibility(Button.GONE);
+                leaveButton.setVisibility(Button.VISIBLE);
+            } else {
+                joinButton.setVisibility(Button.VISIBLE);
+                leaveButton.setVisibility(Button.GONE);
+            }
         }
+    }
+    
+    private void openEditEvent() {
+        Intent intent = new Intent(this, EventActivity.class);
+        intent.putExtra("eventId", eventId);
+        intent.putExtra("isEditMode", true);
+        startActivity(intent);
+        finish();
     }
 
     private void joinWaitlist() {
@@ -136,6 +162,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         db.getEvent(eventId, 
             event -> {
                 if (event != null) {
+                    currentEvent = event;
                     titleText.setText(event.getTitle());
                     locationText.setText(event.getLocation());
                     datesText.setText(event.getEventStartDate() + " to " + event.getEventEndDate());
@@ -143,6 +170,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                     descriptionText.setText(event.getDescription());
                     capacityText.setText("Capacity: " + event.getCapacity());
                     feeText.setText("Fee: " + event.getFee());
+                    updateButtonVisibility();
                 } else {
                     Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
                     finish();
