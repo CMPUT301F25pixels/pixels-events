@@ -1,10 +1,14 @@
 package com.example.pixel_events.events;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -13,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.notifications.LotteryNotificationService;
+import com.example.pixel_events.qr.QRCode;
 import com.example.pixel_events.waitingList.WaitingList;
 
 /**
@@ -38,6 +43,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private Button joinButton;
     private Button leaveButton;
     private Button editButton;
+    private Button viewQrButton;
     private Button testNotificationButton;
     private Button backButton;
 
@@ -73,6 +79,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton = findViewById(R.id.join_button);
         leaveButton = findViewById(R.id.leave_button);
         editButton = findViewById(R.id.edit_button);
+        viewQrButton = findViewById(R.id.view_qr_button);
         testNotificationButton = findViewById(R.id.test_notification_button);
         backButton = findViewById(R.id.back_button);
 
@@ -84,6 +91,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton.setOnClickListener(v -> joinWaitlist());
         leaveButton.setOnClickListener(v -> leaveWaitlist());
         editButton.setOnClickListener(v -> openEditEvent());
+        viewQrButton.setOnClickListener(v -> showQRCode());
         testNotificationButton.setOnClickListener(v -> testNotification());
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
@@ -138,6 +146,43 @@ public class EventDetailsActivity extends AppCompatActivity {
         intent.putExtra("isEditMode", true);
         startActivity(intent);
         finish();
+    }
+    
+    private void showQRCode() {
+        if (currentEvent == null) {
+            Toast.makeText(this, "Event data not loaded", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Create QR code data with event ID
+        String qrData = "EVENT:" + eventId;
+        
+        // Generate QR code bitmap
+        Bitmap qrBitmap = QRCode.generateQRCodeBitmap(qrData, 800, 800);
+        
+        if (qrBitmap == null) {
+            Toast.makeText(this, "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show QR code in dialog
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_qr_code);
+        
+        TextView title = dialog.findViewById(R.id.qr_dialog_title);
+        TextView subtitle = dialog.findViewById(R.id.qr_dialog_subtitle);
+        ImageView qrImageView = dialog.findViewById(R.id.qr_code_image);
+        Button closeButton = dialog.findViewById(R.id.qr_dialog_close);
+        
+        title.setText(currentEvent.getTitle());
+        subtitle.setText("Scan this QR code to join the event");
+        qrImageView.setImageBitmap(qrBitmap);
+        
+        closeButton.setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.show();
+        Log.d(TAG, "Showing QR code for event: " + eventId);
     }
     
     private void testNotification() {

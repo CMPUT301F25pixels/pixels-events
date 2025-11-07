@@ -123,6 +123,18 @@
             android:visibility="gone" />
 
         <Button
+            android:id="@+id/view_qr_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="View Event QR Code"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:layout_marginBottom="12dp" />
+
+        <Button
             android:id="@+id/test_notification_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"

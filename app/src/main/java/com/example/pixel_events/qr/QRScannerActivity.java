@@ -77,7 +77,18 @@ public class QRScannerActivity extends AppCompatActivity {
         @Override
         public void barcodeResult(BarcodeResult result) {
             if (result.getText() != null) {
-                String eventId = result.getText();
+                String scannedText = result.getText();
+                String eventId;
+                
+                // Check if QR code has EVENT: prefix
+                if (scannedText.startsWith("EVENT:")) {
+                    eventId = scannedText.substring(6); // Remove "EVENT:" prefix
+                } else {
+                    // Assume the text is the event ID directly
+                    eventId = scannedText;
+                }
+                
+                Toast.makeText(QRScannerActivity.this, "Opening event...", Toast.LENGTH_SHORT).show();
                 
                 Intent intent = new Intent(QRScannerActivity.this, EventDetailsActivity.class);
                 intent.putExtra("eventId", eventId);
