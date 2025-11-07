@@ -1,27 +1,33 @@
 package com.example.pixel_events;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.entrant.EventDetailsLauncherActivity;
-import com.example.pixel_events.events.EventActivity;
-import com.example.pixel_events.events.EventsListActivity;
+import com.example.pixel_events.qr.QRScannerActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private static final int CAMERA_PERMISSION_CODE = 100;
     private DatabaseHandler db;
     private Button addFormButton;
+    private Button scanButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,27 +40,60 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Verify Firebase initialization (already done in PixelEventsApplication)
         try {
             FirebaseApp app = FirebaseApp.getInstance();
             Log.d(TAG, "Firebase is initialized: " + (app != null));
             
-            // Verify Firestore connection
             FirebaseFirestore.getInstance();
             Log.d(TAG, "Firestore instance retrieved successfully");
         } catch (Exception e) {
             Log.e(TAG, "Firebase initialization error", e);
         }
 
-        // Init DatabaseHandler (singleton pattern)
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
         addFormButton = findViewById(R.id.addEvent);
-
         addFormButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, EventDetailsLauncherActivity.class);
             startActivity(intent);
         });
+
+        scanButton = findViewById(R.id.scan_qr_button);
+        scanButton.setOnClickListener(v -> {
+            if (checkCameraPermission()) {
+                openQRScanner();
+            } else {
+                requestCameraPermission();
+            }
+        });
+    }
+
+    private boolean checkCameraPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        ActivityCompat.requestPermissions(this, 
+                new String[]{Manifest.permission.CAMERA}, 
+                CAMERA_PERMISSION_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openQRScanner();
+            } else {
+                Toast.makeText(this, "Camera permission needed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void openQRScanner() {
+        Intent intent = new Intent(this, QRScannerActivity.class);
+        startActivity(intent);
     }
 }

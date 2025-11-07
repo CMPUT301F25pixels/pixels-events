@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -50,6 +52,13 @@
             android:name=".settings.ProfileActivity" />
         <activity
             android:name=".settings.EditProfileActivity" />
+        
+        <activity
+            android:name=".qr.QRScannerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".events.EventDetailsActivity"
+            android:exported="false" />
 
     </application>
 
