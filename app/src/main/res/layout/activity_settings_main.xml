@@ -43,7 +43,7 @@
                 android:background="#00FFF8F8"
                 app:srcCompat="@drawable/outline_home_30"/>
             <ImageButton
-                android:id="@+id/settingsActiveButton"
+                android:id="@+id/settingsSettingsButton"
                 android:layout_width="145dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
