@@ -16,8 +16,6 @@
         android:theme="@style/Theme.Pixelevents">
         <activity
             android:name=".MainActivity"
-            android:name=".settings.MainSettingsActivity"
-
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,6 +32,9 @@
 
         <activity
             android:name=".events.EventActivity"
+            android:exported="true" />
+        <activity
+            android:name=".settings.MainSettingsActivity"
             android:exported="true" />
         <activity
             android:name=".events.EventsListActivity"
