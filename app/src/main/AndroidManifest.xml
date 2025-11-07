@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pixelevents">
         <activity
-            android:name=".MainActivity"
+            android:name=".login.WelcomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,12 +26,22 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <activity
             android:name=".login.LoginActivity"
             android:exported="true" />
+        <activity
+            android:name=".login.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".login.ResetPasswordActivity"
+            android:exported="false" />
 
         <activity
             android:name=".events.EventActivity"
