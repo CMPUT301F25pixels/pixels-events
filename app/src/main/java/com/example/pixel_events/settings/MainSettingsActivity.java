@@ -9,13 +9,21 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.LoginActivity;
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.SessionManager;
+import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.qr.QRCode;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class MainSettingsActivity extends AppCompatActivity {
     // Setup buttons
     private Button viewProfileButton, regHistButton, notifPrefButton, logoutButton, delAccButton;
-    private ImageButton homeButton, QRButton, myEventsButton, profileButton;
+    private ImageButton homeButton, QRButton, myEventsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +40,6 @@ public class MainSettingsActivity extends AppCompatActivity {
         homeButton = findViewById(R.id.settingsHomeButton);
         QRButton = findViewById(R.id.settingsQRButton);
         myEventsButton = findViewById(R.id.settingsMyEventsButton);
-        profileButton = findViewById(R.id.settingsSettingsButton);
 
         // Set onClickListeners for all buttons
 
@@ -54,12 +61,13 @@ public class MainSettingsActivity extends AppCompatActivity {
         // Go to Home Page Activity
         homeButton.setOnClickListener(v -> startActivity((new Intent(MainSettingsActivity.this, MainActivity.class))));
 
-        // Go to QR Scanner Activity TODO
-//        QRButton.setOnClickListener(v -> startActivity(new Intent(MainSettingsActivity.this, )));
+        // Go to QR Scanner Activity
+        QRButton.setOnClickListener(v -> startActivity(new Intent(MainSettingsActivity.this, QRCode.class)));
 
         // Go to My Events Activity TODO
 //        myEventsButton.setOnClickListener(v -> startActivity(new Intent(MainSettingsActivity.this, )));
 
+        // DO nothing for Settings
     }
 
     /**
@@ -72,11 +80,11 @@ public class MainSettingsActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialogue_logout_acc);
 
         // Get the positive and negative buttons
-        Button confirmBtn = dialog.findViewById(R.id.logoutConfirmButton);
-        Button cancelBtn = dialog.findViewById(R.id.logoutCancelButton);
+        Button confirmButton = dialog.findViewById(R.id.logoutConfirmButton);
+        Button cancelButton = dialog.findViewById(R.id.logoutCancelButton);
 
         // Set Positive
-        confirmBtn.setOnClickListener(v -> {
+        confirmButton.setOnClickListener(v -> {
             // Log the user out TODO
             dialog.dismiss();
 //            startActivity(new Intent(SettingsActivity.this, ));            // Return to Login Page TODO
@@ -84,14 +92,40 @@ public class MainSettingsActivity extends AppCompatActivity {
         });
 
         // Set Negative
-        cancelBtn.setOnClickListener(v -> dialog.dismiss());                // Close the popup
+        cancelButton.setOnClickListener(v -> dialog.dismiss());                // Close the popup
 
         // Display the Pop-up
         dialog.show();
 
     }
 
+    /**
+     * Show a pop-up Dialogue box with custom .xml file and ask user once again if they want to delete account data.
+     */
     private void showDeleteDialogue() {
+        Dialog dialog = new Dialog(MainSettingsActivity.this);
 
+        // Set view to the custom xml
+        dialog.setContentView(R.layout.dialogue_delete_acc);
+
+        // Get positive and negative
+        Button confirmButton = dialog.findViewById(R.id.deletePopupConfirmButton);
+        Button cancelButton = dialog.findViewById(R.id.deletePopupCancelButton);
+
+        // Set positive
+        confirmButton.setOnClickListener(v -> {
+            // TODO: getProfileId will return userID
+            // String a = SessionManager.getProfileId(this);
+            int userID = 0;                 // TEMP VALUE
+            DatabaseHandler.getInstance().deleteAcc(userID);
+            startActivity(new Intent(MainSettingsActivity.this, LoginActivity.class));
+            dialog.dismiss();
+        });
+
+        // set negative
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        // Display the Pop-up
+        dialog.show();
     }
 }

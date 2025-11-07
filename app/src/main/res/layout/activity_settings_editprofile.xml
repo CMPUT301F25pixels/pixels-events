@@ -69,7 +69,7 @@
             android:layout_gravity="center"
             tools:srcCompat="@tools:sample/avatars"
             android:layout_marginTop="20dp"
-
+            android:src="@drawable/ic_launcher_foreground"
             />
         <TextView
             android:id="@+id/profileEditRoleText"
@@ -87,7 +87,7 @@
                     android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/button"
+                    android:id="@+id/profileEditCancelButton"
                     android:layout_width="100dp"
                     android:layout_height="40dp"
                     android:layout_gravity="start"
@@ -127,23 +127,9 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="Username"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF" />
-
-                <EditText
-                    android:id="@+id/profileInputNameText"
-                    android:layout_width="350dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="18dp"
-                    android:background="@drawable/rounded_textview"
-                    android:fontFamily="@font/poppins"
-                    android:hint="Firstname Lastname"
-                    android:paddingLeft="20dp"
-                    android:textColor="@color/white"
-                    android:textColorHint="#62FFFFFF"/>
 
                 <EditText
                     android:id="@+id/profileInputDOBText"
@@ -153,7 +139,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="dd/mm/yyyy"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>
@@ -166,7 +151,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="Gender"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>
@@ -179,7 +163,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="example@gmail.com"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>
@@ -192,7 +175,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="1233456789"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>
@@ -205,7 +187,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="City"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>
@@ -218,7 +199,6 @@
                     android:layout_marginTop="18dp"
                     android:background="@drawable/rounded_textview"
                     android:fontFamily="@font/poppins"
-                    android:hint="Province"
                     android:paddingLeft="20dp"
                     android:textColor="@color/white"
                     android:textColorHint="#62FFFFFF"/>

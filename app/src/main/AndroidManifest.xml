@@ -14,13 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pixelevents">
-
         <activity
             android:name=".settings.MainSettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:name=".LoginActivity"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,6 +38,10 @@
         <activity
             android:name=".EntrantSignupActivity"
             android:exported="false" />
+        <activity
+            android:name=".settings.ProfileActivity" />
+        <activity
+            android:name=".settings.EditProfileActivity" />
 
     </application>
 
