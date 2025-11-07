@@ -32,6 +32,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private static final String TAG = "EventDetailsActivity";
     private static final String PREFS_NAME = "pixels_prefs";
     private static final String KEY_PROFILE_ID = "current_profile_id";
+    private static final String KEY_ROLE = "current_role";
     
     private TextView titleText;
     private TextView locationText;
@@ -43,12 +44,14 @@ public class EventDetailsActivity extends AppCompatActivity {
     private Button joinButton;
     private Button leaveButton;
     private Button editButton;
+    private Button deleteButton;
     private Button viewQrButton;
     private Button testNotificationButton;
     private Button backButton;
 
     private String eventId;
     private String currentUserId;
+    private String userRole;
     private Event currentEvent;
     private WaitingList waitingList;
     private boolean isOnWaitlist = false;
@@ -61,9 +64,10 @@ public class EventDetailsActivity extends AppCompatActivity {
         // Get event id from intent
         eventId = getIntent().getStringExtra("eventId");
 
-        // Get current user ID
+        // Get current user ID and role
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         currentUserId = prefs.getString(KEY_PROFILE_ID, "0");
+        userRole = prefs.getString(KEY_ROLE, "user");
 
         // Initialize waiting list
         waitingList = new WaitingList(eventId);
@@ -79,6 +83,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton = findViewById(R.id.join_button);
         leaveButton = findViewById(R.id.leave_button);
         editButton = findViewById(R.id.edit_button);
+        deleteButton = findViewById(R.id.delete_button);
         viewQrButton = findViewById(R.id.view_qr_button);
         testNotificationButton = findViewById(R.id.test_notification_button);
         backButton = findViewById(R.id.back_button);
@@ -91,6 +96,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton.setOnClickListener(v -> joinWaitlist());
         leaveButton.setOnClickListener(v -> leaveWaitlist());
         editButton.setOnClickListener(v -> openEditEvent());
+        deleteButton.setOnClickListener(v -> confirmDeleteEvent());
         viewQrButton.setOnClickListener(v -> showQRCode());
         testNotificationButton.setOnClickListener(v -> testNotification());
         backButton.setOnClickListener(v -> {
@@ -118,18 +124,26 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     private void updateButtonVisibility() {
-        // Check if current user is the organizer
+        // Check if current user is the organizer or admin
         boolean isOrganizer = currentEvent != null && 
                               String.valueOf(currentEvent.getOrganizerId()).equals(currentUserId);
+        boolean isAdmin = "admin".equals(userRole);
         
-        if (isOrganizer) {
-            // Organizer sees edit button, not join/leave buttons
+        // Admins can edit/delete any event, organizers can only edit/delete their own
+        boolean canModifyEvent = isAdmin || isOrganizer;
+        
+        if (canModifyEvent) {
+            // Show edit and delete buttons for organizers/admins
             joinButton.setVisibility(Button.GONE);
             leaveButton.setVisibility(Button.GONE);
             editButton.setVisibility(Button.VISIBLE);
+            deleteButton.setVisibility(Button.VISIBLE);
+            
+            Log.d(TAG, "User can modify event - Role: " + userRole + ", IsOrganizer: " + isOrganizer + ", IsAdmin: " + isAdmin);
         } else {
             // Regular users see join/leave buttons based on waitlist status
             editButton.setVisibility(Button.GONE);
+            deleteButton.setVisibility(Button.GONE);
             if (isOnWaitlist) {
                 joinButton.setVisibility(Button.GONE);
                 leaveButton.setVisibility(Button.VISIBLE);
@@ -183,6 +197,46 @@ public class EventDetailsActivity extends AppCompatActivity {
         
         dialog.show();
         Log.d(TAG, "Showing QR code for event: " + eventId);
+    }
+    
+    private void confirmDeleteEvent() {
+        if (currentEvent == null) {
+            return;
+        }
+        
+        // Show confirmation dialog
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Delete Event")
+            .setMessage("Are you sure you want to delete \"" + currentEvent.getTitle() + "\"? This action cannot be undone.")
+            .setPositiveButton("Delete", (dialog, which) -> deleteEvent())
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+    
+    private void deleteEvent() {
+        if (currentEvent == null) {
+            return;
+        }
+        
+        DatabaseHandler db = DatabaseHandler.getInstance();
+        
+        // Delete the event from Firebase
+        db.deleteEvent(eventId, 
+            () -> {
+                Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Event " + eventId + " deleted successfully");
+                
+                // Navigate back to events list
+                Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            },
+            error -> {
+                Toast.makeText(this, "Failed to delete event: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Failed to delete event", error);
+            }
+        );
     }
     
     private void testNotification() {

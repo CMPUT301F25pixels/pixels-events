@@ -442,6 +442,23 @@ public class DatabaseHandler {
                         Log.e("DB", "Error deleting event " + eventID, e));
     }
 
+    public void deleteEvent(String eventID, Runnable onSuccess, OnFailureListener onFailure) {
+        eventRef.document(eventID)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    Log.d("DB", "Deleted event: " + eventID);
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error deleting event " + eventID, e);
+                    if (onFailure != null) {
+                        onFailure.onFailure(e);
+                    }
+                });
+    }
+
     // WAITING LIST FUNCTIONS ------------------------------------------------------------------------
     /**
      * Creates a new waiting list document for an event if it doesn't already exist.
