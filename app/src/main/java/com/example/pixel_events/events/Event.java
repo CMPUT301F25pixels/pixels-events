@@ -3,6 +3,7 @@ package com.example.pixel_events.events;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.waitingList.WaitingList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,6 @@ public class Event {
     private String location;
     private String capacity;
     private String description;
-    private int waitlistId;
     private int organizerId;
     private String qrCode;
     private String eventStartDate;
@@ -28,7 +28,8 @@ public class Event {
     private String eventStartTime;
     private String eventEndTime;
     private String fee;
-    
+    private WaitingList waitingList;
+
     // Flag to control whether setters should automatically update database
     private boolean autoUpdateDatabase = true;
 
@@ -114,7 +115,7 @@ public class Event {
         this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
-
+        this.waitingList = new WaitingList(String.valueOf(eventId));
     }
 
     /**
@@ -140,6 +141,7 @@ public class Event {
                     this.location, this.capacity, this.description, this.fee, this.eventStartDate,
                     this.eventEndDate, this.eventStartTime, this.eventEndTime,
                     this.registrationStartDate, this.registrationEndDate);
+            db.addWaitingList(this.waitingList.getEventId(), this.waitingList.getMaxWaitlistSize());
         } catch (Exception e) {
             Log.e("Event", "Failed to save event to database", e);
         }
@@ -163,9 +165,6 @@ public class Event {
     }
     public String getDescription() {
         return description;
-    }
-    public int getWaitlistId() {
-        return waitlistId;
     }
     public int getOrganizerId() {
         return organizerId;

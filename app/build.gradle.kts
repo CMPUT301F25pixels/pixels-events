@@ -39,7 +39,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
-    
+
     // JUnit 4 for unit testing
     testImplementation(libs.junit)
     testImplementation("junit:junit:4.13.2")
@@ -64,4 +64,8 @@ dependencies {
 
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
+    // Glide - image loading and caching library for displaying images from URLs or storage
+    implementation("com.github.bumptech.glide:glide:5.0.5")
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
+
 }

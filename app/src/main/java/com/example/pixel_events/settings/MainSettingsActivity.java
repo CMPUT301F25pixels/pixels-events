@@ -9,16 +9,12 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.pixel_events.LoginActivity;
+import com.example.pixel_events.login.LoginActivity;
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
-import com.example.pixel_events.SessionManager;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.qr.QRCode;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class MainSettingsActivity extends AppCompatActivity {
     // Setup buttons

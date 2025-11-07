@@ -1,18 +1,18 @@
-package com.example.pixel_events;
+package com.example.pixel_events.login;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.MainActivity;
+import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.profile.Profile;
 
 import java.util.ArrayList;
 import java.util.Date;
