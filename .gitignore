@@ -1,15 +1,26 @@
+# Ignore
 *.iml
+.idea/
+.vscode/
+
+# Ignore Gradle files
 .gradle
 /local.properties
+
+# Ignore OS-specific files
+.DS_Store
+
+# Ignore build output
+/build
+/captures
+.externalNativeBuild
+.cxx
+.log
+
+# Ignore additional IntelliJ settings
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
