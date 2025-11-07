@@ -9,6 +9,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 
+/**
+ * ResetPasswordActivity
+ *
+ * Allows user to set a new password after verification:
+ * - Enter new password
+ * - Confirm new password
+ * - Validate passwords match
+ * - Update password in system
+ */
 public class ResetPasswordActivity extends AppCompatActivity {
 
     @Override
@@ -39,4 +48,19 @@ public class ResetPasswordActivity extends AppCompatActivity {
         });
     }
 }
+
+/*
+ * Class:
+ *      ResetPasswordActivity
+ *
+ * Responsibilities:
+ *      Collect new password from user
+ *      Validate password confirmation matches
+ *      Update password in database
+ *      Provide user feedback
+ *
+ * Collaborators:
+ *      Profile (for password update)
+ *      DatabaseHandler (for persistence)
+ */
 

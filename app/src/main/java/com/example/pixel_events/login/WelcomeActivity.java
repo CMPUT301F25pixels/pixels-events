@@ -10,6 +10,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 
+/**
+ * WelcomeActivity
+ *
+ * Initial welcome screen providing multiple authentication options:
+ * - Sign up with email
+ * - Continue with Google (placeholder)
+ * - Continue with Apple (placeholder)
+ * - Log in for existing users
+ */
 public class WelcomeActivity extends AppCompatActivity {
 
     @Override
@@ -41,4 +50,19 @@ public class WelcomeActivity extends AppCompatActivity {
         });
     }
 }
+
+/*
+ * Class:
+ *      WelcomeActivity
+ *
+ * Responsibilities:
+ *      Display welcome screen with authentication options
+ *      Navigate to signup screen
+ *      Navigate to login screen
+ *      Provide placeholders for Google/Apple auth
+ *
+ * Collaborators:
+ *      EntrantSignupActivity
+ *      LoginActivity
+ */
 

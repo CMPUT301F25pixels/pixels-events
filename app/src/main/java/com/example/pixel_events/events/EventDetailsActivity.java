@@ -10,6 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 
+/**
+ * EventDetailsActivity
+ *
+ * Displays detailed information about an event loaded from Firebase.
+ * Allows users to view event details and join the waiting list.
+ * 
+ * Implements US 01.06.01 (view event details) and US 01.06.02 (signup from details).
+ */
 public class EventDetailsActivity extends AppCompatActivity {
     private TextView titleText;
     private TextView locationText;
@@ -62,6 +70,11 @@ public class EventDetailsActivity extends AppCompatActivity {
         backButton.setOnClickListener(v -> finish());
     }
 
+    /**
+     * Load event details from Firebase using event ID
+     * Populates all UI elements with event information
+     * Shows error message and closes activity if event not found
+     */
     private void loadEvent() {
         DatabaseHandler db = DatabaseHandler.getInstance();
         
@@ -88,3 +101,18 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 }
 
+/*
+ * Class:
+ *      EventDetailsActivity
+ *
+ * Responsibilities:
+ *      Display event details from database (US 01.06.01)
+ *      Allow user to join waiting list (US 01.06.02)
+ *      Load event information from Firebase
+ *      Handle event not found scenarios
+ *
+ * Collaborators:
+ *      DatabaseHandler
+ *      Event
+ *      WaitingList (future integration)
+ */

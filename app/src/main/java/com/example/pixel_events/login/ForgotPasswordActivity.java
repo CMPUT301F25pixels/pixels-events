@@ -10,6 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 
+/**
+ * ForgotPasswordActivity
+ *
+ * Handles password recovery flow:
+ * - User enters registered email
+ * - User enters verification code sent to email
+ * - Navigates to password reset screen
+ */
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     @Override
@@ -36,4 +44,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         });
     }
 }
+
+/*
+ * Class:
+ *      ForgotPasswordActivity
+ *
+ * Responsibilities:
+ *      Collect user email for password recovery
+ *      Validate verification code
+ *      Navigate to reset password screen
+ *
+ * Collaborators:
+ *      ResetPasswordActivity
+ */
 

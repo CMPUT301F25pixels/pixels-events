@@ -12,6 +12,15 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 import com.example.pixel_events.R;
 
+/**
+ * QRScannerActivity
+ *
+ * Scans QR codes using device camera to retrieve event IDs.
+ * Opens event details screen when valid QR code is scanned.
+ * Uses ZXing library for barcode scanning functionality.
+ * 
+ * Implements US 01.06.01 (view event details via QR scan).
+ */
 public class QRScannerActivity extends AppCompatActivity {
     private DecoratedBarcodeView barcodeView;
 
@@ -24,14 +33,16 @@ public class QRScannerActivity extends AppCompatActivity {
         barcodeView.decodeContinuous(callback);
     }
 
+    /**
+     * Callback for QR code scanning results
+     * Extracts event ID from scanned QR code and opens event details
+     */
     private final BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
             if (result.getText() != null) {
-                // qr code contains event id
                 String eventId = result.getText();
                 
-                // open event details
                 Intent intent = new Intent(QRScannerActivity.this, EventDetailsActivity.class);
                 intent.putExtra("eventId", eventId);
                 startActivity(intent);
@@ -53,3 +64,17 @@ public class QRScannerActivity extends AppCompatActivity {
     }
 }
 
+/*
+ * Class:
+ *      QRScannerActivity
+ *
+ * Responsibilities:
+ *      Scan QR codes using device camera
+ *      Extract event ID from scanned codes
+ *      Navigate to event details screen
+ *      Manage camera lifecycle
+ *
+ * Collaborators:
+ *      EventDetailsActivity
+ *      QRCode (for generation on organizer side)
+ */
