@@ -2,11 +2,16 @@ package com.example.pixel_events.qr;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.events.EventDetailsActivity;
+import com.example.pixel_events.events.EventsListActivity;
+import com.example.pixel_events.settings.MainSettingsActivity;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
@@ -31,6 +36,37 @@ public class QRScannerActivity extends AppCompatActivity {
 
         barcodeView = findViewById(R.id.barcode_scanner);
         barcodeView.decodeContinuous(callback);
+        
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish());
+        
+        setupBottomNav();
+    }
+    
+    private void setupBottomNav() {
+        LinearLayout navHome = findViewById(R.id.nav_home);
+        LinearLayout navEvents = findViewById(R.id.nav_events);
+        LinearLayout navScanner = findViewById(R.id.nav_scanner);
+        LinearLayout navProfile = findViewById(R.id.nav_profile);
+
+        navHome.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        });
+
+        navEvents.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EventsListActivity.class);
+            startActivity(intent);
+        });
+
+        navScanner.setOnClickListener(v -> {
+            Toast.makeText(this, "Already on Scanner", Toast.LENGTH_SHORT).show();
+        });
+
+        navProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainSettingsActivity.class);
+            startActivity(intent);
+        });
     }
 
     /**
