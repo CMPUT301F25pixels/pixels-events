@@ -52,10 +52,6 @@
         <activity
             android:name=".entrant.EventDetailsLauncherActivity"
             android:exported="false" />
-        <activity
-            android:name=".settings.ProfileActivity" />
-        <activity
-            android:name=".settings.EditProfileActivity" />
 
     </application>
 

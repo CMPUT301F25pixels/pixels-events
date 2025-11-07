@@ -9,10 +9,10 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.pixel_events.LoginActivity;
+import com.example.pixel_events.login.LoginActivity;
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
-import com.example.pixel_events.SessionManager;
+import com.example.pixel_events.login.SessionManager;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.qr.QRCode;
 
