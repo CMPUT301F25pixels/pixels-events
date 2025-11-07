@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.notifications.LotteryNotificationService;
 import com.example.pixel_events.waitingList.WaitingList;
 
 /**
@@ -37,6 +38,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private Button joinButton;
     private Button leaveButton;
     private Button editButton;
+    private Button testNotificationButton;
     private Button backButton;
 
     private String eventId;
@@ -71,6 +73,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton = findViewById(R.id.join_button);
         leaveButton = findViewById(R.id.leave_button);
         editButton = findViewById(R.id.edit_button);
+        testNotificationButton = findViewById(R.id.test_notification_button);
         backButton = findViewById(R.id.back_button);
 
         // Load event from database
@@ -81,6 +84,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         joinButton.setOnClickListener(v -> joinWaitlist());
         leaveButton.setOnClickListener(v -> leaveWaitlist());
         editButton.setOnClickListener(v -> openEditEvent());
+        testNotificationButton.setOnClickListener(v -> testNotification());
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(EventDetailsActivity.this, EventsListActivity.class);
             startActivity(intent);
@@ -133,6 +137,15 @@ public class EventDetailsActivity extends AppCompatActivity {
         intent.putExtra("isEditMode", true);
         startActivity(intent);
         finish();
+    }
+    
+    private void testNotification() {
+        if (currentEvent != null) {
+            LotteryNotificationService notificationService = new LotteryNotificationService(this);
+            notificationService.sendTestNotification(currentEvent.getTitle());
+            Toast.makeText(this, "Test notification sent!", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Test notification sent for event: " + currentEvent.getTitle());
+        }
     }
 
     private void joinWaitlist() {

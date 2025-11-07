@@ -348,6 +348,24 @@ public class DatabaseHandler {
                 });
     }
 
+    public void getAllEvents(OnSuccessListener<java.util.List<Event>> listener, OnFailureListener errorListener) {
+        eventRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Event> events = new java.util.ArrayList<>();
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot document : querySnapshot) {
+                        Event event = document.toObject(Event.class);
+                        if (event != null) {
+                            events.add(event);
+                        }
+                    }
+                    listener.onSuccess(events);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting all events", e);
+                    errorListener.onFailure(e);
+                });
+    }
+
     /**
      * Modify event information in the database
      * @param eventID Unique event ID

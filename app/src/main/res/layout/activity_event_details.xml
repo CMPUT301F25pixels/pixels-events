@@ -123,6 +123,18 @@
             android:visibility="gone" />
 
         <Button
+            android:id="@+id/test_notification_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Test Lottery Notification"
+            android:backgroundTint="@color/card_bg"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp"
+            android:visibility="visible" />
+
+        <Button
             android:id="@+id/back_button"
             android:layout_width="match_parent"
             android:layout_height="56dp"

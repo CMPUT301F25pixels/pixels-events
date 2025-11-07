@@ -21,6 +21,7 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.entrant.EventDetailsLauncherActivity;
 import com.example.pixel_events.events.EventActivity;
 import com.example.pixel_events.events.EventsListActivity;
+import com.example.pixel_events.notifications.LotteryNotificationService;
 import com.example.pixel_events.qr.QRScannerActivity;
 import com.example.pixel_events.settings.ProfileActivity;
 import com.google.firebase.FirebaseApp;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
+
+        // Check for lottery notifications
+        checkLotteryNotifications();
 
         addFormButton = findViewById(R.id.addEvent);
         addFormButton.setOnClickListener(v -> {
@@ -124,5 +128,16 @@ public class MainActivity extends AppCompatActivity {
     private void openQRScanner() {
         Intent intent = new Intent(this, QRScannerActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Check for lottery notifications
+     * Called when the app starts to notify users about registration deadlines
+     * that have passed for events they're on the waitlist for
+     */
+    private void checkLotteryNotifications() {
+        LotteryNotificationService notificationService = new LotteryNotificationService(this);
+        notificationService.checkAndNotifyRegistrationDeadlines();
+        Log.d(TAG, "Checked for lottery notifications");
     }
 }
