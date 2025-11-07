@@ -65,8 +65,6 @@ public class EntrantSignupActivity extends AppCompatActivity {
             return;
         }
 
-        String phoneNum = phoneStr;
-
         String accType = "user";
         Date dob = new Date();     // placeholder for now
         String gender = "";
@@ -79,7 +77,7 @@ public class EntrantSignupActivity extends AppCompatActivity {
         notifyPrefs.add(true); // lose notif
 
         db.addAcc(entrantId, accType, name, dob, gender,
-                email, city, province, phoneNum, notifyPrefs);
+                email, city, province, phoneStr, notifyPrefs);
 
         // Save session so we don't ask again
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
