@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +21,12 @@ import com.example.pixel_events.events.EventsListActivity;
 import com.example.pixel_events.qr.QRCode;
 import com.example.pixel_events.qr.QRScannerActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
 
 public class MainSettingsActivity extends AppCompatActivity {
     private static final String TAG = "MainSettingsActivity";
@@ -30,6 +37,7 @@ public class MainSettingsActivity extends AppCompatActivity {
     // Setup buttons
     private Button viewProfileButton, regHistButton, notifPrefButton, logoutButton, delAccButton;
     private String currentUserId;
+    private TextView usn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,9 @@ public class MainSettingsActivity extends AppCompatActivity {
         notifPrefButton = findViewById(R.id.settingsNotiPrefButton);
         logoutButton = findViewById(R.id.settingsLogOutButton);
         delAccButton = findViewById(R.id.settingsDelAccButton);
+
+
+
 
         // Set onClickListeners for all buttons
 
