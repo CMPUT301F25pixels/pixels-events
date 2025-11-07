@@ -18,12 +18,6 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -427,7 +421,7 @@ public class DatabaseHandler {
      * The method uses {@link com.google.firebase.firestore.SetOptions#merge()} to ensure that
      * existing fields are preserved if the document already exists.
      */
-    public Task<Void> createWaitingList(String eventId, int capacity) {
+    public Task<Void> addWaitingList(String eventId, int capacity) {
         DocumentReference doc = waitListRef.document(eventId);
 
         Map<String, Object> init = new HashMap<>();

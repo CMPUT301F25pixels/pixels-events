@@ -11,8 +11,6 @@ public class WaitingList {
     private ArrayList<String> selected = new ArrayList<>();
     private int maxWaitlistSize = 1000000;
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     public WaitingList() {
         this.waitList = new ArrayList<>();
         this.selected = new ArrayList<>();

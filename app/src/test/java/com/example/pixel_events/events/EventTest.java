@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for Event class
  * Tests individual methods and combined operations (add, modify, delete)
- * 
+ *
  * NOTE: These tests use the empty Event() constructor to avoid Firebase initialization
  * and then manually set fields to test getters, setters, and validation logic.
  */
@@ -37,23 +37,23 @@ public class EventTest {
     public void setUp() {
         // Create event using parameterized constructor
         // This will validate fields but NOT save to database automatically
-    testEvent = new Event(
-        TEST_EVENT_ID,
-        TEST_ORGANIZER_ID,
-        TEST_TITLE,
-        TEST_IMAGE_URL,
-        TEST_LOCATION,
-        TEST_CAPACITY,
-        TEST_DESCRIPTION,
-        TEST_FEE,
-        TEST_EVENT_START,
-        TEST_EVENT_END,
-        TEST_EVENT_START_TIME,
-        TEST_EVENT_END_TIME,
-        TEST_REG_START,
-        TEST_REG_END
-    );
-        
+        testEvent = new Event(
+                TEST_EVENT_ID,
+                TEST_ORGANIZER_ID,
+                TEST_TITLE,
+                TEST_IMAGE_URL,
+                TEST_LOCATION,
+                TEST_CAPACITY,
+                TEST_DESCRIPTION,
+                TEST_FEE,
+                TEST_EVENT_START,
+                TEST_EVENT_END,
+                TEST_EVENT_START_TIME,
+                TEST_EVENT_END_TIME,
+                TEST_REG_START,
+                TEST_REG_END
+        );
+
         // Disable automatic database updates for testing
         testEvent.setAutoUpdateDatabase(false);
     }
@@ -183,7 +183,7 @@ public class EventTest {
         testEvent.setRegistrationEndDate(newRegEnd);
         assertEquals("Registration end date should be updated", newRegEnd, testEvent.getRegistrationEndDate());
     }
-    
+
 
     // ========================================================================================
     // UNIT TESTS - Testing event creation
@@ -192,12 +192,12 @@ public class EventTest {
     @Test
     public void testEventConstructorWithAllParameters() {
         Event newEvent = new Event(
-        2002, 502, "Music Festival", "https://example.com/music.jpg",
-        "Vancouver", "2000", "Annual music festival",
-        "Free",
-        "2026-08-01", "2026-08-05", "10:00", "22:00",
-        "2026-06-01", "2026-07-31"
-    );
+                2002, 502, "Music Festival", "https://example.com/music.jpg",
+                "Vancouver", "2000", "Annual music festival",
+                "Free",
+                "2026-08-01", "2026-08-05", "10:00", "22:00",
+                "2026-06-01", "2026-07-31"
+        );
 
         assertEquals("Event ID should match", 2002, newEvent.getEventId());
         assertEquals("Organizer ID should match", 502, newEvent.getOrganizerId());
@@ -226,114 +226,114 @@ public class EventTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullTitle() {
-    new Event(1, 1, null, "url", "location", "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, null, "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyTitle() {
-    new Event(1, 1, "", "url", "location", "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullLocation() {
-    new Event(1, 1, "title", "url", null, "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", null, "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyLocation() {
-    new Event(1, 1, "title", "url", "", "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullCapacity() {
-    new Event(1, 1, "title", "url", "location", null, 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", null,
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyCapacity() {
-    new Event(1, 1, "title", "url", "location", "", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullDescription() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        null, "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "100",
+                null, "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyDescription() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        "", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "100",
+                "", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroEventId() {
-    new Event(0, 1, "title", "url", "location", "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(0, 1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeEventId() {
-    new Event(-1, 1, "title", "url", "location", "100", 
-    "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(-1, 1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroOrganizerId() {
-    new Event(1, 0, "title", "url", "location", "100", 
-        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 0, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeOrganizerId() {
-    new Event(1, -1, "title", "url", "location", "100", 
-        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, -1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventStartDate() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        "description", "Free", null, "2025-01-05", "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "100",
+                "description", "Free", null, "2025-01-05", "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventEndDate() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        "description", "Free", "2025-01-01", null, "09:00", "17:00",
-        "2024-12-01", "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", null, "09:00", "17:00",
+                "2024-12-01", "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationStartDate() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        null, "2024-12-31");
+        new Event(1, 1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                null, "2024-12-31");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationEndDate() {
-    new Event(1, 1, "title", "url", "location", "100", 
-        "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-        "2024-12-01", null);
+        new Event(1, 1, "title", "url", "location", "100",
+                "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
+                "2024-12-01", null);
     }
 
     // ========================================================================================
@@ -497,7 +497,7 @@ public class EventTest {
         testEvent.setLocation("Updated Location");
         testEvent.setCapacity("999");
         testEvent.setDescription("Updated Description");
-        
+
         // Verify all updates
         assertEquals("Title should be updated", "Updated Title", testEvent.getTitle());
         assertEquals("Location should be updated", "Updated Location", testEvent.getLocation());
@@ -519,13 +519,13 @@ public class EventTest {
                 "2026-01-01", "2026-01-31"
         );
         consistencyEvent.setAutoUpdateDatabase(false);
-        
+
         // Verify all data is consistent after creation
         assertEquals(4004, consistencyEvent.getEventId());
         assertEquals(504, consistencyEvent.getOrganizerId());
         assertEquals("Consistency Test", consistencyEvent.getTitle());
         assertEquals("Location", consistencyEvent.getLocation());
-        
+
         // Modify and verify consistency maintained
         consistencyEvent.setTitle("Updated Consistency Test");
         assertEquals("Updated Consistency Test", consistencyEvent.getTitle());
@@ -606,10 +606,10 @@ public class EventTest {
 
 /*
  * Test Class: EventTest
- * 
+ *
  * Purpose:
  *      Comprehensive unit and integration testing for Event class
- * 
+ *
  * Test Coverage:
  *      - Individual getter methods (11 tests)
  *      - Individual setter methods (12 tests)
@@ -620,9 +620,9 @@ public class EventTest {
  *      - Multiple field updates (1 test)
  *      - Data consistency (1 test)
  *      - Edge cases (special characters, unicode, large values) (6 tests)
- * 
+ *
  * Total Tests: 71 test cases
- * 
+ *
  * Notes:
  *      - Tests run WITHOUT Firebase/Firestore initialization
  *      - Uses setAutoUpdateDatabase(false) to prevent database calls during tests
@@ -630,7 +630,7 @@ public class EventTest {
  *      - Uses @Test(expected = IllegalArgumentException.class) for validation tests
  *      - For Firebase integration tests, see EventIntegrationTest.java
  *      - Uses CountDownLatch for async operation testing
- * 
+ *
  * Key Changes for Testability:
  *      - Event constructor NO LONGER automatically saves to database
  *      - Use event.saveToDatabase() to explicitly persist

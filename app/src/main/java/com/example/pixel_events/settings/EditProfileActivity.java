@@ -56,6 +56,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void loadProfileData() {
         DatabaseHandler.getInstance().getAcc(userID, profile -> {
+            // Check if activity is still valid
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
             if (profile != null) {
                 runOnUiThread(() -> {
                     try {
@@ -71,7 +76,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                         gender.setHint(profile.getGender());
                         email.setHint(profile.getEmail());
-                        num.setHint(String.valueOf(profile.getPhoneNum())); // ← FIXED: Convert int to String
+                        num.setHint(String.valueOf(profile.getPhoneNum())); 
                         city.setHint(profile.getCity());
                         prov.setHint(profile.getProvince());
                     } catch (Exception e) {

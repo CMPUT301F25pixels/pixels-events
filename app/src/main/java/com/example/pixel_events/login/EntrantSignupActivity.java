@@ -1,4 +1,4 @@
-package com.example.pixel_events;
+package com.example.pixel_events.login;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.MainActivity;
+import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ public class EntrantSignupActivity extends AppCompatActivity {
     private EditText phoneInput;
     private Button saveButton;
     private Button cancelButton;
-
     private DatabaseHandler db;
     private int entrantId;
 

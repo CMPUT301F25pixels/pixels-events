@@ -15,8 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pixelevents">
         <activity
-            android:name=".settings.MainSettingsActivity"
-
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,17 +27,20 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <activity
-            android:name=".MainActivity"
+            android:name=".login.LoginActivity"
             android:exported="true" />
 
         <activity
             android:name=".events.EventActivity"
             android:exported="true" />
         <activity
+            android:name=".settings.MainSettingsActivity"
+            android:exported="true" />
+        <activity
             android:name=".events.EventsListActivity"
             android:exported="true" />
         <activity
-            android:name=".EntrantSignupActivity"
+            android:name=".login.EntrantSignupActivity"
             android:exported="false" />
         <activity
             android:name=".settings.ProfileActivity" />
@@ -46,6 +48,14 @@
             android:name=".settings.EditProfileActivity" />
         <activity
             android:name=".settings.NotifPrefActivity" />
+
+        <activity
+            android:name=".entrant.EventDetailsLauncherActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.ProfileActivity" />
+        <activity
+            android:name=".settings.EditProfileActivity" />
 
     </application>
 
