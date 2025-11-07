@@ -17,14 +17,15 @@ public class QRCode {
     private static final int DEFAULT_HEIGHT = 400;
     private String data;
     private Bitmap qrCodeBitmap;
+    private final int width;
+    private final int height;
 
     /**
      * Constructor to create a QR code from text data
      * @param data The text data to encode in the QR code
      */
     public QRCode(String data) {
-        this.data = data;
-        this.qrCodeBitmap = generateQRCode(data, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        this(data, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
     /**
@@ -35,7 +36,8 @@ public class QRCode {
      */
     public QRCode(String data, int width, int height) {
         this.data = data;
-        this.qrCodeBitmap = generateQRCode(data, width, height);
+        this.width = width;
+        this.height = height;
     }
 
     /**
@@ -63,10 +65,13 @@ public class QRCode {
     }
 
     /**
-     * Get the QR code as a Bitmap
-     * @return The QR code bitmap, or null if generation failed
+     * Get the QR code as a Bitmap. The bitmap is generated on the first call.
+     * @return The QR code bitmap, or null if generation fails
      */
     public Bitmap getBitmap() {
+        if (qrCodeBitmap == null) {
+            qrCodeBitmap = generateQRCode(data, width, height);
+        }
         return qrCodeBitmap;
     }
 

@@ -1,12 +1,11 @@
-package com.example.pixel_events.events;
+package com.example.pixel_events;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.*;
+
+import com.example.pixel_events.events.Event;
 
 /**
  * Unit tests for Event class
@@ -37,22 +36,22 @@ public class EventTest {
     public void setUp() {
         // Create event using parameterized constructor
         // This will validate fields but NOT save to database automatically
-    testEvent = new Event(
-        TEST_EVENT_ID,
-        TEST_ORGANIZER_ID,
-        TEST_TITLE,
-        TEST_IMAGE_URL,
-        TEST_LOCATION,
-        TEST_CAPACITY,
-        TEST_DESCRIPTION,
-        TEST_FEE,
-        TEST_EVENT_START,
-        TEST_EVENT_END,
-        TEST_EVENT_START_TIME,
-        TEST_EVENT_END_TIME,
-        TEST_REG_START,
-        TEST_REG_END
-    );
+        testEvent = new Event(
+            TEST_EVENT_ID,
+            TEST_ORGANIZER_ID,
+            TEST_TITLE,
+            TEST_IMAGE_URL,
+            TEST_LOCATION,
+            TEST_CAPACITY,
+            TEST_DESCRIPTION,
+            TEST_FEE,
+            TEST_EVENT_START,
+            TEST_EVENT_END,
+            TEST_EVENT_START_TIME,
+            TEST_EVENT_END_TIME,
+            TEST_REG_START,
+            TEST_REG_END
+        );
         
         // Disable automatic database updates for testing
         testEvent.setAutoUpdateDatabase(false);
