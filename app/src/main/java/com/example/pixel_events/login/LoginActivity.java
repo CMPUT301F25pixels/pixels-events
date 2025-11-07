@@ -1,18 +1,18 @@
-package com.example.pixel_events;
+package com.example.pixel_events.login;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.MainActivity;
+import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.profile.Profile;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,12 +30,6 @@ import java.util.List;
  * in SharedPreferences so the app can remember who is logged in.
  */
 public class LoginActivity extends AppCompatActivity {
-
-    private static final String PREFS_NAME = "pixels_prefs";
-    private static final String KEY_ROLE = "current_role";
-    private static final String KEY_PROFILE_ID = "current_profile_id";
-    private static final String KEY_ENTRANT_ID = "entrant_profile_id";
-
     // MVP access codes – change these later or hook to Firestore
     private static final String ORGANIZER_CODE = "ORG123";
     private static final String ADMIN_CODE = "ADMIN123";
@@ -73,21 +67,16 @@ public class LoginActivity extends AppCompatActivity {
      * If we already have a stored role + profileId, go straight to MainActivity.
      */
     private boolean maybeSkipLogin() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        String role = prefs.getString(KEY_ROLE, null);
-        String profileId = prefs.getString(KEY_PROFILE_ID, null);
-
-        if (role == null || profileId == null) {
+        if (!SessionManager.hasActiveSession(this)) {
             return false;
         }
 
-        // In a more complex app, you might route differently per role.
-        // For MVP, everyone goes to MainActivity.
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
         return true;
     }
+
 
     /**
      * Entrant login: device-based identification, no password.
@@ -105,7 +94,8 @@ public class LoginActivity extends AppCompatActivity {
         db.getAcc(userIdString, profile -> {
             if (profile != null) {
                 // Existing entrant profile: just log in
-                onLoginSuccess("user", entrantId);
+                onLoginSuccess(SessionManager.ROLE_ENTRANT, entrantId);
+
             } else {
                 // First-time entrant: go to signup screen
                 Intent intent = new Intent(LoginActivity.this, EntrantSignupActivity.class);
@@ -133,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void handleOrganizerOrAdminLogin(boolean isAdmin) {
         String enteredCode = accessCodeEditText.getText().toString().trim();
-        String role = isAdmin ? "admin" : "org";
+        String role = isAdmin ? SessionManager.ROLE_ADMIN : SessionManager.ROLE_ORGANIZER;
 
         // Simple MVP validation
         if (enteredCode.isEmpty()) {
@@ -219,11 +209,7 @@ public class LoginActivity extends AppCompatActivity {
      * Save login state and navigate to MainActivity.
      */
     private void onLoginSuccess(String role, int profileId) {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        prefs.edit()
-                .putString(KEY_ROLE, role)
-                .putString(KEY_PROFILE_ID, String.valueOf(profileId))
-                .apply();
+        SessionManager.startSession(this, role, profileId);
 
         Toast.makeText(this, "Logged in as " + role, Toast.LENGTH_SHORT).show();
 
@@ -231,6 +217,7 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
 
     /**
      * Get or create a stable entrant ID tied to this device.
