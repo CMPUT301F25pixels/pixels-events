@@ -6,6 +6,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.example.pixel_events.events.Event;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 
 /**
  * Unit tests for Event class
@@ -31,6 +34,7 @@ public class EventTest {
     private static final String TEST_EVENT_END_TIME = "14:00";
     private static final String TEST_REG_START = "2025-12-10";
     private static final String TEST_REG_END = "2025-12-20";
+    private static final ArrayList<String> TEST_TAGS = new ArrayList<>(Arrays.asList("Workshop", "Networking"));
 
     @Before
     public void setUp() {
@@ -50,7 +54,8 @@ public class EventTest {
             TEST_EVENT_START_TIME,
             TEST_EVENT_END_TIME,
             TEST_REG_START,
-            TEST_REG_END
+            TEST_REG_END,
+            TEST_TAGS
         );
         
         // Disable automatic database updates for testing
@@ -195,7 +200,8 @@ public class EventTest {
                 "Vancouver", "2000", "Annual music festival",
                 "Free",
                 "2026-08-01", "2026-08-05", "10:00", "22:00",
-                "2026-06-01", "2026-07-31"
+                "2026-06-01", "2026-07-31",
+                new ArrayList<>(Arrays.asList("Adventure", "Cultural"))
         );
 
         assertEquals("Event ID should match", 2002, newEvent.getEventId());
@@ -209,6 +215,7 @@ public class EventTest {
         assertEquals("Event end date should match", "2026-08-05", newEvent.getEventEndDate());
         assertEquals("Registration start date should match", "2026-06-01", newEvent.getRegistrationStartDate());
         assertEquals("Registration end date should match", "2026-07-31", newEvent.getRegistrationEndDate());
+        assertEquals("Tags should match", new ArrayList<>(Arrays.asList("Adventure", "Cultural")), newEvent.getTags());
     }
 
     @Test
@@ -227,112 +234,112 @@ public class EventTest {
     public void testConstructorWithNullTitle() {
         new Event(1, 1, null, "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyTitle() {
         new Event(1, 1, "", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullLocation() {
         new Event(1, 1, "title", "url", null, "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyLocation() {
         new Event(1, 1, "title", "url", "", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullCapacity() {
         new Event(1, 1, "title", "url", "location", null,
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyCapacity() {
         new Event(1, 1, "title", "url", "location", "",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullDescription() {
         new Event(1, 1, "title", "url", "location", "100",
                 null, "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyDescription() {
         new Event(1, 1, "title", "url", "location", "100",
                 "", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroEventId() {
         new Event(0, 1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeEventId() {
         new Event(-1, 1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroOrganizerId() {
         new Event(1, 0, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNegativeOrganizerId() {
         new Event(1, -1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventStartDate() {
         new Event(1, 1, "title", "url", "location", "100",
                 "description", "Free", null, "2025-01-05", "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullEventEndDate() {
         new Event(1, 1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", null, "09:00", "17:00",
-                "2024-12-01", "2024-12-31");
+                "2024-12-01", "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationStartDate() {
         new Event(1, 1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                null, "2024-12-31");
+                null, "2024-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithNullRegistrationEndDate() {
         new Event(1, 1, "title", "url", "location", "100",
                 "description", "Free", "2025-01-01", "2025-01-05", "09:00", "17:00",
-                "2024-12-01", null);
+                "2024-12-01", null, new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     // ========================================================================================
@@ -464,7 +471,7 @@ public class EventTest {
                 "Vancouver", "2000", "Annual music festival",
                 "Free",
                 "2026-08-01", "2026-08-05", "10:00", "22:00",
-                "2026-06-01", "2026-07-31"
+                "2026-06-01", "2026-07-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural"))
         );
         newEvent.setAutoUpdateDatabase(false);
 
@@ -515,7 +522,7 @@ public class EventTest {
                 4004, 504, "Consistency Test", "url",
                 "Location", "100", "Description", "Free",
                 "2026-12-01", "2026-12-05", "09:00", "17:00",
-                "2026-01-01", "2026-01-31"
+                "2026-01-01", "2026-01-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural"))
         );
         consistencyEvent.setAutoUpdateDatabase(false);
 
@@ -540,7 +547,7 @@ public class EventTest {
         // end date earlier than start date
         new Event(5005, 505, "Bad Dates", "url", "Somewhere", "50",
                 "Info", "Free", "2025-12-10", "2025-12-01", "10:00", "12:00",
-                "2025-11-01", "2025-11-30");
+                "2025-11-01", "2025-11-30", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -548,7 +555,7 @@ public class EventTest {
         // dates clearly in the past should be rejected
         new Event(5006, 506, "Past Event", "url", "Somewhere", "50",
                 "Info", "Free", "2000-01-01", "2000-01-02", "10:00", "12:00",
-                "1999-12-01", "1999-12-31");
+                "1999-12-01", "1999-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -556,7 +563,7 @@ public class EventTest {
         // same start and end date but end time before start time
         new Event(5007, 507, "Bad Times", "url", "Somewhere", "50",
                 "Info", "Free", "2026-01-01", "2026-01-01", "18:00", "09:00",
-                "2025-12-01", "2025-12-31");
+                "2025-12-01", "2025-12-31", new ArrayList<>(Arrays.asList("Adventure", "Cultural")));
     }
 
     // ========================================================================================

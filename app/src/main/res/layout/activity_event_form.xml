@@ -275,6 +275,73 @@
             android:text="Enable Geolocation"
             android:textColor="@android:color/black" />
 
+        <!-- Tags    -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/eventFormTagGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:singleSelection="false"
+            app:selectionRequired="false"
+            app:chipSpacing="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagAdventure"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Adventure"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagCultural"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Cultural"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagReligious"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Religious"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagEducational"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Educational"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagWorkshop"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Workshop"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagNetworking"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Networking"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+
         <!-- Buttons -->
         <LinearLayout
             android:layout_width="match_parent"

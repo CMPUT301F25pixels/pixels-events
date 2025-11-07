@@ -6,6 +6,7 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.qr.QRCode;
 import com.example.pixel_events.waitingList.WaitingList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.text.ParseException;
@@ -30,6 +31,7 @@ public class Event {
     private String eventEndTime;
     private String fee;
     private WaitingList waitingList;
+    private ArrayList<String> tags;
 
     // Flag to control whether setters should automatically update database
     private boolean autoUpdateDatabase = true;
@@ -64,7 +66,8 @@ public class Event {
             String eventStartTime,
             String eventEndTime,
             String registrationStartDate,
-            String registrationEndDate
+            String registrationEndDate,
+            ArrayList<String> tags
     ) {
         // Validate required fields
         validateNotEmpty(title, "Title");
@@ -93,6 +96,7 @@ public class Event {
         this.location = location;
         this.capacity = capacity;
         this.description = description;
+        this.tags = tags;
 
         // Validate dates and times
         validateDateRelations(eventStartDate, eventEndDate,
@@ -142,7 +146,7 @@ public class Event {
             db.addEvent(this.eventId, this.organizerId, this.title, this.imageUrl,
                     this.location, this.capacity, this.description, this.fee, this.eventStartDate,
                     this.eventEndDate, this.eventStartTime, this.eventEndTime,
-                    this.registrationStartDate, this.registrationEndDate);
+                    this.registrationStartDate, this.registrationEndDate, this.tags);
             db.addWaitingList(this.waitingList.getEventId(), this.waitingList.getMaxWaitlistSize());
         } catch (Exception e) {
             Log.e("Event", "Failed to save event to database", e);
@@ -203,6 +207,9 @@ public class Event {
     }
     public String getRegistrationEndDate() {
         return registrationEndDate;
+    }
+    public ArrayList<String> getTags() {
+        return tags;
     }
 
     // Setters - These update both the local field and the database
