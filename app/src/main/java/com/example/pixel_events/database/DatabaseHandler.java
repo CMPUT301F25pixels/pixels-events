@@ -421,7 +421,7 @@ public class DatabaseHandler {
      * The method uses {@link com.google.firebase.firestore.SetOptions#merge()} to ensure that
      * existing fields are preserved if the document already exists.
      */
-    public Task<Void> createWaitingList(String eventId, int capacity) {
+    public Task<Void> addWaitingList(String eventId, int capacity) {
         DocumentReference doc = waitListRef.document(eventId);
 
         Map<String, Object> init = new HashMap<>();

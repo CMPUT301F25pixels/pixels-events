@@ -25,6 +25,9 @@ import com.example.pixel_events.events.Event;
 import com.example.pixel_events.login.SessionManager;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EventDetailsFragment extends Fragment {
     private String TAG = "EventDetailsFragment";
     public static final String ARG_EVENT_ID = "eventId";
@@ -43,7 +46,7 @@ public class EventDetailsFragment extends Fragment {
     private String endTime;
     private TextView infoHeader, aboutHeader, aboutBody, lotteryHeader, lotteryStep1, lotteryStep2, lotteryStep3;
     public static final String ARG_EVENT_IDS = "eventId";
-    private static final String HARDCODED_EVENT_ID = "1762463338";
+    private static final String HARDCODED_EVENT_ID = "1762485069";
 
     @Nullable
     @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -55,10 +58,7 @@ public class EventDetailsFragment extends Fragment {
         eventId = getArguments() != null
                 ? getArguments().getString(ARG_EVENT_ID, HARDCODED_EVENT_ID)
                 : HARDCODED_EVENT_ID;
-
-        // REMOVE the old "Missing event id; finish()" block
-        // ...then proceed as normal to load/bind the event
-
+        String userId = "56789";  // or whatever user key you're using
 
         DatabaseHandler db = DatabaseHandler.getInstance();
 
@@ -75,7 +75,6 @@ public class EventDetailsFragment extends Fragment {
         lotteryStep1 = v.findViewById(R.id.lottery_step1);
         lotteryStep2 = v.findViewById(R.id.lottery_step2);
         lotteryStep3 = v.findViewById(R.id.lottery_step3);
-//        eventId = requireArguments().getString(ARG_EVENT_ID, null);
         if (TextUtils.isEmpty(eventId)) {
             toast("Missing event id"); requireActivity().finish(); return;
         }
@@ -85,16 +84,36 @@ public class EventDetailsFragment extends Fragment {
         }, e -> { toast(e.getMessage()); requireActivity().finish();
         });
 
-        // Get waiting list info}
+        // Get waiting list info
+        db.getWaitingList(eventId, waitList -> {
+            if (waitList != null) {
+                Log.d(TAG, "Loaded waitlist for event: " + waitList.getEventId());
 
-        // Live updates
+                List<String> ids = waitList.getWaitList();
+                if (ids == null) {
+                    Log.d(TAG, "Waitlist list is null; treating as empty.");
+                    ids = java.util.Collections.emptyList();
+                }
 
-        // Initial joined state
+                if (userId == null) {
+                    Log.w(TAG, "userId is null; cannot determine joined state.");
+                    joined = false;
+                } else {
+                    joined = ids.contains(userId);
+                }
+
+                Log.d(TAG, "Waitlist size=" + ids.size() + ", joined=" + joined);
+                // If you want, update UI now
+                renderCTA();
+            } else {
+                Log.w(TAG, "waitList is null for this event.");
+                joined = false;
+                renderCTA();
+            }
+        }, e -> Log.e("WAITLIST", "Failed to fetch waitlist", e));
 
 
         cta.setOnClickListener(view -> {
-            cta.setEnabled(false);
-            String userId = "12345";  // or whatever user key you're using
             Log.d(TAG, "User ID: " + userId);
 
             if (joined) {
@@ -138,9 +157,6 @@ public class EventDetailsFragment extends Fragment {
 
         if (!TextUtils.isEmpty(posterUrl)) Glide.with(this).load(posterUrl).into(poster);
         else poster.setImageDrawable(null);
-
-
-        renderCTA();
     }
 
     private void renderCTA() {
