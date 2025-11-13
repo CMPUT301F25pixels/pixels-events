@@ -4,62 +4,50 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import android.os.Bundle;
+
+import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.R;
-import com.example.pixel_events.login.LoginActivity;
+import com.example.pixel_events.login.LoginFragment;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class LoginActivityUITest {
 
-    @Rule
-    public ActivityScenarioRule<LoginActivity> activityRule =
-            new ActivityScenarioRule<>(LoginActivity.class);
+        @Test
+        public void loginScreen_allElementsVisible() {
+                FragmentScenario.launchInContainer(LoginFragment.class, new Bundle());
 
-    @Test
-    public void loginScreen_allElementsVisible() {
-        // Check title is displayed
-        onView(withId(R.id.text_hello))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Hello!")));
+                onView(withId(R.id.text_signin_title))
+                                .check(matches(isDisplayed()))
+                                .check(matches(withText("Sign In")));
 
-        onView(withId(R.id.text_welcome_back))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Welcome back.")));
+                onView(withId(R.id.login_user_email))
+                                .check(matches(isDisplayed()));
 
-        // Check role label
-        onView(withId(R.id.text_role_label))
-                .check(matches(isDisplayed()));
+                onView(withId(R.id.login_user_password))
+                                .check(matches(isDisplayed()));
 
-        // Check all role buttons are displayed
-        onView(withId(R.id.button_entrant))
-                .check(matches(isDisplayed()));
+                onView(withId(R.id.login_user_save))
+                                .check(matches(isDisplayed()))
+                                .check(matches(withText("Sign In")));
 
-        onView(withId(R.id.button_organizer))
-                .check(matches(isDisplayed()));
+                onView(withId(R.id.login_user_signup))
+                                .check(matches(isDisplayed()));
+        }
 
-        onView(withId(R.id.button_admin))
-                .check(matches(isDisplayed()));
-
-        // Check access code field
-        onView(withId(R.id.edit_access_code))
-                .check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void loginScreen_buttonsClickable() {
-        // Test entrant button is clickable
-        onView(withId(R.id.button_entrant))
-                .check(matches(isDisplayed()))
-                .perform(click());
-    }
+        @Test
+        public void loginScreen_signInButtonClickable() {
+                FragmentScenario.launchInContainer(LoginFragment.class, new Bundle());
+                onView(withId(R.id.login_user_save))
+                                .check(matches(isDisplayed()))
+                                .perform(click());
+        }
 }
-

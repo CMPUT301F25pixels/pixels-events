@@ -39,7 +39,7 @@ public class EventCRUDTest {
     @Test
     public void testCreateAndRetrieveEvent() throws InterruptedException {
         Log.d(TAG, "Starting testCreateAndRetrieveEvent");
-        
+
         // Create test event data
         int testEventId = (int) (System.currentTimeMillis() / 1000L);
         int organizerId = 999;
@@ -49,12 +49,12 @@ public class EventCRUDTest {
         String capacity = "100";
         String description = "Test Description";
         String fee = "Free";
-        String eventStartDate = "2025-12-31";
-        String eventEndDate = "2025-12-31";
+        String eventStartDate = "2026-01-08";
+        String eventEndDate = "2026-01-10";
         String eventStartTime = "10:00";
         String eventEndTime = "12:00";
-        String registrationStartDate = "2025-11-01";
-        String registrationEndDate = "2025-11-30";
+        String registrationStartDate = "2026-01-01";
+        String registrationEndDate = "2026-01-06";
         ArrayList<String> tags = new ArrayList<>();
         tags.add("Test");
 
@@ -63,7 +63,7 @@ public class EventCRUDTest {
         Event testEvent = new Event(testEventId, organizerId, title, imageUrl, location,
                 capacity, description, fee, eventStartDate, eventEndDate, eventStartTime,
                 eventEndTime, registrationStartDate, registrationEndDate, tags);
-        
+
         testEvent.saveToDatabase();
         Log.d(TAG, "Event saved to database");
 
@@ -75,7 +75,7 @@ public class EventCRUDTest {
         final Event[] retrievedEvent = {null};
         final Exception[] error = {null};
 
-        db.getEvent(String.valueOf(testEventId),
+        db.getEvent(testEventId,
                 event -> {
                     retrievedEvent[0] = event;
                     latch.countDown();

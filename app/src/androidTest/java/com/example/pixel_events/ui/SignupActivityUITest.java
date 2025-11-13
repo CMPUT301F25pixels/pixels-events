@@ -8,75 +8,54 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import android.content.Intent;
+import android.os.Bundle;
 
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.R;
-import com.example.pixel_events.login.EntrantSignupActivity;
+import com.example.pixel_events.login.SignupFragment;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class SignupActivityUITest {
 
-    @Rule
-    public ActivityScenarioRule<EntrantSignupActivity> activityRule =
-            new ActivityScenarioRule<>(createIntent());
+        @Test
+        public void signupScreen_allElementsVisible() {
+                FragmentScenario.launchInContainer(SignupFragment.class, new Bundle());
 
-    private static Intent createIntent() {
-        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), EntrantSignupActivity.class);
-        intent.putExtra("entrant_id", 12345);
-        return intent;
-    }
+                onView(withId(R.id.text_signup_title))
+                                .check(matches(isDisplayed()))
+                                .check(matches(withText("Sign Up")));
 
-    @Test
-    public void signupScreen_allElementsVisible() {
-        // Check title
-        onView(withId(R.id.text_signup_title))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Sign Up")));
+                onView(withId(R.id.signup_user_name)).check(matches(isDisplayed()));
+                onView(withId(R.id.signup_user_email)).check(matches(isDisplayed()));
+                onView(withId(R.id.signup_user_password)).check(matches(isDisplayed()));
+                onView(withId(R.id.signup_user_role)).check(matches(isDisplayed()));
 
-        // Check all input fields are displayed
-        onView(withId(R.id.edit_entrant_name))
-                .check(matches(isDisplayed()));
+                onView(withId(R.id.signup_user_save))
+                                .check(matches(isDisplayed()))
+                                .check(matches(withText("Create account")));
 
-        onView(withId(R.id.edit_entrant_email))
-                .check(matches(isDisplayed()));
+                onView(withId(R.id.signup_user_signin))
+                                .check(matches(isDisplayed()));
+        }
 
-        onView(withId(R.id.edit_entrant_password))
-                .check(matches(isDisplayed()));
+        @Test
+        public void signupScreen_inputFieldsWork() {
+                FragmentScenario.launchInContainer(SignupFragment.class, new Bundle());
 
-        // Check button
-        onView(withId(R.id.button_entrant_save))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Create account")));
+                onView(withId(R.id.signup_user_name)).perform(typeText("Test User"));
+                onView(withId(R.id.signup_user_email)).perform(typeText("test@example.com"));
+        }
 
-        // Check sign in link
-        onView(withId(R.id.text_signin))
-                .check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void signupScreen_inputFieldsWork() {
-        // Test typing into name field
-        onView(withId(R.id.edit_entrant_name))
-                .perform(typeText("Test User"));
-
-        // Test typing into email field
-        onView(withId(R.id.edit_entrant_email))
-                .perform(typeText("test@example.com"));
-    }
-
-    @Test
-    public void signupScreen_createButtonClickable() {
-        onView(withId(R.id.button_entrant_save))
-                .check(matches(isDisplayed()))
-                .perform(click());
-    }
+        @Test
+        public void signupScreen_createButtonClickable() {
+                FragmentScenario.launchInContainer(SignupFragment.class, new Bundle());
+                onView(withId(R.id.signup_user_save))
+                                .check(matches(isDisplayed()))
+                                .perform(click());
+        }
 }
-

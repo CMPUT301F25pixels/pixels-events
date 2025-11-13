@@ -6,50 +6,38 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import android.os.Bundle;
+
+import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
+import com.example.pixel_events.home.DashboardFragment;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class MainActivityUITest {
 
-    @Rule
-    public ActivityScenarioRule<MainActivity> activityRule =
-            new ActivityScenarioRule<>(MainActivity.class);
+        @Test
+        public void dashboard_allElementsVisible() {
+                FragmentScenario.launchInContainer(DashboardFragment.class, new Bundle());
 
-    @Test
-    public void mainScreen_allElementsVisible() {
-        // Check welcome text
-        onView(withId(R.id.welcome_text))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Pixels Events")));
+                // Filter title and controls
+                onView(withId(R.id.dashboard_filters_title))
+                                .check(matches(isDisplayed()))
+                                .check(matches(withText("Filter events")));
 
-        // Check add event button
-        onView(withId(R.id.addEvent))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Add Event")));
+                onView(withId(R.id.dashboard_chip_group))
+                                .check(matches(isDisplayed()));
 
-        // Check scan QR button
-        onView(withId(R.id.scan_qr_button))
-                .check(matches(isDisplayed()))
-                .check(matches(withText("Scan QR Code")));
+                // Recycler view for events list
+                onView(withId(R.id.dashboard_eventRecyclerView))
+                                .check(matches(isDisplayed()));
 
-        // Check bottom navigation
-        onView(withId(R.id.bottom_nav))
-                .check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void mainScreen_darkThemeApplied() {
-        // Verify dark theme colors are applied by checking visibility
-        onView(withId(R.id.main))
-                .check(matches(isDisplayed()));
-    }
+                // Apply/Clear buttons
+                onView(withId(R.id.dashboard_apply_filters)).check(matches(isDisplayed()));
+                onView(withId(R.id.dashboard_clear_filters)).check(matches(isDisplayed()));
+        }
 }
-

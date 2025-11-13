@@ -30,6 +30,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -40,6 +43,12 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation(libs.annotation)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
+
     // JUnit 4 for unit testing
     testImplementation(libs.junit)
     testImplementation("junit:junit:4.13.2")
@@ -49,6 +58,7 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:5.2.0")
     
     // Android testing
+    debugImplementation("androidx.fragment:fragment-testing:1.7.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     
@@ -59,6 +69,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-auth")
     
     // Google Play Services (required for Firebase)
     implementation("com.google.android.gms:play-services-tasks:18.1.0")

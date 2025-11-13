@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.events.Event;
+import com.example.pixel_events.profile.Profile;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -15,8 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -64,7 +63,7 @@ public class FirebaseConnectivityTest {
                     latch.countDown();
                 });
 
-        assertTrue("Firestore query should complete within 10 seconds", 
+        assertTrue("Firestore query should complete within 10 seconds",
                 latch.await(10, TimeUnit.SECONDS));
         assertTrue("Should be able to connect to Firestore", success.get());
     }
@@ -73,25 +72,26 @@ public class FirebaseConnectivityTest {
     public void testCreateAndRetrieveEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(false);
-        
+
         int testEventId = (int) (System.currentTimeMillis() / 1000L);
         String testTitle = "Test Event " + testEventId;
-        
+
         ArrayList<String> tags = new ArrayList<>();
         tags.add("Test");
-        
+
         Log.d(TAG, "Creating test event with ID: " + testEventId);
-        
+        Event testEvent = new Event(testEventId, 1, testTitle, "", "Test Location",
+                "100", "Test Description", "Free", "2026-01-08", "2026-01-10",
+                "10:00", "18:00", "2026-01-01", "2026-01-06", tags);
+
         // Create event
-        db.addEvent(testEventId, 1, testTitle, "", "Test Location",
-                "100", "Test Description", "Free", "2025-12-01", "2025-12-02",
-                "10:00", "18:00", "2025-11-01", "2025-11-30", tags);
-        
+        db.addEvent(testEvent);
+
         // Wait a bit for Firestore to process
         Thread.sleep(2000);
-        
+
         // Try to retrieve it
-        db.getEvent(String.valueOf(testEventId), 
+        db.getEvent(testEventId,
                 event -> {
                     if (event != null) {
                         assertEquals("Event title should match", testTitle, event.getTitle());
@@ -106,11 +106,11 @@ public class FirebaseConnectivityTest {
                     Log.e(TAG, "Error retrieving event", e);
                     latch.countDown();
                 });
-        
-        assertTrue("Event retrieval should complete within 10 seconds", 
+
+        assertTrue("Event retrieval should complete within 10 seconds",
                 latch.await(10, TimeUnit.SECONDS));
         assertTrue("Should be able to create and retrieve event", success.get());
-        
+
         // Cleanup
         db.deleteEvent(testEventId);
     }
@@ -119,29 +119,29 @@ public class FirebaseConnectivityTest {
     public void testEventListRetrieval() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Integer> eventCount = new AtomicReference<>(0);
-        
+
         Log.d(TAG, "Testing event list retrieval from EventData collection");
-        
+
         firestore.collection("EventData")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     eventCount.set(queryDocumentSnapshots.size());
                     Log.d(TAG, "Found " + eventCount.get() + " events in database");
-                    
+
                     // Log first event details if any exist
                     if (eventCount.get() > 0) {
                         Map<String, Object> firstEvent = queryDocumentSnapshots.getDocuments().get(0).getData();
                         Log.d(TAG, "First event data: " + firstEvent);
                     }
-                    
+
                     latch.countDown();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Failed to retrieve events", e);
                     latch.countDown();
                 });
-        
-        assertTrue("Event list query should complete within 10 seconds", 
+
+        assertTrue("Event list query should complete within 10 seconds",
                 latch.await(10, TimeUnit.SECONDS));
         Log.d(TAG, "Event list retrieval test completed. Events found: " + eventCount.get());
     }
@@ -150,26 +150,30 @@ public class FirebaseConnectivityTest {
     public void testAccountCreationAndRetrieval() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean success = new AtomicBoolean(false);
-        
+
         int testUserId = (int) (System.currentTimeMillis() / 1000L);
         String testUserName = "Test User " + testUserId;
-        
+
         Log.d(TAG, "Creating test account with ID: " + testUserId);
-        
-        List<Boolean> notifyPrefs = new ArrayList<>();
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
-        notifyPrefs.add(true);
-        
+
+        List<Boolean> notifyPrefs = new ArrayList<>(
+                List.of(true, true, true)
+        );
+
+        Profile testProfile = new Profile(
+                testUserId, "user", testUserName, "Other", "test@example.com",
+                "1234567890","", "", "",
+                notifyPrefs
+        );
+
         // Create account
-        db.addAcc(testUserId, "user", testUserName, new Date(), "Other",
-                "test@example.com", "Test City", "Test Province", 1234567890, notifyPrefs);
-        
+        db.addAcc(testProfile);
+
         // Wait for Firestore to process
         Thread.sleep(2000);
-        
+
         // Try to retrieve it
-        db.getAcc(String.valueOf(testUserId),
+        db.getProfile(testUserId,
                 profile -> {
                     if (profile != null) {
                         assertEquals("Username should match", testUserName, profile.getUserName());
@@ -184,11 +188,11 @@ public class FirebaseConnectivityTest {
                     Log.e(TAG, "Error retrieving account", e);
                     latch.countDown();
                 });
-        
-        assertTrue("Account retrieval should complete within 10 seconds", 
+
+        assertTrue("Account retrieval should complete within 10 seconds",
                 latch.await(10, TimeUnit.SECONDS));
         assertTrue("Should be able to create and retrieve account", success.get());
-        
+
         // Cleanup
         db.deleteAcc(testUserId);
     }

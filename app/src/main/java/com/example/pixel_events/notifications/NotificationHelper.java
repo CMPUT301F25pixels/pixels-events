@@ -17,10 +17,10 @@ import com.example.pixel_events.R;
 public class NotificationHelper {
     private static final String CHANNEL_ID = "lottery_notifications";
     private static final String CHANNEL_NAME = "Lottery Results";
-    
+
     private Context context;
     private NotificationManager notificationManager;
-    
+
     /**
      * Initialize NotificationHelper with context
      * @param context Application context for notification system access
@@ -30,7 +30,7 @@ public class NotificationHelper {
         this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
     }
-    
+
     /**
      * Create notification channel for Android O and above
      * Required for displaying notifications on newer Android versions
@@ -38,19 +38,19 @@ public class NotificationHelper {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_HIGH
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
             );
             channel.setDescription("Notifications for lottery results");
             notificationManager.createNotificationChannel(channel);
         }
     }
-    
+
     /**
      * Send a win notification to user
      * @param eventName Name of the event user won lottery for
-     * 
+     *
      * Displays: "Congratulations! You won the lottery for [eventName]"
      */
     public void sendWinNotification(String eventName) {
@@ -58,11 +58,11 @@ public class NotificationHelper {
         String message = "You won the lottery for " + eventName;
         sendNotification(1, title, message);
     }
-    
+
     /**
      * Send a loss notification to user
      * @param eventName Name of the event user was not selected for
-     * 
+     *
      * Displays: "You were not selected for [eventName]"
      */
     public void sendLossNotification(String eventName) {
@@ -70,7 +70,7 @@ public class NotificationHelper {
         String message = "You were not selected for " + eventName;
         sendNotification(2, title, message);
     }
-    
+
     /**
      * Send a notification to user's device
      * @param notificationId Unique ID for this notification
@@ -79,12 +79,12 @@ public class NotificationHelper {
      */
     private void sendNotification(int notificationId, String title, String message) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true);
-        
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
         notificationManager.notify(notificationId, builder.build());
     }
 }

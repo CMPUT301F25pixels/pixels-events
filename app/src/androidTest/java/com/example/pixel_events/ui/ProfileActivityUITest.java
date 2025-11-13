@@ -5,65 +5,29 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import android.os.Bundle;
+
+import androidx.fragment.app.testing.FragmentScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.R;
-import com.example.pixel_events.settings.ProfileActivity;
+import com.example.pixel_events.profile.ProfileFragment;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class ProfileActivityUITest {
 
-    @Rule
-    public ActivityScenarioRule<ProfileActivity> activityRule =
-            new ActivityScenarioRule<>(ProfileActivity.class);
+        @Test
+        public void profileScreen_allElementsVisible() {
+                FragmentScenario.launchInContainer(ProfileFragment.class, new Bundle());
 
-    @Test
-    public void profileScreen_allElementsVisible() {
-        // Check title
-        onView(withId(R.id.profileProfileText))
-                .check(matches(isDisplayed()));
-
-        // Check role and username
-        onView(withId(R.id.profileRoleText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profileUsernameText))
-                .check(matches(isDisplayed()));
-
-        // Check edit button
-        onView(withId(R.id.profileEditButton))
-                .check(matches(isDisplayed()));
-
-        // Check profile fields
-        onView(withId(R.id.profileDOBText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profileGenderText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profileEmailText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profilePhoneText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profileCityText))
-                .check(matches(isDisplayed()));
-
-        onView(withId(R.id.profileProvinceText))
-                .check(matches(isDisplayed()));
-    }
-
-    @Test
-    public void profileScreen_bottomNavVisible() {
-        // Check bottom navigation bar
-        onView(withId(R.id.profileBottomBar))
-                .check(matches(isDisplayed()));
-    }
+                onView(withId(R.id.profile_username)).check(matches(isDisplayed()));
+                onView(withId(R.id.profile_viewprofile)).check(matches(isDisplayed()));
+                onView(withId(R.id.profile_registrationhistory)).check(matches(isDisplayed()));
+                onView(withId(R.id.profile_notificationspreferences)).check(matches(isDisplayed()));
+                onView(withId(R.id.profile_logout)).check(matches(isDisplayed()));
+                onView(withId(R.id.profile_deleteaccount)).check(matches(isDisplayed()));
+        }
 }
-
