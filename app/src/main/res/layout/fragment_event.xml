@@ -30,7 +30,7 @@
                 android:id="@+id/event_fragment_backbutton"
                 android:layout_width="47dp"
                 android:layout_height="48dp"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:layout_marginBottom="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Back"
