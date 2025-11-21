@@ -40,7 +40,7 @@ public class WaitingList {
 
     public void addEntrantInWaitList(int userId) {
         if (isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + "already in waitlist");
+            throw new IllegalArgumentException(userId + " already in waitlist");
         }
         if (waitList.size() >= maxWaitlistSize) {
             throw new IllegalArgumentException("Waitlist is full. Try again later.");
@@ -50,8 +50,8 @@ public class WaitingList {
     }
 
     public void removeEntrantInWaitList(int userId) {
-        if (!isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + "not present in waitlist");
+        if (!isUserInWaitlist(Integer.valueOf(userId))) {
+            throw new IllegalArgumentException(userId + " not present in waitlist");
         }
         waitList.remove(userId);
         updateDatabase("waitList", waitList);

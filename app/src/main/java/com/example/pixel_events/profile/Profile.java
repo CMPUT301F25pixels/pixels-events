@@ -41,7 +41,7 @@ public class Profile {
         Validator.validateNotEmpty(email, "Email");
 
         if (userid <= 0) {
-            throw new IllegalArgumentException("Event ID must be positive");
+            throw new IllegalArgumentException("User ID must be positive");
         }
 
         // Assign all variables

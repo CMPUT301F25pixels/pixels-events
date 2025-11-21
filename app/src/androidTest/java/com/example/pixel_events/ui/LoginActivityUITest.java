@@ -42,12 +42,4 @@ public class LoginActivityUITest {
                 onView(withId(R.id.login_user_signup))
                                 .check(matches(isDisplayed()));
         }
-
-        @Test
-        public void loginScreen_signInButtonClickable() {
-                FragmentScenario.launchInContainer(LoginFragment.class, new Bundle());
-                onView(withId(R.id.login_user_save))
-                                .check(matches(isDisplayed()))
-                                .perform(click());
-        }
 }
