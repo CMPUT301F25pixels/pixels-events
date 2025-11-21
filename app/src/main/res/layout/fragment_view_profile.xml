@@ -22,8 +22,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-
-
             <TextView
                 android:id="@+id/profileProfileText"
                 android:layout_width="match_parent"
@@ -181,13 +179,15 @@
         </LinearLayout>
 
     </ScrollView>
+
     <ImageButton
         android:id="@+id/profileBackButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginBottom="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Back"
-        android:src="@drawable/ic_arrow_back" />
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
