@@ -22,14 +22,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/profileBackButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Back"
-                android:src="@drawable/ic_arrow_back" />
+
 
             <TextView
                 android:id="@+id/profileProfileText"
@@ -103,6 +96,7 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="Gender"
+                    android:hint="Gender"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -117,6 +111,7 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="Email"
+                    android:hint="Email"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -131,6 +126,7 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="Phone Number"
+                    android:hint="Phone Number"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -145,6 +141,7 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="Postal Code"
+                    android:hint="Postal Code"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -159,6 +156,7 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="Province"
+                    android:hint="Province"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -174,11 +172,22 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:text="City"
+                    android:hint="City"
                     android:textColor="@color/white" />
-
             </LinearLayout>
 
+
+
         </LinearLayout>
+
     </ScrollView>
+    <ImageButton
+        android:id="@+id/profileBackButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_arrow_back" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

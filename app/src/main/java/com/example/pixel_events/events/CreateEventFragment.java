@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -35,7 +36,7 @@ import java.util.Calendar;
 
 public class CreateEventFragment extends Fragment {
     private TextInputEditText startDate, endDate, startTime, endTime, regStartDate, regEndDate;
-    private TextInputEditText titleField, locationField, capacityField, descriptionField, feeField;
+    private EditText titleField, locationField, capacityField, descriptionField, feeField;
     private Button doneButton, cancelButton, uploadButton;
     private ImageView imageView;
     private ChipGroup tagGroup;
@@ -140,8 +141,7 @@ public class CreateEventFragment extends Fragment {
                         .setText(String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)),
                 c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
-        long oneDay = 24L * 60L * 60L * 1000L;
-        dpd.getDatePicker().setMinDate(System.currentTimeMillis() + oneDay);
+        dpd.getDatePicker().setMinDate(System.currentTimeMillis());
         dpd.show();
     }
 

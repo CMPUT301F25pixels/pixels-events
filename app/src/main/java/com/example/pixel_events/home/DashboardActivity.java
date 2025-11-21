@@ -36,6 +36,26 @@ public class DashboardActivity extends AppCompatActivity {
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(navView, navController);
+
+            // Hide overlay container when its back stack empties
+            getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
+                    binding.overlayFragmentContainer.setVisibility(View.GONE);
+                }
+            });
+
+            // Bottom navigation: clear ONLY overlay fragments, then delegate to NavigationUI
+            navView.setOnItemSelectedListener(item -> {
+                // Remove overlay fragments if present (they were added via add() on overlay container)
+                while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStackImmediate();
+                }
+                if (binding.overlayFragmentContainer != null) {
+                    binding.overlayFragmentContainer.setVisibility(View.GONE);
+                }
+                return NavigationUI.onNavDestinationSelected(item, navController);
+            });
+
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 if (binding.dashboardTitle != null) {
                     CharSequence title = null;
@@ -62,10 +82,14 @@ public class DashboardActivity extends AppCompatActivity {
                     if (binding.dashboardTitle != null) {
                         binding.dashboardTitle.setText("Create Event");
                     }
+                    if (binding.overlayFragmentContainer != null) {
+                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                    }
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.nav_host_fragment_activity_dashboard, new CreateEventFragment())
-                            .addToBackStack(null)
+                            .setReorderingAllowed(true)
+                            .add(R.id.overlay_fragment_container, new CreateEventFragment())
+                            .addToBackStack("overlay")
                             .commit();
                 });
             }
@@ -77,6 +101,24 @@ public class DashboardActivity extends AppCompatActivity {
                 if (nhf != null) {
                     NavController nc = nhf.getNavController();
                     NavigationUI.setupWithNavController(navView, nc);
+
+                    // Hide overlay when back stack empties
+                    getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+                        if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
+                            binding.overlayFragmentContainer.setVisibility(View.GONE);
+                        }
+                    });
+
+                    navView.setOnItemSelectedListener(item -> {
+                        while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                            getSupportFragmentManager().popBackStackImmediate();
+                        }
+                        if (binding.overlayFragmentContainer != null) {
+                            binding.overlayFragmentContainer.setVisibility(View.GONE);
+                        }
+                        return NavigationUI.onNavDestinationSelected(item, nc);
+                    });
+
                     nc.addOnDestinationChangedListener((controller, destination, arguments) -> {
                         if (binding.dashboardTitle != null) {
                             CharSequence title = null;
@@ -99,10 +141,14 @@ public class DashboardActivity extends AppCompatActivity {
                             if (binding.dashboardTitle != null) {
                                 binding.dashboardTitle.setText("Create Event");
                             }
+                            if (binding.overlayFragmentContainer != null) {
+                                binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                            }
                             getSupportFragmentManager()
                                     .beginTransaction()
-                                    .replace(R.id.nav_host_fragment_activity_dashboard, new CreateEventFragment())
-                                    .addToBackStack(null)
+                                    .setReorderingAllowed(true)
+                                    .add(R.id.overlay_fragment_container, new CreateEventFragment())
+                                    .addToBackStack("overlay")
                                     .commit();
                         });
                     }

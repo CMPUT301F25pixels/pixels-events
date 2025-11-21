@@ -51,12 +51,12 @@ public class ViewProfileFragment extends Fragment {
         profileText.setText("Profile Details");
         roleText.setText(profile.getRole());
         usernameText.setText(profile.getUserName());
-        genderText.setText(profile.getGender());
+        if (profile.getGender() != null) genderText.setText(profile.getGender());
         emailText.setText(profile.getEmail());
-        phoneText.setText(profile.getPhoneNum());
+        if (profile.getPhoneNum() != null) phoneText.setText(profile.getPhoneNum());
         postalText.setText(profile.getPostalcode());
-        provinceText.setText(profile.getProvince());
-        cityText.setText(profile.getCity());
+        if (profile.getProvince() != null) provinceText.setText(profile.getProvince());
+        if (profile.getCity() != null) cityText.setText(profile.getCity());
 
         backButton.setOnClickListener(v -> {
             requireActivity().getSupportFragmentManager().popBackStack();

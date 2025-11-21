@@ -102,8 +102,9 @@ public class SignupFragment extends Fragment {
                 return;
             }
 
-            if (TextUtils.isEmpty(phoneNumber)) {
-                phoneEditText.setError("Phone number is required");
+
+            if (postalCodeEditText.getText().toString().trim().isEmpty()) {
+                postalCodeEditText.setError("Postal code is required");
                 return;
             }
 

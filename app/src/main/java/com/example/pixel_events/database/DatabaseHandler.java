@@ -360,12 +360,20 @@ public class DatabaseHandler {
             java.lang.reflect.Field f = target.getClass().getDeclaredField(fieldName);
             f.setAccessible(true);
             Object value = data.get(fieldName);
-            // Handle numeric strings for int fields
-            if (f.getType() == int.class && value instanceof String) {
-                try {
-                    value = Integer.parseInt((String) value);
-                } catch (NumberFormatException ignored) {
-                    /* leave unchanged */ }
+            // Handle numeric conversions for int fields
+            if (f.getType() == int.class) {
+                if (value instanceof String) {
+                    try {
+                        value = Integer.parseInt((String) value);
+                    } catch (NumberFormatException ignored) {
+                        /* leave unchanged */ }
+                } else if (value instanceof Long) {
+                    // Firestore returns numbers as Long, convert to int
+                    value = ((Long) value).intValue();
+                } else if (value instanceof Integer) {
+                    // Already an int, no conversion needed
+                    value = (Integer) value;
+                }
             }
             f.set(target, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {

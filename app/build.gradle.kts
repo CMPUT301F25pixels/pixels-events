@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     // JUnit 4 for unit testing
     testImplementation(libs.junit)

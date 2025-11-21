@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,6 +46,7 @@ public class EventDetailedFragment extends Fragment {
     private TextView title, date, description;
     private MaterialButton joinLeaveButton;
     private ImageButton backButton, qrButton;
+    private LinearLayout tagsContainer;
 
     public EventDetailedFragment() {
     }
@@ -86,6 +88,7 @@ public class EventDetailedFragment extends Fragment {
         joinLeaveButton = view.findViewById(R.id.event_jlbutton);
         backButton = view.findViewById(R.id.event_backbutton);
         qrButton = view.findViewById(R.id.event_qrcode_button);
+        tagsContainer = view.findViewById(R.id.eventTagsContainer);
 
         backButton.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
 
@@ -183,7 +186,40 @@ public class EventDetailedFragment extends Fragment {
             if (bitmap != null) {
                 poster.setImageBitmap(bitmap);
             }
-        } else {
+        }
+
+        // Display tags
+        displayTags();
+    }
+
+    private void displayTags() {
+        if (tagsContainer == null || event == null) return;
+        
+        tagsContainer.removeAllViews();
+        List<String> tags = event.getTags();
+        
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+        
+        for (String tag : tags) {
+            if (tag == null || tag.trim().isEmpty()) continue;
+            
+            TextView tagView = new TextView(requireContext());
+            tagView.setText(tag);
+            tagView.setTextColor(getResources().getColor(R.color.white, null));
+            tagView.setTextSize(12);
+            tagView.setPadding(16, 8, 16, 8);
+            tagView.setBackground(getResources().getDrawable(R.drawable.view_tag_outline, null));
+            
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMarginEnd(8);
+            tagView.setLayoutParams(params);
+            
+            tagsContainer.addView(tagView);
         }
     }
 
@@ -191,9 +227,9 @@ public class EventDetailedFragment extends Fragment {
         if (!isAdded() || joinLeaveButton == null)
             return;
         if (joined) {
-            joinLeaveButton.setText("Leave (" + waitingListCount + ")");
+            joinLeaveButton.setText("Leave\n"+ waitingListCount +" in waiting list");
         } else {
-            joinLeaveButton.setText("Join (" + waitingListCount + ")");
+            joinLeaveButton.setText("Join\n"+ waitingListCount +" in waiting list");
         }
         joinLeaveButton.setEnabled(true);
     }

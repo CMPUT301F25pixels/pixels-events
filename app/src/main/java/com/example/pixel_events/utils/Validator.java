@@ -53,11 +53,11 @@ public class Validator {
             if (endDateObj != null && !endDateObj.after(today)) {
                 throw new IllegalArgumentException("Event end date must be after today");
             }
-            if (regStartObj != null && !regStartObj.after(today)) {
-                throw new IllegalArgumentException("Registration start date must be after today");
+            if (regStartObj != null && !regStartObj.before(today)) {
+                throw new IllegalArgumentException("Registration start date must be before today");
             }
-            if (regEndObj != null && !regEndObj.after(today)) {
-                throw new IllegalArgumentException("Registration end date must be after today");
+            if (regEndObj != null && !regEndObj.before(today)) {
+                throw new IllegalArgumentException("Registration end date must be before today");
             }
 
             // End must be after start when both present
@@ -71,7 +71,7 @@ public class Validator {
             }
 
             // Registration must finish before event starts (if both present)
-            if (regEndObj != null && startDateObj != null && !regEndObj.before(startDateObj)) {
+            if  (regEndObj != null && startDateObj != null && !regEndObj.before(startDateObj))  {
                 throw new IllegalArgumentException("Registration must end before the event start date");
             }
 

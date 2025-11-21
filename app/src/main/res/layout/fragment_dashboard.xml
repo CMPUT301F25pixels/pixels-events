@@ -49,42 +49,54 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Adventure"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_cultural"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cultural"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_religious"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Religious"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_educational"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Educational"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_workshop"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Workshop"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_networking"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Networking"
-                    app:checkedIconVisible="false"/>
+                    app:checkedIconVisible="false"
+                    android:textColor="@color/white"
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 

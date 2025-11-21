@@ -60,16 +60,19 @@ public class DashboardFragment extends Fragment {
         eventsRecyclerView = view.findViewById(R.id.dashboard_eventRecyclerView);
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize adapter with empty list
+        // Initialize adapter with empty list. Use overlay container so NavHost remains intact.
         adapter = new DashboardAdapter(new ArrayList<>(), event -> {
-            if (!isAdded())
-                return;
-            androidx.fragment.app.Fragment detail = new EventDetailedFragment(
-                    event.getEventId());
+            if (!isAdded()) return;
+            androidx.fragment.app.Fragment detail = new EventDetailedFragment(event.getEventId());
+            View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
+            if (overlay != null && overlay.getVisibility() != View.VISIBLE) {
+                overlay.setVisibility(View.VISIBLE);
+            }
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.nav_host_fragment_activity_dashboard, detail)
-                    .addToBackStack(null)
+                    .setReorderingAllowed(true)
+                    .add(R.id.overlay_fragment_container, detail)
+                    .addToBackStack("overlay")
                     .commit();
         });
         eventsRecyclerView.setAdapter(adapter);
@@ -126,6 +129,7 @@ public class DashboardFragment extends Fragment {
                         endDateView.setText(str);
                     }
                 }, y, m, d);
+        dialog.getDatePicker().setMinDate(System.currentTimeMillis());
         dialog.show();
     }
 
@@ -166,16 +170,6 @@ public class DashboardFragment extends Fragment {
             String lt = t.trim().toLowerCase(Locale.US);
             if (selectedTags.contains(lt))
                 return true;
-        }
-        // Special case: treat "Workshop & Networking" chip as two logical tags
-        if (selectedTags.contains("workshop & networking")) {
-            for (String t : tags) {
-                if (t == null)
-                    continue;
-                String lt = t.trim().toLowerCase(Locale.US);
-                if (lt.contains("workshop") || lt.contains("networking"))
-                    return true;
-            }
         }
         return false;
     }

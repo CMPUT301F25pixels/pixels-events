@@ -5,15 +5,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
+import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.EventViewHolder> {
     private List<Event> events;
@@ -57,6 +60,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.Even
         private TextView eventTitle;
         private TextView eventTime;
         private TextView eventLocation;
+        private LinearLayout tagsContainer;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -64,18 +68,58 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.Even
             eventTitle = itemView.findViewById(R.id.eventListTitle);
             eventTime = itemView.findViewById(R.id.eventListTime);
             eventLocation = itemView.findViewById(R.id.eventListLocation);
+            tagsContainer = itemView.findViewById(R.id.eventTagsContainer);
         }
 
         public void bind(Event event, OnEventClickListener listener) {
             eventTitle.setText(event.getTitle());
             eventTime.setText(event.getEventStartTime());
             eventLocation.setText(event.getLocation());
+            if (!Objects.equals(event.getImageUrl(), "")) {
+                eventImage.setImageBitmap(ImageConversion.base64ToBitmap(event.getImageUrl()));
+            } else {
+                eventImage.setImageResource(R.drawable.sample_image);
+            }
+
+            // Display tags
+            displayTags(event);
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onEventClick(event);
                 }
             });
+        }
+
+        private void displayTags(Event event) {
+            if (tagsContainer == null) return;
+            
+            tagsContainer.removeAllViews();
+            List<String> tags = event.getTags();
+            
+            if (tags == null || tags.isEmpty()) {
+                return;
+            }
+            
+            for (String tag : tags) {
+                if (tag == null || tag.trim().isEmpty()) continue;
+                
+                TextView tagView = new TextView(itemView.getContext());
+                tagView.setText(tag);
+                tagView.setTextColor(itemView.getContext().getResources().getColor(R.color.white, null));
+                tagView.setTextSize(10);
+                tagView.setPadding(12, 6, 12, 6);
+                tagView.setBackground(itemView.getContext().getResources().getDrawable(R.drawable.view_tag_outline, null));
+                
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params.setMarginEnd(6);
+                tagView.setLayoutParams(params);
+                
+                tagsContainer.addView(tagView);
+            }
         }
     }
 }
