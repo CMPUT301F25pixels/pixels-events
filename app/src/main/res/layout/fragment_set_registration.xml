@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/dark_bg"
+    tools:context=".events.SetRegistrationFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputRegStartDate"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Event Start Date"
+            android:inputType="none"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputRegEndDate"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Event Start Date"
+            android:inputType="none"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/inputRegButtonDone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/accent_blue"
+        android:fontFamily="@font/poppins_bold" />
+
+
+</LinearLayout>

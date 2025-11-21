@@ -46,7 +46,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.google.android.material:material:1.12.0")
 
     // --- Firebase (Bill of Materials) ---
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
@@ -59,6 +59,8 @@ dependencies {
 
     // --- Imaging ---
     implementation("com.github.bumptech.glide:glide:5.0.5")
+    implementation(libs.legacy.support.v4)
+    implementation(libs.recyclerview)
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 
     // --- QR / ZXing ---

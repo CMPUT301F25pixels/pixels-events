@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.pixel_events.utils.ImageConversion;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class EventDetailedFragment extends Fragment {
     private static final String TAG = "EventDetailedFragment";
@@ -151,7 +155,6 @@ public class EventDetailedFragment extends Fragment {
                 waitingListCount = ids.size();
                 renderCTA();
             }
-
         }
 
         joinLeaveButton.setOnClickListener(v -> {
@@ -178,7 +181,7 @@ public class EventDetailedFragment extends Fragment {
 
         title.setText(event.getTitle());
         date.setText(event.getDateString());
-        description.setText(event.getDescription());
+        description.setText(event.getFullDescription());
 
         // Load poster image
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
@@ -226,12 +229,45 @@ public class EventDetailedFragment extends Fragment {
     private void renderCTA() {
         if (!isAdded() || joinLeaveButton == null)
             return;
-        if (joined) {
-            joinLeaveButton.setText("Leave\n"+ waitingListCount +" in waiting list");
-        } else {
-            joinLeaveButton.setText("Join\n"+ waitingListCount +" in waiting list");
+        
+        // Determine registration state
+        String startStr = event != null ? event.getRegistrationStartDate() : null;
+        String endStr = event != null ? event.getRegistrationEndDate() : null;
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        try {
+            Date today = truncateToDay(new Date());
+            Date start = (startStr != null && !startStr.isEmpty()) ? truncateToDay(fmt.parse(startStr)) : null;
+            Date end = (endStr != null && !endStr.isEmpty()) ? truncateToDay(fmt.parse(endStr)) : null;
+
+            if (start == null || end == null) {
+                joinLeaveButton.setText("Registration Closed");
+                joinLeaveButton.setEnabled(false);
+                return;
+            }
+
+            if (today.before(start)) {
+                joinLeaveButton.setText("Registration opens " + startStr);
+                joinLeaveButton.setEnabled(false);
+                return;
+            }
+            if (today.after(end)) {
+                joinLeaveButton.setText("Registration Closed");
+                joinLeaveButton.setEnabled(false);
+                return;
+            }
+
+            // Open window
+            if (joined) {
+                joinLeaveButton.setText("Leave\n" + waitingListCount + " in waiting list");
+            } else {
+                joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
+            }
+            joinLeaveButton.setEnabled(true);
+        } catch (ParseException e) {
+            Log.e(TAG, "Failed to parse registration dates", e);
+            joinLeaveButton.setText("Registration Closed");
+            joinLeaveButton.setEnabled(false);
         }
-        joinLeaveButton.setEnabled(true);
     }
 
     private void joinWaitlist() {
@@ -308,5 +344,34 @@ public class EventDetailedFragment extends Fragment {
             dialogView.setOnClickListener(v -> dialog.dismiss());
         }
         dialog.show();
+    }
+
+    // Helper: check if today's date is within registration start/end (inclusive)
+    private boolean isWithinRegistrationPeriod() {
+        if (event == null) return false;
+        String startStr = event.getRegistrationStartDate();
+        String endStr = event.getRegistrationEndDate();
+        if (startStr == null || endStr == null || startStr.isEmpty() || endStr.isEmpty()) return false;
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        try {
+            Date today = truncateToDay(new Date());
+            Date start = truncateToDay(fmt.parse(startStr));
+            Date end = truncateToDay(fmt.parse(endStr));
+            if (start == null || end == null) return false;
+            return !today.before(start) && !today.after(end);
+        } catch (ParseException e) {
+            Log.e(TAG, "Failed to parse registration dates", e);
+            return false;
+        }
+    }
+
+    private Date truncateToDay(Date d) {
+        if (d == null) return null;
+        SimpleDateFormat dayFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        try {
+            return dayFmt.parse(dayFmt.format(d));
+        } catch (ParseException e) {
+            return d; // fallback
+        }
     }
 }
