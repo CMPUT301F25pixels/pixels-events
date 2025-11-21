@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:orientation="vertical"
+    android:paddingLeft="32dp"
+    android:paddingRight="32dp">
+
+    <!-- Top bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/event_backbutton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            app:srcCompat="@drawable/ic_arrow_back" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/event_qrcode_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="QR Code"
+            app:srcCompat="@drawable/ic_qr_code" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Poster -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/event_poster"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="24dp"
+                android:contentDescription="Event Poster"
+                android:scaleType="centerCrop"
+                android:src="@drawable/sample_image"
+                app:shapeAppearanceOverlay="@style/RoundedImageCorners" />
+
+            <!-- Event Title -->
+            <TextView
+                android:id="@+id/event_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Event Title"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <!-- Event Date -->
+            <TextView
+                android:id="@+id/event_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Fri, Oct 29, 2:00 PM - 6:00 PM"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="Tags:"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/eventTagsContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"></LinearLayout>
+                </HorizontalScrollView>
+
+            </LinearLayout>
+
+            <!-- Join / Leave Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/event_jlbutton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/accent_blue_darker"
+                android:text="Join\n0 in waiting list"
+                android:textColor="@color/white"
+                app:iconTint="@color/white"
+                app:strokeColor="#3B82F6" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#233155" />
+
+            <!-- About Event header -->
+            <TextView
+                android:id="@+id/event_aboutheader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="About Event:"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- About Event body -->
+            <TextView
+                android:id="@+id/event_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Event Description ..."
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+
+            <!-- Lottery header -->
+            <TextView
+                android:id="@+id/event_lotteryheader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="How the Lottery works:"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Lottery steps -->
+            <TextView
+                android:id="@+id/lottery_step1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="•  Step 1: Join the Waitlist if registration is open. \n•  Step 2: Watch for an acceptance/denial notification or check the Notifications tab for updates.\n•  Step 3: If accepted, accept or decline the invite. Otherwise, better luck next time."
+                android:textColor="@color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
+

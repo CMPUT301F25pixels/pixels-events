@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_signup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:padding="32dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_signup_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Sign Up"
+                android:textColor="@color/white"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="80dp" />
+
+            <EditText
+                android:id="@+id/signup_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Full name *"
+                android:inputType="textPersonName"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/signup_user_email"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Email address *"
+                android:inputType="textEmailAddress"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/signup_user_password"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Password *"
+                android:inputType="textPassword"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/signup_user_role"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signup_user_entrant"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Entrant"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/toggle_button_bg_tint_blue" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signup_user_organizer"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Organizer"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/toggle_button_bg_tint_blue" />
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <LinearLayout
+                android:id="@+id/signup_gender_phone_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/signup_user_gender"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/signup_gender_male"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="M"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/signup_gender_female"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="F"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/signup_gender_other"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:text="Other"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                        app:cornerRadius="8dp" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <EditText
+                    android:id="@+id/signup_user_phone"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Phone Number"
+                    android:inputType="phone"
+                    android:maxLength="15"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/signup_user_postalcode"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Postal code *"
+                android:inputType="textPostalAddress"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/signup_user_province"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Province"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <EditText
+                android:id="@+id/signup_user_city"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="City"
+                android:padding="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <Button
+                android:id="@+id/signup_user_save"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="@color/accent_blue"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Create account"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/signup_layout_signin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:text="You have account? "
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/signup_user_signin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/poppins_bold"
+                    android:padding="4dp"
+                    android:text="Sign in"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

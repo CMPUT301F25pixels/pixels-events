@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="RoundedImageCorners">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+    <style name="ActiveIndicatorStyle">
+        <item name="android:colorBackground">#4A9FFF</item>
+    </style>
+</resources>
