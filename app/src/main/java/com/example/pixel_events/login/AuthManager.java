@@ -60,11 +60,7 @@ public class AuthManager {
             return;
         }
 
-        int id = user.getUid().hashCode();
-        if (id <= 0) {
-            currentUserProfile = null;
-            return;
-        }
+        int id = DatabaseHandler.uidToId(user.getUid());
 
         DatabaseHandler.getInstance().getProfile(id,
                 (OnSuccessListener<Profile>) profile -> {

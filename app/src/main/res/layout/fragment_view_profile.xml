@@ -93,9 +93,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="Gender"
                     android:hint="Gender"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
 
                 <TextView
                     android:id="@+id/profileEmailText"
@@ -108,9 +108,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="Email"
                     android:hint="Email"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
 
                 <TextView
                     android:id="@+id/profilePhoneText"
@@ -123,9 +123,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="Phone Number"
                     android:hint="Phone Number"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
 
                 <TextView
                     android:id="@+id/profilePostalText"
@@ -138,9 +138,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="Postal Code"
                     android:hint="Postal Code"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
 
                 <TextView
                     android:id="@+id/profileProvinceText"
@@ -153,9 +153,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="Province"
                     android:hint="Province"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
 
                 <TextView
                     android:id="@+id/profileCityText"
@@ -169,9 +169,9 @@
                     android:fontFamily="@font/poppins"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:text="City"
                     android:hint="City"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"/>
             </LinearLayout>
         </LinearLayout>
 

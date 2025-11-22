@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.admin.AdminActivity;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.home.DashboardActivity;
 import com.example.pixel_events.login.AuthManager;
@@ -60,11 +61,12 @@ public class MainActivity extends AppCompatActivity {
 
             // Load user profile from database
             db.getProfile(
-                    user.getUid().hashCode(),
+                    DatabaseHandler.uidToId(user.getUid()),
                     profile -> {
                         if (profile != null) {
                             Log.d(TAG, "Profile loaded successfully for: " + profile.getUserId());
-                            showDashboardActivity();
+                            if (profile.getRole().equals("admin")) showAdminActivity();
+                            else showDashboardActivity();
                         }
                     },
                     e -> {
@@ -84,6 +86,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new LoginFragment())
                 .commit();
+    }
+
+    private void showAdminActivity() {
+        Intent intent = new Intent(this, AdminActivity.class);
+        startActivity(intent);
+        finish(); // Close MainActivity
     }
 
     private void showDashboardActivity() {

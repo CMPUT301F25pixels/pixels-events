@@ -9,8 +9,6 @@ import android.util.Patterns;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.login.AuthManager;
-import com.example.pixel_events.profile.Profile;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -42,9 +40,9 @@ public class LoginViewModel extends ViewModel {
                         if (user != null) {
                             Log.d(TAG, "Login successful: " + user.getEmail());
 
-                            // Load user profile using DatabaseHandler.getProfile (uid -> int via hashCode)
-                            int id = user.getUid().hashCode();
-                            DatabaseHandler.getInstance().getProfile(id,
+                                // Load user profile using DatabaseHandler.getProfile (uid -> positive int)
+                                int id = DatabaseHandler.uidToId(user.getUid());
+                                DatabaseHandler.getInstance().getProfile(id,
                                     profile -> {
                                         if (profile != null) {
                                             AuthManager.getInstance().setCurrentUserProfile(profile);

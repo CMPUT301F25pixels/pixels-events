@@ -85,6 +85,19 @@ public class DatabaseHandler {
         return db;
     }
 
+    /**
+     * Convert a Firebase UID string to a positive integer id used by legacy DB.
+     * Ensures the returned id is > 0.
+     */
+    public static int uidToId(String uid) {
+        if (uid == null) return 1;
+        int raw = uid.hashCode();
+        if (raw == Integer.MIN_VALUE) return Integer.MAX_VALUE;
+        int v = Math.abs(raw);
+        if (v <= 0) v = 1;
+        return v;
+    }
+
     public CollectionReference getAccountCollection() {
         return accRef;
     }
@@ -177,6 +190,34 @@ public class DatabaseHandler {
                 .delete()
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+    }
+
+    /**
+     * Fetch all profiles in AccountData collection.
+     * @param listener success callback with list of Profile objects (empty list if none)
+     * @param errorListener failure callback invoked on Firestore error
+     */
+    public void getAllProfile(OnSuccessListener<java.util.List<Profile>> listener,
+                              OnFailureListener errorListener) {
+        accRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Profile> profiles = new java.util.ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        try {
+                            Profile p = document.toObject(Profile.class);
+                            if (p != null) {
+                                profiles.add(p);
+                            }
+                        } catch (RuntimeException ex) {
+                            Log.e("DB", "Failed to deserialize Profile doc: " + document.getId(), ex);
+                        }
+                    }
+                    listener.onSuccess(profiles);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting all profiles", e);
+                    errorListener.onFailure(e);
+                });
     }
 
     // EVENT INFO FUNCTIONS

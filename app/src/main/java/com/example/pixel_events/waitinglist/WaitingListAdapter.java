@@ -55,9 +55,9 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
 
         VH(@NonNull View itemView) {
             super(itemView);
-            avatar = itemView.findViewById(R.id.eventImage);
-            title = itemView.findViewById(R.id.eventTitle);
-            subtitle = itemView.findViewById(R.id.eventTime);
+            avatar = itemView.findViewById(R.id.item_profile_image);
+            title = itemView.findViewById(R.id.item_profile_title);
+            subtitle = itemView.findViewById(R.id.item_profile_email);
         }
     }
 }
