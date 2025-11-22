@@ -3,10 +3,9 @@ package com.example.pixel_events.waitinglist;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class WaitingList {
     private int eventId;    // Identifier of the event associated with this waitlist
@@ -23,6 +22,8 @@ public class WaitingList {
         this.eventId = eventId;
         this.status = "waiting";
         this.maxWaitlistSize = maxWaitlistSize;
+        this.waitList = new ArrayList<>();
+        this.selected = new ArrayList<>();
     }
 
     // Constructor without waitlist max size
@@ -30,6 +31,8 @@ public class WaitingList {
         this.eventId = eventId;
         this.status = "waiting";
         this.maxWaitlistSize = 1000000;
+        this.waitList = new ArrayList<>();
+        this.selected = new ArrayList<>();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
@@ -38,46 +41,44 @@ public class WaitingList {
         return waitList.contains(userId);
     }
 
-    public void addEntrantInWaitList(int userId) {
+    /**
+     * Asynchronously joins the waitlist in Firestore and updates local list on success.
+     * Throws IllegalArgumentException immediately for duplicate or full list conditions.
+     */
+    public Task<Void> addEntrantInWaitList(int userId) {
+        if (waitList == null) {
+            waitList = new ArrayList<>();
+        }
         if (isUserInWaitlist(userId)) {
             throw new IllegalArgumentException(userId + " already in waitlist");
         }
         if (waitList.size() >= maxWaitlistSize) {
             throw new IllegalArgumentException("Waitlist is full. Try again later.");
         }
-        waitList.add(userId);
-        updateDatabase("waitList", waitList);
+        // Use DatabaseHandler to update remote; update local list after success
+        return DatabaseHandler.getInstance()
+                .joinWaitingList(eventId, userId)
+                .addOnSuccessListener(unused -> waitList.add(userId))
+                .addOnFailureListener(e -> Log.e("WaitingList", "Failed to join waitlist", e));
     }
 
-    public void removeEntrantInWaitList(int userId) {
-        if (!isUserInWaitlist(Integer.valueOf(userId))) {
+    /**
+     * Asynchronously removes entrant from waitlist in Firestore and updates local list on success.
+     * Throws IllegalArgumentException if user not present.
+     */
+    public Task<Void> removeEntrantInWaitList(int userId) {
+        if (waitList == null) {
+            waitList = new ArrayList<>();
+        }
+        if (!isUserInWaitlist(userId)) {
             throw new IllegalArgumentException(userId + " not present in waitlist");
         }
-        waitList.remove(userId);
-        updateDatabase("waitList", waitList);
+        return DatabaseHandler.getInstance()
+                .leaveWaitingList(eventId, userId)
+                .addOnSuccessListener(unused -> waitList.remove(Integer.valueOf(userId)))
+                .addOnFailureListener(e -> Log.e("WaitingList", "Failed to leave waitlist", e));
     }
 
-    private void updateDatabase(String fieldName, Object value)
-    {
-        // Only update database if auto-update is enabled and event has valid ID
-        if (!autoUpdateDatabase || this.eventId <= 0) {
-            return;
-        }
-
-        try {
-            Map<String, Object> updates = new HashMap<>();
-            updates.put(fieldName, value);
-
-            DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getWaitListCollection(),
-                    this.eventId, updates, error -> {
-                if (error != null) {
-                    Log.e("Event", "Failed to update " + fieldName + ": " + error);
-                }
-            });
-        } catch (Exception e) {
-            Log.e("Event", "Failed to access database for update", e);
-        }
-    }
 
     // Getters
     public int getEventId() {
