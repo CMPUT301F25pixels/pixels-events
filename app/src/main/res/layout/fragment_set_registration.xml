@@ -38,7 +38,7 @@
             android:layout_weight="1"
             android:background="@drawable/view_rounded_text"
             android:fontFamily="@font/poppins"
-            android:hint="Event Start Date"
+            android:hint="Event End Date"
             android:inputType="none"
             android:paddingLeft="16dp"
             android:textColor="@color/white"

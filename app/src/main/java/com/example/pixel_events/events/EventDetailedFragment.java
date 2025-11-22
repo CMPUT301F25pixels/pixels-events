@@ -113,6 +113,10 @@ public class EventDetailedFragment extends Fragment {
                             event = evt;
                             if (isAdded())
                                 updateUI();
+                            // Re-evaluate CTA once event dates available
+                            if (isAdded()) {
+                                requireActivity().runOnUiThread(this::renderCTA);
+                            }
                         },
                         error -> {
                             Log.e(TAG, "Error getting event: " + error);
@@ -229,10 +233,18 @@ public class EventDetailedFragment extends Fragment {
     private void renderCTA() {
         if (!isAdded() || joinLeaveButton == null)
             return;
-        
+        // If event not yet loaded, keep disabled loading state
+        if (event == null) {
+            joinLeaveButton.setText("Loading registration…");
+            joinLeaveButton.setEnabled(false);
+            return;
+        }
+
         // Determine registration state
-        String startStr = event != null ? event.getRegistrationStartDate() : null;
-        String endStr = event != null ? event.getRegistrationEndDate() : null;
+        String startStr = event.getRegistrationStartDate();
+        String endStr = event.getRegistrationEndDate();
+        if (startStr != null) startStr = startStr.trim();
+        if (endStr != null) endStr = endStr.trim();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         try {
             Date today = truncateToDay(new Date());
@@ -240,7 +252,7 @@ public class EventDetailedFragment extends Fragment {
             Date end = (endStr != null && !endStr.isEmpty()) ? truncateToDay(fmt.parse(endStr)) : null;
 
             if (start == null || end == null) {
-                joinLeaveButton.setText("Registration Closed");
+                joinLeaveButton.setText("Registration dates missing");
                 joinLeaveButton.setEnabled(false);
                 return;
             }
@@ -264,8 +276,8 @@ public class EventDetailedFragment extends Fragment {
             }
             joinLeaveButton.setEnabled(true);
         } catch (ParseException e) {
-            Log.e(TAG, "Failed to parse registration dates", e);
-            joinLeaveButton.setText("Registration Closed");
+            Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
+            joinLeaveButton.setText("Registration dates invalid");
             joinLeaveButton.setEnabled(false);
         }
     }
@@ -344,25 +356,6 @@ public class EventDetailedFragment extends Fragment {
             dialogView.setOnClickListener(v -> dialog.dismiss());
         }
         dialog.show();
-    }
-
-    // Helper: check if today's date is within registration start/end (inclusive)
-    private boolean isWithinRegistrationPeriod() {
-        if (event == null) return false;
-        String startStr = event.getRegistrationStartDate();
-        String endStr = event.getRegistrationEndDate();
-        if (startStr == null || endStr == null || startStr.isEmpty() || endStr.isEmpty()) return false;
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        try {
-            Date today = truncateToDay(new Date());
-            Date start = truncateToDay(fmt.parse(startStr));
-            Date end = truncateToDay(fmt.parse(endStr));
-            if (start == null || end == null) return false;
-            return !today.before(start) && !today.after(end);
-        } catch (ParseException e) {
-            Log.e(TAG, "Failed to parse registration dates", e);
-            return false;
-        }
     }
 
     private Date truncateToDay(Date d) {
