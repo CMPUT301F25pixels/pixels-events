@@ -1,6 +1,5 @@
 package com.example.pixel_events.waitinglist;
 
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,18 +12,20 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.app.AlertDialog.Builder;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.profile.ViewProfileFragment;
+import com.example.pixel_events.utils.SavingData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WaitingListFragment extends Fragment {
     private WaitingList waitingList;
-    private ImageButton backButton;
+    private ImageButton backButton, shareButton;
     private int eventId = -1;
     private DatabaseHandler db;
 
@@ -51,6 +52,7 @@ public class WaitingListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_waitinglist, container, false);
         db = DatabaseHandler.getInstance();
         backButton = view.findViewById(R.id.waitinglist_backbutton);
+        shareButton = view.findViewById(R.id.waitinglist_exportButton);
 
         recyclerView = view.findViewById(R.id.waitinglist_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -81,6 +83,20 @@ public class WaitingListFragment extends Fragment {
         backButton.setOnClickListener(v ->
             requireActivity().getSupportFragmentManager().popBackStack()
         );
+
+        shareButton.setOnClickListener(v -> {
+            if (waitingList == null || waitingList.getWaitList() == null || waitingList.getWaitList().isEmpty()) {
+                showInfoDialog("Nothing to export");
+                return;
+            }
+            // Use utility to export
+            new SavingData(waitingList.getWaitList())
+                    .exportProfiles(requireContext(), eventId, message -> {
+                        if (isAdded()) {
+                            requireActivity().runOnUiThread(() -> showInfoDialog(message));
+                        }
+                    });
+        });
 
         return view;
     }
@@ -114,5 +130,13 @@ public class WaitingListFragment extends Fragment {
                         }
                     }, e -> Log.e("WaitingListFragment", "Failed to load profile " + pid, e));
         }
+    }
+
+    private void showInfoDialog(String message) {
+        if (!isAdded()) return;
+        new Builder(requireContext())
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
     }
 }
