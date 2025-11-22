@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="32dp"
+    android:paddingRight="32dp"
+    android:background="@color/dark_bg">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteX="32dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/editprofile_imageView"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/ic_launcher_foreground"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/editprofile_imageView"
+                app:layout_constraintTop_toTopOf="@+id/editprofile_imageView">
+
+                <EditText
+                    android:id="@+id/editprofile_user_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="40dp"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Full name"
+                    android:inputType="textPersonName"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <EditText
+                    android:id="@+id/editprofile_user_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Email address"
+                    android:inputType="textEmailAddress"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/editprofile_user_name" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/editprofile_user_role"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/editprofile_user_email"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/editprofile_user_entrant"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="Entrant"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/toggle_button_bg_tint_blue" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/editprofile_user_organizer"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="Organizer"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/toggle_button_bg_tint_blue" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <LinearLayout
+                    android:id="@+id/editprofile_gender_phone_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/editprofile_user_role">
+
+                    <!-- Gender Toggle -->
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/editprofile_user_gender"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="0dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/editprofile_gender_male"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="56dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:text="M"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                            app:cornerRadius="8dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/editprofile_gender_female"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="56dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:text="F"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                            app:cornerRadius="8dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/editprofile_gender_other"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="56dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:text="Other"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/toggle_button_bg_tint_blue"
+                            app:cornerRadius="8dp" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
+                    <!-- Phone Field -->
+                    <EditText
+                        android:id="@+id/editprofile_user_phone"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/view_rounded_text"
+                        android:fontFamily="@font/poppins"
+                        android:hint="Phone Number"
+                        android:inputType="phone"
+                        android:maxLength="15"
+                        android:padding="16dp"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
+                <!-- Address fields -->
+                <EditText
+                    android:id="@+id/editprofile_user_postalcode"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Postal Code"
+                    android:inputType="textPostalAddress"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary" />
+
+                <EditText
+                    android:id="@+id/editprofile_user_province"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Province"
+                    android:inputType="text"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary" />
+
+                <EditText
+                    android:id="@+id/editprofile_user_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/view_rounded_text"
+                    android:fontFamily="@font/poppins"
+                    android:hint="City"
+                    android:inputType="text"
+                    android:paddingLeft="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_secondary" />
+
+                <Button
+                    android:id="@+id/editprofile_user_save"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="32dp"
+                    android:backgroundTint="@color/accent_blue"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Edit"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/editprofile_user_city" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageButton
+        android:id="@+id/editprofile_backbutton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+</androidx.constraintlayout.widget.ConstraintLayout>

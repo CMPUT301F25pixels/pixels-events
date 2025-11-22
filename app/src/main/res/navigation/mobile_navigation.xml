@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_dashboard">
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.example.pixel_events.home.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_myevents"
+        android:name="com.example.pixel_events.events.MyEventFragment"
+        android:label="My Events"
+        tools:layout="@layout/fragment_myevents" />
+
+    <fragment
+        android:id="@+id/navigation_scanner"
+        android:name="com.example.pixel_events.qrcode.ScannerFragment"
+        android:label="QR Code Scanner"
+        tools:layout="@layout/fragment_scanner" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.pixel_events.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>

@@ -3,58 +3,92 @@ package com.example.pixel_events;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.entrant.EventDetailsLauncherActivity;
-import com.example.pixel_events.events.EventActivity;
-import com.example.pixel_events.events.EventsListActivity;
+import com.example.pixel_events.home.DashboardActivity;
+import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.login.LoginFragment;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private DatabaseHandler db;
-    private Button addFormButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        // Verify Firebase initialization (already done in PixelEventsApplication)
         try {
             FirebaseApp app = FirebaseApp.getInstance();
             Log.d(TAG, "Firebase is initialized: " + (app != null));
-            
-            // Verify Firestore connection
+
             FirebaseFirestore.getInstance();
             Log.d(TAG, "Firestore instance retrieved successfully");
         } catch (Exception e) {
             Log.e(TAG, "Firebase initialization error", e);
         }
 
-        // Init DatabaseHandler (singleton pattern)
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
-        addFormButton = findViewById(R.id.addEvent);
+        try {
+            AuthManager.getInstance().getAuth().getFirebaseAuthSettings()
+                    .setAppVerificationDisabledForTesting(true);
+            Log.d(TAG, "App verification disabled for testing");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to disable app verification", e);
+        }
 
-        addFormButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, EventDetailsLauncherActivity.class);
-            startActivity(intent);
-        });
+        // ✅ Firebase Auth check - Auto login
+        checkAuthState();
+    }
+
+    private void checkAuthState() {
+        AuthManager authManager = AuthManager.getInstance();
+        FirebaseUser user = authManager.getCurrentFirebaseUser();
+        if (user == null) {
+            Log.d(TAG, "No user logged in — navigating to LoginFragment");
+            showLoginFragment();
+        } else {
+            Log.d(TAG, "User already logged in: " + user.getEmail() + " — loading profile");
+
+            // Load user profile from database
+            db.getProfile(
+                    user.getUid().hashCode(),
+                    profile -> {
+                        if (profile != null) {
+                            Log.d(TAG, "Profile loaded successfully for: " + profile.getUserId());
+                            showDashboardActivity();
+                        }
+                    },
+                    e -> {
+                        Log.e(TAG, "Failed to load profile: " + e);
+                        Toast.makeText(MainActivity.this,
+                                "Failed to load profile. Please login again.",
+                                Toast.LENGTH_LONG).show();
+
+                        // Sign out and show login
+                        authManager.signOut();
+                        showLoginFragment();
+                    });
+        }
+    }
+
+    private void showLoginFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new LoginFragment())
+                .commit();
+    }
+
+    private void showDashboardActivity() {
+        Intent intent = new Intent(this, DashboardActivity.class);
+        startActivity(intent);
+        finish(); // Close MainActivity so the user can't go back to it
     }
 }
