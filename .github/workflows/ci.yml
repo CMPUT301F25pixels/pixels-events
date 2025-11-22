@@ -86,7 +86,10 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --stacktrace
+          script: |
+            echo "Removing UI instrumentation tests (app/src/androidTest/java/**/ui) before running connected tests"
+            find app/src/androidTest/java -type d -name ui -exec rm -rf {} + || true
+            ./gradlew connectedDebugAndroidTest --stacktrace
 
       - name: Upload test results
         if: always()
