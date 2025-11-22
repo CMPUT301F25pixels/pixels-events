@@ -3,6 +3,7 @@ package com.example.pixel_events.profile;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.utils.Validator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,42 +12,49 @@ import java.util.List;
 import java.util.Map;
 
 public class Profile {
-    private int id;                              // Unique userID
-    private String accType;                      // { user, org, admin }
-    private String userName;                     // User entered name
-    private Date DOB;                            // Date of birth
-    private String gender;                       // { male, female, other }
-    private String email;                        // e-mail address
-    private String city;                         // city of residence
-    private String province;                     // province of residence
-    private int phoneNum;                        // user's phone number
-    private List<Integer> eventsUpcoming;        // list of upcoming eventID
-    private List<Integer> eventsPart;            // list of past eventID that user participated in
-    private List<Integer> eventsNPart;           // list of past eventID that user did not participate in
-    private List<Boolean> notify;                // [All Notif, Win notif, Lose Notif]
+    private int userId; // Unique userId (for backwards compatibility)
+    private String role; // { user, org, admin }
+    private String userName; // User entered name
+    private String gender; // { male, female, other }
+    private String email; // e-mail address
+    private String phoneNum; // user's phone number
+    private String postalcode; // user's postal code
+    private String province; // user's province
+    private String city; // user's city
+    private List<Integer> eventsUpcoming; // list of upcoming eventID
+    private List<Integer> eventsPart; // list of past eventID that user participated in
+    private List<Integer> eventsNPart; // list of past eventID that user did not participate in
+    private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]
+    private boolean autoUpdateDatabase = true;
 
-    /**
-     * Empty constructor for Firebase
-     */
-    public Profile() {}
+    public Profile() {
+    }
 
-    /**
-     * Initialize
-     */
-    public Profile(int id, String accType, String userName, Date DOB, String gender,
-                   String email, String city, String province, int phoneNum,
-                   List<Boolean> notify) {
+    // New constructor with address fields
+    public Profile(int userid, String role, String userName, String gender,
+            String email, String phoneNum, String postalcode,
+            String province, String city, List<Boolean> notify) {
+        // Validate required fields
+        Validator.validateNotEmpty(role, "Role");
+        Validator.validateNotEmpty(userName, "User Name");
+        Validator.validateNotEmpty(gender, "Gender");
+        Validator.validateNotEmpty(email, "Email");
+
+        if (userid <= 0) {
+            throw new IllegalArgumentException("User ID must be positive");
+        }
+
         // Assign all variables
-        this.id = id;
-        this.accType = accType;
+        this.userId = userid;
+        this.role = role;
         this.userName = userName;
-        this.DOB = DOB;
         this.gender = gender;
         this.email = email;
-        this.city = city;
-        this.province = province;
-        this.phoneNum = phoneNum;
         this.notify = notify;
+        this.phoneNum = phoneNum;
+        this.postalcode = postalcode;
+        this.province = province;
+        this.city = city;
 
         // assign an empty events list
         this.eventsUpcoming = new ArrayList<>();
@@ -54,109 +62,159 @@ public class Profile {
         this.eventsNPart = new ArrayList<>();
     }
 
-    // Getters
-    public int getId() { return id; }
-    public String getAccType() { return accType; }
-    public String getUserName() { return userName; }
-    public Date getDOB() { return DOB; }
-    public String getGender() { return gender; }
-    public String getEmail() { return email; }
-    public String getCity() { return city; }
-    public String getProvince() { return province; }
-    public int getPhoneNum() { return phoneNum; }
-    public List<Integer> getEventsUpcoming() { return eventsUpcoming; }
-    public List<Integer> getEventsPart() { return eventsPart; }
-    public List<Integer> getEventsNPart() { return eventsNPart; }
-    public List<Boolean> getNotify() { return notify; }
+    public void setAutoUpdateDatabase(boolean autoUpdate) {
+        this.autoUpdateDatabase = autoUpdate;
+    }
 
-    // Setters - These update both the local field and the database
-    public void setId(int id) { 
-        this.id = id; 
-        updateDatabase("id", id);
+    public void saveToDatabase() {
+        if (!autoUpdateDatabase) {
+            return;
+        }
+        try {
+            DatabaseHandler db = DatabaseHandler.getInstance();
+            db.addAcc(this);
+        } catch (Exception e) {
+            Log.e("Event", "Failed to save event to database", e);
+        }
     }
-    
-    public void setAccType(String accType) { 
-        this.accType = accType; 
-        updateDatabase("accType", accType);
+
+    private void updateDatabase(String fieldName, Object value) {
+        if (!autoUpdateDatabase || this.userId <= 0) {
+            return;
+        }
+
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put(fieldName, value);
+
+            DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getAccountCollection(),
+                    this.userId, updates, error -> {
+                        if (error != null) {
+                            Log.e("Profile", "Failed to update " + fieldName + ": " + error);
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e("Profile", "Failed to access database for update", e);
+        }
+
     }
-    
-    public void setUserName(String userName) { 
-        this.userName = userName; 
+
+    // Getters
+    public int getUserId() {
+        return userId;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhoneNum() {
+        return phoneNum;
+    }
+
+    public List<Integer> getEventsUpcoming() {
+        return eventsUpcoming;
+    }
+
+    public List<Integer> getEventsPart() {
+        return eventsPart;
+    }
+
+    public List<Integer> getEventsNPart() {
+        return eventsNPart;
+    }
+
+    public List<Boolean> getNotify() {
+        return notify;
+    }
+
+    public String getPostalcode() {
+        return postalcode;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    // Setters / Modify Profile
+    public void setUserId(int userId) {
+        this.userId = userId;
+        updateDatabase("id", userId);
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+        updateDatabase("role", role);
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
         updateDatabase("userName", userName);
     }
-    
-    public void setDOB(Date DOB) { 
-        this.DOB = DOB; 
-        updateDatabase("DOB", DOB);
-    }
-    
-    public void setGender(String gender) { 
-        this.gender = gender; 
+
+    public void setGender(String gender) {
+        this.gender = gender;
         updateDatabase("gender", gender);
     }
-    
-    public void setEmail(String email) { 
-        this.email = email; 
+
+    public void setEmail(String email) {
+        this.email = email;
         updateDatabase("email", email);
     }
-    
-    public void setCity(String city) { 
-        this.city = city; 
-        updateDatabase("city", city);
-    }
-    
-    public void setProvince(String province) { 
-        this.province = province; 
-        updateDatabase("province", province);
-    }
-    
-    public void setPhoneNum(int phoneNum) { 
-        this.phoneNum = phoneNum; 
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
         updateDatabase("phoneNum", phoneNum);
     }
-    
-    public void setEventsUpcoming(List<Integer> eventsUpcoming) { 
-        this.eventsUpcoming = eventsUpcoming; 
-        updateDatabase("eventsUpcoming", eventsUpcoming);
-    }
-    
-    public void setEventsPart(List<Integer> eventsPart) { 
-        this.eventsPart = eventsPart; 
-        updateDatabase("eventsPart", eventsPart);
-    }
-    
-    public void setEventsNPart(List<Integer> eventsNPart) { 
-        this.eventsNPart = eventsNPart; 
-        updateDatabase("eventsNPart", eventsNPart);
-    }
-    
-    public void setNotify(List<Boolean> notify) { 
-        this.notify = notify; 
-        updateDatabase("notify", notify);
-    }
-    
-    /**
-     * Helper method to update a single field in the database
-     * @param fieldName The name of the field to update
-     * @param value The new value for the field
-     */
-    private void updateDatabase(String fieldName, Object value) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put(fieldName, value);
-        
-        DatabaseHandler.getInstance().modifyAcc(this.id, updates, error -> {
-            if (error != null) {
-                Log.e("Profile", "Failed to update " + fieldName + ": " + error);
-            }
-        });
+
+    public void setPostalcode(String postalcode) {
+        this.postalcode = postalcode;
+        updateDatabase("postalcode", postalcode);
     }
 
-    /**
-     * Create and save profile to database
-     * @param db DatabaseHandler reference
-     */
-    private void createProfile(DatabaseHandler db) {
-        db.addAcc(this.id, this.accType, this.userName, this.DOB, this.gender,
-                this.email, this.city, this.province, this.phoneNum, this.notify);
+    public void setProvince(String province) {
+        this.province = province;
+        updateDatabase("province", province);
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+        updateDatabase("city", city);
+    }
+
+    public void setEventsUpcoming(List<Integer> eventsUpcoming) {
+        this.eventsUpcoming = eventsUpcoming;
+        updateDatabase("eventsUpcoming", eventsUpcoming);
+    }
+
+    public void setEventsPart(List<Integer> eventsPart) {
+        this.eventsPart = eventsPart;
+        updateDatabase("eventsPart", eventsPart);
+    }
+
+    public void setEventsNPart(List<Integer> eventsNPart) {
+        this.eventsNPart = eventsNPart;
+        updateDatabase("eventsNPart", eventsNPart);
+    }
+
+    public void setNotify(List<Boolean> notify) {
+        this.notify = notify;
+        updateDatabase("notify", notify);
     }
 }
