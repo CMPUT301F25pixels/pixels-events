@@ -21,7 +21,6 @@ import java.util.List;
 
 public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Holder> {
     public interface Listener { void onDelete(Event e); }
-
     private final List<Event> data = new ArrayList<>();
     private final Listener listener;
 
@@ -61,10 +60,6 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ho
         } else {
             holder.image.setImageResource(R.drawable.sample_image);
         }
-
-        holder.delete.setOnClickListener(v -> {
-            if (listener != null) listener.onDelete(e);
-        });
     }
 
     @Override

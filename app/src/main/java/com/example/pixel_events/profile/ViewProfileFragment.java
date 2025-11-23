@@ -78,10 +78,29 @@ public class ViewProfileFragment extends Fragment {
     }
 
     private void replaceFragment(Fragment fragment) {
+        // Determine the correct container at runtime (admin overlay preferred)
+        int containerId;
+        if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
+            containerId = R.id.overlay_fragment_container;
+        } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+            containerId = R.id.nav_host_fragment_activity_admin;
+        } else {
+            // Fallback for non-admin context (original dashboard host)
+            containerId = R.id.nav_host_fragment_activity_dashboard;
+        }
+
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.nav_host_fragment_activity_dashboard, fragment)
+                .replace(containerId, fragment)
                 .addToBackStack(null)
                 .commit();
+
+        // Ensure overlay becomes visible if used
+        if (containerId == R.id.overlay_fragment_container) {
+            View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
+            if (overlay != null && overlay.getVisibility() != View.VISIBLE) {
+                overlay.setVisibility(View.VISIBLE);
+            }
+        }
     }
 }
