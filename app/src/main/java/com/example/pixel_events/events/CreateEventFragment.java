@@ -232,7 +232,7 @@ public class CreateEventFragment extends Fragment {
 
         String imageURL = "";
         if (bitmap != null) {
-            imageURL = ImageConversion.bitmapToBase64(bitmap);
+            imageURL = ImageConversion.bitmapToCompressedBase64(bitmap);
         } else if (isEditMode && existingEvent != null && existingEvent.getImageUrl() != null) {
             imageURL = existingEvent.getImageUrl();
         }

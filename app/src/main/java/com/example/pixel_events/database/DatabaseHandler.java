@@ -7,6 +7,8 @@ import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -190,6 +192,42 @@ public class DatabaseHandler {
                 .delete()
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+
+        // Also try to delete from Firebase Auth if it is the current user
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && uidToId(currentUser.getUid()) == userID) {
+            currentUser.delete()
+                    .addOnSuccessListener(aVoid -> Log.d("DB", "Deleted user from Firebase Auth"))
+                    .addOnFailureListener(e -> Log.e("DB", "Failed to delete user from Firebase Auth", e));
+        }
+
+        // Delete events organized by this user
+        eventRef.whereEqualTo("organizerId", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        try {
+                            int eventId = Integer.parseInt(doc.getId());
+                            deleteEvent(eventId);
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                    }
+                });
+
+        // Remove user from all waitlists and selected lists
+        waitListRef.whereArrayContains("waitList", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().update("waitList", FieldValue.arrayRemove(userID));
+                    }
+                });
+
+        waitListRef.whereArrayContains("selected", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().update("selected", FieldValue.arrayRemove(userID));
+                    }
+                });
     }
 
     /**
