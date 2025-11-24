@@ -277,8 +277,6 @@ public class Event {
             registrationStartDate, this.registrationEndDate,
             this.eventStartTime, this.eventEndTime);
 
-        this.registrationStartDate = registrationStartDate;
-        updateDatabase("registrationStartDate", registrationStartDate);
     }
 
     public void setRegistrationEndDate(String registrationEndDate)
