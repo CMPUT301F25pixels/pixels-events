@@ -6,6 +6,8 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WaitingList {
     private int eventId;    // Identifier of the event associated with this waitlist
@@ -96,4 +98,50 @@ public class WaitingList {
     public int getMaxWaitlistSize() {
         return maxWaitlistSize;
     }
+
+    // Setters / Modify waitlist
+    public void setEventId(int eventId)
+    {
+        if (eventId <= 0) {
+            throw new IllegalArgumentException("Event ID must be positive");
+        }
+        this.eventId = eventId;
+        updateDatabase("eventId", eventId);
+    }
+
+    public void setStatus(String status)
+    {
+        this.status = status;
+        updateDatabase("status", status);
+    }
+
+    public void setMaxWaitlistSize(int maxWaitlistSize)
+    {
+        this.maxWaitlistSize = maxWaitlistSize;
+        updateDatabase("maxWaitlistSize", maxWaitlistSize);
+    }
+
+    private void updateDatabase(String fieldName, Object value)
+    {
+        // Only update database if auto-update is enabled and event has valid ID
+        if (!autoUpdateDatabase || this.eventId <= 0) {
+            return;
+        }
+
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put(fieldName, value);
+
+            DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getWaitListCollection(),
+                    this.eventId, updates, error -> {
+                if (error != null) {
+                    Log.e("WaitingList", "Failed to update " + fieldName + ": " + error);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("WaitingList", "Failed to access database for update", e);
+        }
+    }
+
+
 }

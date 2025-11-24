@@ -43,7 +43,7 @@ public class EventDetailedFragment extends Fragment {
     private int userId; // String form of current profile id
     private int eventId = -1;
     private boolean joined = false;
-    private int waitingListCount = 0;
+    private int waitingListCount = 0, waitingListMaxCount = 0;
 
     // UI elements
     private ShapeableImageView poster;
@@ -139,6 +139,7 @@ public class EventDetailedFragment extends Fragment {
                         }
                         joined = (userId != -1 && ids.contains(userId));
                         waitingListCount = ids.size();
+                        waitingListMaxCount = waitList.getMaxWaitlistSize();
                     } else {
                         joined = false;
                         waitingListCount = 0;
@@ -157,6 +158,7 @@ public class EventDetailedFragment extends Fragment {
                 }
                 joined = (userId != -1 && ids.contains(userId));
                 waitingListCount = ids.size();
+                waitingListMaxCount = waitList.getMaxWaitlistSize();
                 renderCTA();
             }
         }
@@ -271,10 +273,16 @@ public class EventDetailedFragment extends Fragment {
             // Open window
             if (joined) {
                 joinLeaveButton.setText("Leave\n" + waitingListCount + " in waiting list");
+                joinLeaveButton.setEnabled(true);
             } else {
+                if (waitingListCount >= waitingListMaxCount) {
+                    joinLeaveButton.setText("Waitlist full");
+                    joinLeaveButton.setEnabled(false);
+                    return;
+                }
                 joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
+                joinLeaveButton.setEnabled(waitingListCount < waitingListMaxCount);
             }
-            joinLeaveButton.setEnabled(true);
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
             joinLeaveButton.setText("Registration dates invalid");

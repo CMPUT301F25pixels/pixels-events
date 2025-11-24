@@ -24,9 +24,7 @@ import com.example.pixel_events.utils.Validator;
 import java.util.Calendar;
 
 public class SetRegistrationFragment extends BottomSheetDialogFragment {
-
     private static final String ARG_EVENT_ID = "eventId";
-
     private TextInputEditText regStartDateField;
     private TextInputEditText regEndDateField;
     private Button doneButton;
