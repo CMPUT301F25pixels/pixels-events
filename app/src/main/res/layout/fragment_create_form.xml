@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:paddingLeft="32dp"
+    android:paddingRight="32dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- Event Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/eventFormPosterImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="Event Poster"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_image"
+            app:shapeAppearanceOverlay="@style/RoundedImageCorners" />
+
+        <Button
+            android:id="@+id/eventFormUploadImage"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:backgroundTint="@color/accent_blue"
+            android:fontFamily="@font/poppins_bold"
+            android:text="Upload Image"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Event Title -->
+        <EditText
+            android:id="@+id/eventFormTitle"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Event Title"
+            android:inputType="text"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+
+        <!-- Location -->
+        <EditText
+            android:id="@+id/eventFormLocation"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Location"
+            android:inputType="text"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormRegStartDate"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Reg. Start Date"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormRegEndDate"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Reg. End Date"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+        </LinearLayout>
+
+
+        <!-- Registration note -->
+        <TextView
+            android:id="@+id/registrationNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Registrations are from 00:00am to 11:59pm"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:textStyle="italic" />
+
+        <!-- Dates -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormStartDate"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event Start Date"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormEndDate"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event End Date"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- Event Times (new) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormStartTime"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event Start Time"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/eventFormEndTime"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event End Time"
+                android:inputType="none"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- Description -->
+        <EditText
+            android:id="@+id/eventFormDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Event Description"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+
+        <!-- Fee and Capacity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/eventFormFee"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event Fee"
+                android:inputType="numberDecimal"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/eventFormCapacity"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:background="@drawable/view_rounded_text"
+                android:fontFamily="@font/poppins"
+                android:hint="Event Capacity"
+                android:inputType="number"
+                android:paddingLeft="16dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- Toggles -->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/eventFormGeoLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:paddingLeft="16dp"
+            android:text="Enable Geolocation"
+            android:textColor="@color/white"
+            app:thumbTint="#26A69A"
+            app:trackTint="#5C6BC0" />
+
+        <!-- Tags    -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/eventFormTagGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:singleSelection="false"
+            app:selectionRequired="false"
+            app:chipSpacing="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagAdventure"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Adventure"
+                android:textColor="@color/white"
+                app:checkedIconVisible="false"
+                app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagCultural"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Cultural"
+                app:checkedIconVisible="false"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagReligious"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Religious"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/accent_blue"
+                app:checkedIconVisible="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagEducational"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Educational"
+                android:textColor="@color/white"
+                app:checkedIconVisible="false"
+                app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagWorkshop"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Workshop"
+                app:checkedIconVisible="false"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/eventFormTagNetworking"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:text="Networking"
+                android:textColor="@color/white"
+                app:checkedIconVisible="false"
+                app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/eventFormCancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#333333"
+                android:text="Cancel"
+                android:textColor="@color/white" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/eventFormAdd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="#1D9BF0"
+                android:text="Done"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

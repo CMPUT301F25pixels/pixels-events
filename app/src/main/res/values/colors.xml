@@ -12,18 +12,17 @@
 
     <!-- Accent Colors -->
     <color name="accent_blue">#4A9FFF</color>
-    <color name="accent_blue_light">#3679F7</color>
-    <color name="accent_blue_lighter">#74AEFF</color>
+    <color name="accent_blue_dark">#1E6CF6</color>
+    <color name="accent_blue_light">#74AEFF</color>
+    <color name="accent_blue_darker">#2B44BA</color>
     <color name="user_input">#74AEFF</color>
     <color name="cancel_button">#777</color>
     <color name="placeholder_gray">#3A3F4E</color>
 
     <!-- Status Colors -->
-    <color name="bottom_drawer">#2B44BA</color>
     <color name="status_selected">#4CAF50</color>
     <color name="status_not_selected">#F44336</color>
     <color name="status_pending">#FF9800</color>
-
 
     <!-- Background Colors -->
     <color name="search_bg">#1A1F2E</color>
