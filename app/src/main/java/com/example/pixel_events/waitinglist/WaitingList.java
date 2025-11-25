@@ -103,29 +103,20 @@ public class WaitingList {
     }
 
     // Setters / Modify waitlist
-    public void setEventId(int eventId)
-    {
-        if (eventId <= 0) {
-            throw new IllegalArgumentException("Event ID must be positive");
-        }
-        this.eventId = eventId;
-        updateDatabase("eventId", eventId);
-    }
-
-    public void setStatus(String status)
-    {
+    public void setStatus(String status) {
         this.status = status;
         updateDatabase("status", status);
     }
 
-    public void setMaxWaitlistSize(int maxWaitlistSize)
-    {
+    public void setMaxWaitlistSize(int maxWaitlistSize) {
+        if (maxWaitlistSize <= 0) {
+            throw new IllegalArgumentException("Max waitlist size must be positive");
+        }
         this.maxWaitlistSize = maxWaitlistSize;
         updateDatabase("maxWaitlistSize", maxWaitlistSize);
     }
 
-    private void updateDatabase(String fieldName, Object value)
-    {
+    private void updateDatabase(String fieldName, Object value) {
         // Only update database if auto-update is enabled and event has valid ID
         if (!autoUpdateDatabase || this.eventId <= 0) {
             return;
@@ -145,6 +136,4 @@ public class WaitingList {
             Log.e("WaitingList", "Failed to access database for update", e);
         }
     }
-
-
 }

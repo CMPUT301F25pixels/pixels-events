@@ -252,6 +252,8 @@ public class CreateEventFragment extends Fragment {
             Event event = new Event(eventId, organizerId, title, imageURL, location,
                     capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
 
+            event.saveToDatabase();
+
             android.util.Log.d("CreateEventFrag",
                     (isEditMode ? "Updated" : "Created") + " event: ID=" + eventId + " Title=" + title);
 

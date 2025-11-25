@@ -18,7 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class SetWaitlistFragment extends BottomSheetDialogFragment {
     private static final String ARG_EVENT_ID = "eventId";
-    private TextInputEditText setWailtistSizeField;
+    private TextInputEditText setWaitlistSizeField;
     private Button doneButton;
     private int eventId = -1;
     private WaitingList waitingList;
@@ -42,7 +42,7 @@ public class SetWaitlistFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        setWailtistSizeField = view.findViewById(R.id.inputWaitlistSize);
+        setWaitlistSizeField = view.findViewById(R.id.inputWaitlistSize);
         doneButton = view.findViewById(R.id.inputWaitlistButtonDone);
 
         if (getArguments() != null) {
@@ -60,7 +60,7 @@ public class SetWaitlistFragment extends BottomSheetDialogFragment {
             waitingList = wl;
             if (isAdded() && waitingList != null) {
                 requireActivity().runOnUiThread(() -> {
-                    setWailtistSizeField.setText(String.valueOf(waitingList.getMaxWaitlistSize()));
+                    setWaitlistSizeField.setText(String.valueOf(waitingList.getMaxWaitlistSize()));
                 });
             }
         }, err -> {
@@ -80,18 +80,33 @@ public class SetWaitlistFragment extends BottomSheetDialogFragment {
     public int getTheme() {
         return R.style.ThemeOverlay_Pixelevents_BottomSheetDialog;
     }
+
     private void onSave() {
         if (waitingList == null) {
             Toast.makeText(requireContext(), "Waiting List not loaded", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String waitlistSize = setWailtistSizeField.getText() != null ? setWailtistSizeField.getText().toString().trim() : "";
+        String waitlistSize = setWaitlistSizeField.getText() != null ? setWaitlistSizeField.getText().toString().trim() : "";
 
-
+        if (waitlistSize.isEmpty()) {
+            Toast.makeText(requireContext(), "Please enter a waitlist size.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int size;
+        try {
+            size = Integer.parseInt(waitlistSize);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(requireContext(), "Waitlist size must be a valid number.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (size <= 0) {
+            Toast.makeText(requireContext(), "Waitlist size must be a positive number.", Toast.LENGTH_LONG).show();
+            return;
+        }
         try{
             // Save to DB via setters (they update DB internally)
-            waitingList.setMaxWaitlistSize(Integer.parseInt(waitlistSize));
+            waitingList.setMaxWaitlistSize(size);
 
             // Notify parent (EventFragment) via FragmentResult API so it can refresh UI
             Bundle result = new Bundle();
