@@ -28,7 +28,7 @@ public class EventFragment extends Fragment {
     private int eventId = -1;
     private DatabaseHandler db;
     private Button previewButton, notificationPreferencesButton, viewWaitlistButton,
-            deleteEventButton, editEventButton, setRegistrationButton;
+            deleteEventButton, editEventButton, setRegistrationButton, setWaitlistButton;
     private TextView eventTextView;
     private ImageView eventImageView;
     private ImageButton backButton;
@@ -85,6 +85,7 @@ public class EventFragment extends Fragment {
         deleteEventButton = view.findViewById(R.id.event_fragment_deleteevent);
         editEventButton = view.findViewById(R.id.event_fragment_edit_page);
         setRegistrationButton = view.findViewById(R.id.event_fragment_set_registration);
+        setWaitlistButton = view.findViewById(R.id.event_fragment_SetWaitlistSize);
         eventTextView = view.findViewById(R.id.event_fragment_title);
         eventImageView = view.findViewById(R.id.event_fragment_poster);
         backButton = view.findViewById(R.id.event_fragment_backbutton);
@@ -120,6 +121,11 @@ public class EventFragment extends Fragment {
         setRegistrationButton.setOnClickListener(v -> {
             SetRegistrationFragment.newInstance(eventId)
                     .show(getParentFragmentManager(), "setRegistration");
+        });
+
+        setWaitlistButton.setOnClickListener(v -> {
+            SetWaitlistFragment.newInstance(eventId)
+                    .show(getParentFragmentManager(), "setWaitlistSize");
         });
 
         deleteEventButton.setOnClickListener(v -> {

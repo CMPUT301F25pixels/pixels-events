@@ -6,7 +6,10 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class WaitingList {
     private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
@@ -55,7 +58,7 @@ public class WaitingList {
             return Tasks.forException(new IllegalArgumentException(userId + " already in waitlist"));
         }
         if (waitList.size() >= maxWaitlistSize) {
-            throw new IllegalArgumentException("Waitlist is full. Try again later.");
+            throw new IllegalArgumentException("Waitlist is full. Maximum capacity of " + maxWaitlistSize + " reached.");
         }
         // Use DatabaseHandler to update remote; update local list after success
         return DatabaseHandler.getInstance()
@@ -97,5 +100,40 @@ public class WaitingList {
     }
     public int getMaxWaitlistSize() {
         return maxWaitlistSize;
+    }
+
+    // Setters / Modify waitlist
+    public void setStatus(String status) {
+        this.status = status;
+        updateDatabase("status", status);
+    }
+
+    public void setMaxWaitlistSize(int maxWaitlistSize) {
+        if (maxWaitlistSize <= 0) {
+            throw new IllegalArgumentException("Max waitlist size must be positive");
+        }
+        this.maxWaitlistSize = maxWaitlistSize;
+        updateDatabase("maxWaitlistSize", maxWaitlistSize);
+    }
+
+    private void updateDatabase(String fieldName, Object value) {
+        // Only update database if auto-update is enabled and event has valid ID
+        if (!autoUpdateDatabase || this.eventId <= 0) {
+            return;
+        }
+
+        try {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put(fieldName, value);
+
+            DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getWaitListCollection(),
+                    this.eventId, updates, error -> {
+                if (error != null) {
+                    Log.e("WaitingList", "Failed to update " + fieldName + ": " + error);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("WaitingList", "Failed to access database for update", e);
+        }
     }
 }

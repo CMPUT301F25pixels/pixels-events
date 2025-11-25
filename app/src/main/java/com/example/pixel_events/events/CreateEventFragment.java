@@ -252,10 +252,10 @@ public class CreateEventFragment extends Fragment {
             Event event = new Event(eventId, organizerId, title, imageURL, location,
                     capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
 
+            event.saveToDatabase();
+
             android.util.Log.d("CreateEventFrag",
                     (isEditMode ? "Updated" : "Created") + " event: ID=" + eventId + " Title=" + title);
-
-            event.saveToDatabase();
 
             android.util.Log.d("CreateEventFrag", "Event saved to database successfully");
 
@@ -263,12 +263,13 @@ public class CreateEventFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
 
             requireActivity().runOnUiThread(() -> {
-                androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
-                try {
-                    fm.popBackStackImmediate();
-                } catch (IllegalStateException ignored) {
-                }
+                if (!isAdded()) return;
+                androidx.fragment.app.FragmentManager fm = getParentFragmentManager();
+                
+                // Pop the CreateEventFragment to go back to the previous screen
+                fm.popBackStack();
 
+                // Then navigate to the details fragment
                 androidx.fragment.app.Fragment detail = new EventDetailedFragment(eventId);
                 fm.beginTransaction()
                         .replace(R.id.nav_host_fragment_activity_dashboard, detail)

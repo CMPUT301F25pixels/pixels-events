@@ -104,7 +104,6 @@ public class Event {
         this.registrationEndDate = registrationEndDate;
         this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
         this.waitingList = new WaitingList(eventId);
-        saveToDatabase();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
