@@ -108,25 +108,6 @@ public class AdminProfileFragment extends Fragment {
 		db.deleteAcc(userId);
 		(entrant ? entrants : organizers).remove(p);
 
-		// Cleanup: Remove user from all waiting lists and delete events if organizer
-		db.getAllEvents(events -> {
-			if (events != null) {
-				for (Event e : events) {
-					if (e == null) continue;
-					// If user is the organizer, delete the event
-					if (e.getOrganizerId() == userId) {
-						db.deleteEvent(e.getEventId());
-					} else {
-						// Otherwise, remove user from the waiting list AND selected list of this event
-						db.getWaitListCollection().document(String.valueOf(e.getEventId()))
-								.update("waitList", com.google.firebase.firestore.FieldValue.arrayRemove(userId),
-										"selected", com.google.firebase.firestore.FieldValue.arrayRemove(userId))
-								.addOnFailureListener(err -> Log.e("AdminProfileFragment", "Failed to remove user from waitlist " + e.getEventId(), err));
-					}
-				}
-			}
-		}, err -> Log.e("AdminProfileFragment", "Failed to cleanup events for user " + userId, err));
-
 		if (isAdded()) requireActivity().runOnUiThread(() -> {
 			int checked = (toggleGroup != null) ? toggleGroup.getCheckedButtonId() : R.id.admin_profiles_entrants;
 			if (checked == R.id.admin_profiles_organizers) adapter.updateData(organizers); else adapter.updateData(entrants);
