@@ -14,9 +14,9 @@ import java.util.Map;
 public class WaitingList {
     private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
     private int eventId;    // Identifier of the event associated with this waitlist
-    private String status;     // Status of the entrant in the waitlist (e.g., "waiting", "selected")
-    private ArrayList<Integer> waitList; // The WaitingList
-    private ArrayList<Integer> selected;
+    private String status;     // Status of the event ("waiting", "selected")
+    private ArrayList<WaitlistUser> waitList; // The WaitingList
+    private ArrayList<WaitlistUser> selected;
     private int maxWaitlistSize;
     private boolean autoUpdateDatabase = true;
 
@@ -43,7 +43,12 @@ public class WaitingList {
     public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
 
     public boolean isUserInWaitlist(int userId) {
-        return waitList.contains(userId);
+        for (WaitlistUser user : waitList) {
+            if (user.getUserId() == userId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -60,10 +65,11 @@ public class WaitingList {
         if (waitList.size() >= maxWaitlistSize) {
             throw new IllegalArgumentException("Waitlist is full. Maximum capacity of " + maxWaitlistSize + " reached.");
         }
+        WaitlistUser newUser = new WaitlistUser(userId, 0); // 0 for undecided
         // Use DatabaseHandler to update remote; update local list after success
         return DatabaseHandler.getInstance()
-                .joinWaitingList(eventId, userId)
-                .addOnSuccessListener(unused -> waitList.add(userId))
+                .joinWaitingList(eventId, userId) // This needs to be adapted for WaitlistUser
+                .addOnSuccessListener(unused -> waitList.add(newUser))
                 .addOnFailureListener(e -> Log.e("WaitingList", "Failed to join waitlist", e));
     }
 
@@ -80,7 +86,14 @@ public class WaitingList {
         }
         return DatabaseHandler.getInstance()
                 .leaveWaitingList(eventId, userId)
-                .addOnSuccessListener(unused -> waitList.remove(Integer.valueOf(userId)))
+                .addOnSuccessListener(unused -> {
+                    for (int i = 0; i < waitList.size(); i++) {
+                        if (waitList.get(i).getUserId() == userId) {
+                            waitList.remove(i);
+                            break;
+                        }
+                    }
+                })
                 .addOnFailureListener(e -> Log.e("WaitingList", "Failed to leave waitlist", e));
     }
 
@@ -92,10 +105,10 @@ public class WaitingList {
     public String getStatus() {
         return status;
     }
-    public ArrayList<Integer> getSelected() {
+    public ArrayList<WaitlistUser> getSelected() {
         return selected;
     }
-    public ArrayList<Integer> getWaitList() {
+    public ArrayList<WaitlistUser> getWaitList() {
         return waitList;
     }
     public int getMaxWaitlistSize() {
@@ -106,6 +119,23 @@ public class WaitingList {
     public void setStatus(String status) {
         this.status = status;
         updateDatabase("status", status);
+    }
+
+    public void updateUserStatus(int userId, int newStatus) {
+        for (WaitlistUser user : waitList) {
+            if (user.getUserId() == userId) {
+                user.setStatus(newStatus);
+                // TODO: Update this specific user in the database
+                break;
+            }
+        }
+        for (WaitlistUser user : selected) {
+            if (user.getUserId() == userId) {
+                user.setStatus(newStatus);
+                // TODO: Update this specific user in the database
+                break;
+            }
+        }
     }
 
     public void setMaxWaitlistSize(int maxWaitlistSize) {

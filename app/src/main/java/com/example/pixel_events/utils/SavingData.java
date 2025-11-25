@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.profile.Profile;
+import com.example.pixel_events.waitinglist.WaitlistUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -27,8 +28,11 @@ public class SavingData {
     private final List<Profile> loadedProfiles = Collections.synchronizedList(new ArrayList<>());
     private final DatabaseHandler db = DatabaseHandler.getInstance();
 
-    public SavingData(List<Integer> profileIds) {
-        this.profileIds = profileIds != null ? profileIds : Collections.emptyList();
+    public SavingData(List<WaitlistUser> profiles) {
+        this.profileIds = Collections.emptyList();
+        for (WaitlistUser ids: profiles){
+            this.profileIds.add(ids.getUserId());
+        }
     }
 
     /**
