@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
 import android.util.Log;
+
+import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;
@@ -60,6 +63,10 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ho
         } else {
             holder.image.setImageResource(R.drawable.sample_image);
         }
+
+        holder.delete.setVisibility(View.VISIBLE);
+        
+        holder.delete.setOnClickListener(v -> listener.onDelete(e));
     }
 
     @Override

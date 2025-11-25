@@ -33,9 +33,8 @@ public class SavingData {
 
     /**
      * Asynchronously loads profiles then writes a CSV.
-     *
-     * @param context  Android context for storage path
-     * @param eventId  event identifier used in filename
+     * @param context Android context for storage path
+     * @param eventId event identifier used in filename
      * @param callback receives final status message (success path or error / nothing to export)
      */
     public void exportProfiles(Context context, int eventId, Consumer<String> callback) {

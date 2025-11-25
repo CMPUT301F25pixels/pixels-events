@@ -53,7 +53,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="Delete profile"
         android:src="@android:drawable/ic_menu_delete"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:tint="@color/red" />
 
 </LinearLayout>

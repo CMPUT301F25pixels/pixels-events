@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
 import java.util.ArrayList;
 
@@ -51,7 +52,7 @@ public class WaitingList {
             waitList = new ArrayList<>();
         }
         if (isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + " already in waitlist");
+            return Tasks.forException(new IllegalArgumentException(userId + " already in waitlist"));
         }
         if (waitList.size() >= maxWaitlistSize) {
             throw new IllegalArgumentException("Waitlist is full. Try again later.");
@@ -72,7 +73,7 @@ public class WaitingList {
             waitList = new ArrayList<>();
         }
         if (!isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + " not present in waitlist");
+            return Tasks.forException(new IllegalArgumentException(userId + " not present in waitlist"));
         }
         return DatabaseHandler.getInstance()
                 .leaveWaitingList(eventId, userId)

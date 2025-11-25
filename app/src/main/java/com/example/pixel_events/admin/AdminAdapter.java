@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.home.DashboardAdapter;
+import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;
@@ -22,7 +24,6 @@ import java.util.Objects;
 public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.EventViewHolder> {
     private List<Event> events;
     private final OnEventClickListener listener;
-
     public interface OnEventClickListener {
         void onEventClick(Event event);
         void onDeleteClick(Event event);
@@ -63,6 +64,7 @@ public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.EventViewHol
         private TextView eventTime;
         private TextView eventLocation;
         private LinearLayout tagsContainer;
+        private android.widget.ImageButton deleteButton;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,6 +73,7 @@ public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.EventViewHol
             eventTime = itemView.findViewById(R.id.eventListTime);
             eventLocation = itemView.findViewById(R.id.eventListLocation);
             tagsContainer = itemView.findViewById(R.id.eventTagsContainer);
+            deleteButton = itemView.findViewById(R.id.admin_event_delete);
         }
 
         public void bind(Event event, OnEventClickListener listener) {
@@ -86,13 +89,15 @@ public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.EventViewHol
             // Display tags
             displayTags(event);
 
+            if (deleteButton != null) {
+                deleteButton.setVisibility(View.VISIBLE);
+                deleteButton.setOnClickListener(v -> {
+                    if (listener != null) listener.onDeleteClick(event);
+                });
+            }
+
             itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onEventClick(event);
-            });
-            // Provide delete action via long click for now
-            itemView.setOnLongClickListener(v -> {
-                if (listener != null) listener.onDeleteClick(event);
-                return true;
             });
         }
 

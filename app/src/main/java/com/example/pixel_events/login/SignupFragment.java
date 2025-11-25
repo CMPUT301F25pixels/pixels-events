@@ -114,7 +114,7 @@ public class SignupFragment extends Fragment {
             String province = provinceEditText.getText().toString().trim();
             String city = cityEditText.getText().toString().trim();
 
-            // Create user account
+            // Create user account (do NOT pop the fragment yet; wait until account/profile creation completes)
             createAccount(name, email, password, role, gender, phoneNumber, postalcode, province, city);
         });
 

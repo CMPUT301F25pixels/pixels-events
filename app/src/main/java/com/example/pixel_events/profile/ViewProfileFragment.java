@@ -69,7 +69,30 @@ public class ViewProfileFragment extends Fragment {
         if (!Objects.equals(profile.getCity(), "")) cityText.setText(profile.getCity());
 
         backButton.setOnClickListener(v -> {
-            requireActivity().getSupportFragmentManager().popBackStack();
+            // Get activity before doing anything that might detach the fragment.
+            final androidx.fragment.app.FragmentActivity activity = getActivity();
+            if (activity == null || !isAdded()) {
+                // Fragment is not attached or has been removed, so we can't do anything.
+                return;
+            }
+
+            // Pop back stack synchronously so the previous fragment is shown immediately
+            androidx.fragment.app.FragmentManager fm = activity.getSupportFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStackImmediate();
+            } else {
+                // Fall back to normal back behaviour
+                activity.onBackPressed();
+            }
+
+            // If using an overlay container, hide it when navigating back, but only if no other fragments are in it.
+            View overlay = activity.findViewById(R.id.overlay_fragment_container);
+            if (overlay != null && overlay.getVisibility() == View.VISIBLE) {
+                // After popping, check if the container is now empty.
+                if (fm.findFragmentById(R.id.overlay_fragment_container) == null) {
+                    overlay.setVisibility(View.GONE);
+                }
+            }
         });
 
         editButton.setOnClickListener(v -> {
@@ -89,11 +112,19 @@ public class ViewProfileFragment extends Fragment {
             containerId = R.id.nav_host_fragment_activity_dashboard;
         }
 
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(containerId, fragment)
-                .addToBackStack(null)
-                .commit();
+        androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
+        androidx.fragment.app.FragmentTransaction ft = fm.beginTransaction();
+
+        // If a fragment currently occupies the container, hide it instead of replacing.
+        Fragment current = fm.findFragmentById(containerId);
+        if (current != null) {
+            ft.hide(current);
+        }
+
+        // Add the new fragment on top and add transaction to back stack so pop returns to previous fragment.
+        ft.add(containerId, fragment);
+        ft.addToBackStack(null);
+        ft.commit();
 
         // Ensure overlay becomes visible if used
         if (containerId == R.id.overlay_fragment_container) {

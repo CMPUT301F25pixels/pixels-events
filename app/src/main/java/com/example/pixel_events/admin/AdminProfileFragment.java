@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,8 +103,11 @@ public class AdminProfileFragment extends Fragment {
 	}
 
 	private void deleteProfile(Profile p, boolean entrant) {
-		DatabaseHandler.getInstance().deleteAcc(p.getUserId());
+		DatabaseHandler db = DatabaseHandler.getInstance();
+		int userId = p.getUserId();
+		db.deleteAcc(userId);
 		(entrant ? entrants : organizers).remove(p);
+
 		if (isAdded()) requireActivity().runOnUiThread(() -> {
 			int checked = (toggleGroup != null) ? toggleGroup.getCheckedButtonId() : R.id.admin_profiles_entrants;
 			if (checked == R.id.admin_profiles_organizers) adapter.updateData(organizers); else adapter.updateData(entrants);
@@ -123,6 +127,8 @@ public class AdminProfileFragment extends Fragment {
 			Profile p = data.get(pos);
 			h.name.setText(p.getUserName());
 			h.email.setText(p.getEmail());
+			h.delete.setVisibility(View.VISIBLE);
+
 			h.itemView.setOnClickListener(v -> listener.onClick(p));
 			h.delete.setOnClickListener(v -> listener.onDelete(p));
 		}
