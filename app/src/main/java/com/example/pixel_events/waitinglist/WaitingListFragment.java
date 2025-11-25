@@ -1,6 +1,5 @@
 package com.example.pixel_events.waitinglist;
 
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,11 +59,27 @@ public class WaitingListFragment extends Fragment {
         adapter = new WaitingListAdapter(profiles, profile -> {
             // Open ViewProfileFragment when user taps a profile
             if (isAdded()) {
+                int containerId;
+                if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
+                    containerId = R.id.overlay_fragment_container;
+                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+                    containerId = R.id.nav_host_fragment_activity_admin;
+                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
+                    containerId = R.id.nav_host_fragment_activity_dashboard;
+                } else {
+                    containerId = android.R.id.content;
+                }
+
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.nav_host_fragment_activity_dashboard, new ViewProfileFragment(profile))
+                        .replace(containerId, new ViewProfileFragment(profile))
                         .addToBackStack(null)
                         .commit();
+                
+                if (containerId == R.id.overlay_fragment_container) {
+                    View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
+                    if (overlay != null) overlay.setVisibility(View.VISIBLE);
+                }
             }
         });
         recyclerView.setAdapter(adapter);

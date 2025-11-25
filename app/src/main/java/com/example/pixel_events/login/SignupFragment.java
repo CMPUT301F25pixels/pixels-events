@@ -116,10 +116,6 @@ public class SignupFragment extends Fragment {
 
             // Create user account
             createAccount(name, email, password, role, gender, phoneNumber, postalcode, province, city);
-
-            if (getActivity() != null) {
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
         });
 
         // Navigate to login
@@ -151,7 +147,7 @@ public class SignupFragment extends Fragment {
     private void createAccount(String name, String email, String password, String role, String gender, String phone
     , String postalcode, String province, String city) {
         // Show loading state
-        binding.signupUserSave.setEnabled(false);
+        if (binding != null) binding.signupUserSave.setEnabled(false);
 
         // Create Firebase Authentication account
         auth.createUserWithEmailAndPassword(email, password)
@@ -165,7 +161,7 @@ public class SignupFragment extends Fragment {
                             createUserProfile(uid, name, email, role, gender, phone, postalcode, province, city);
                         }
                     } else {
-                        binding.signupUserSave.setEnabled(true);
+                        if (binding != null) binding.signupUserSave.setEnabled(true);
                         Log.e(TAG, "Signup failed", task.getException());
                         Toast.makeText(getContext(),
                                 "Signup failed: " + task.getException().getMessage(),
@@ -183,7 +179,7 @@ public class SignupFragment extends Fragment {
         notify.add(true); // Lose notifications
 
         try {
-            int userId = uid.hashCode();
+            int userId = DatabaseHandler.uidToId(uid);
 
             Profile profile = new Profile(
                     userId,
@@ -198,9 +194,12 @@ public class SignupFragment extends Fragment {
                     notify);
 
             profile.saveToDatabase();
-
+            // After initiating profile save, navigate back to previous screen on UI thread
+            if (isAdded()) {
+                requireActivity().runOnUiThread(() -> requireActivity().getSupportFragmentManager().popBackStack());
+            }
         } catch (Exception e) {
-            binding.signupUserSave.setEnabled(true);
+            if (binding != null) binding.signupUserSave.setEnabled(true);
             Log.e(TAG, "Error creating profile", e);
             Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
 

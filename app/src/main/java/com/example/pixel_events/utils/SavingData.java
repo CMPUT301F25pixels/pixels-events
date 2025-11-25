@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 public class SavingData {
     private final List<Integer> profileIds;
-    private final List<Profile> loadedProfiles = new ArrayList<>();
+    private final List<Profile> loadedProfiles = Collections.synchronizedList(new ArrayList<>());
     private final DatabaseHandler db = DatabaseHandler.getInstance();
 
     public SavingData(List<Integer> profileIds) {
@@ -33,8 +33,9 @@ public class SavingData {
 
     /**
      * Asynchronously loads profiles then writes a CSV.
-     * @param context Android context for storage path
-     * @param eventId event identifier used in filename
+     *
+     * @param context  Android context for storage path
+     * @param eventId  event identifier used in filename
      * @param callback receives final status message (success path or error / nothing to export)
      */
     public void exportProfiles(Context context, int eventId, Consumer<String> callback) {
@@ -107,7 +108,9 @@ public class SavingData {
         if (val == null) return "null";
         String s = String.valueOf(val).trim();
         if (s.isEmpty()) return "null";
-        if (s.contains("\"")) s = s.replace("\"", "\"\"");
+        if (s.contains("\"") || s.contains(",") || s.contains("\n")) {
+            s = s.replace("\"", "\"\"");
+        }
         if (s.contains(",") || s.contains("\n")) {
             return "\"" + s + "\"";
         }
