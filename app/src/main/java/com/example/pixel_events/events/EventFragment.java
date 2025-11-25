@@ -28,7 +28,7 @@ public class EventFragment extends Fragment {
     private int eventId = -1;
     private DatabaseHandler db;
     private Button previewButton, notificationPreferencesButton, viewWaitlistButton,
-            deleteEventButton;
+            deleteEventButton, editEventButton, setRegistrationButton;
     private TextView eventTextView;
     private ImageView eventImageView;
     private ImageButton backButton;
@@ -83,6 +83,8 @@ public class EventFragment extends Fragment {
         notificationPreferencesButton = view.findViewById(R.id.event_fragment_notificationspreferences);
         viewWaitlistButton = view.findViewById(R.id.event_fragment_waitinglist);
         deleteEventButton = view.findViewById(R.id.event_fragment_deleteevent);
+        editEventButton = view.findViewById(R.id.event_fragment_edit_page);
+        setRegistrationButton = view.findViewById(R.id.event_fragment_set_registration);
         eventTextView = view.findViewById(R.id.event_fragment_title);
         eventImageView = view.findViewById(R.id.event_fragment_poster);
         backButton = view.findViewById(R.id.event_fragment_backbutton);
@@ -104,6 +106,20 @@ public class EventFragment extends Fragment {
 
         notificationPreferencesButton.setOnClickListener(v -> {
             replaceFragment(new EventNotificationFragment());
+        });
+
+        editEventButton.setOnClickListener(v -> {
+            Fragment fragment = new CreateEventFragment();
+            Bundle args = new Bundle();
+            args.putBoolean("isEditMode", true);
+            args.putInt("eventId", eventId);
+            fragment.setArguments(args);
+            replaceFragment(fragment);
+        });
+
+        setRegistrationButton.setOnClickListener(v -> {
+            SetRegistrationFragment.newInstance(eventId)
+                    .show(getParentFragmentManager(), "setRegistration");
         });
 
         deleteEventButton.setOnClickListener(v -> {

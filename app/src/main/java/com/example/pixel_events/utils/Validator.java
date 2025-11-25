@@ -47,17 +47,17 @@ public class Validator {
             // Today's date at midnight
             Date today = dateFmt.parse(dateFmt.format(new Date()));
 
-            if (startDateObj != null && !startDateObj.after(today)) {
-                throw new IllegalArgumentException("Event start date must be after today");
+            if (startDateObj != null && startDateObj.before(today)) {
+                throw new IllegalArgumentException("Event start date must be today or after today");
             }
-            if (endDateObj != null && !endDateObj.after(today)) {
-                throw new IllegalArgumentException("Event end date must be after today");
+            if (endDateObj != null && endDateObj.before(today)) {
+                throw new IllegalArgumentException("Event end date must be today or after today");
             }
             if (regStartObj != null && regStartObj.before(today)) {
-                throw new IllegalArgumentException("Registration start date must be after today");
+                throw new IllegalArgumentException("Registration start date must be today or after today");
             }
             if (regEndObj != null && regEndObj.before(today)) {
-                throw new IllegalArgumentException("Registration end date must be after today");
+                throw new IllegalArgumentException("Registration end date must be today or after today");
             }
 
             // End must be after start when both present

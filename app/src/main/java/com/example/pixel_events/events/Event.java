@@ -163,9 +163,19 @@ public class Event {
     public String getDescription() {
         return description;
     }
+
+    public String getFullDescription(){
+        String desc = description;
+        desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + " from " + eventStartTime + " onwards to " + eventEndTime + ".";
+        desc += "\n\nThe registration date starts from " + registrationStartDate + " to " + registrationEndDate + ".";
+        desc += "\n\nThe event has a capacity of " + capacity + " people.";
+        desc += "\n\nRegister now to increase your chances of joining the event.";
+        return desc;
+    }
     public int getOrganizerId() {
         return organizerId;
     }
+
     public String getQrCode() {
         return qrCode;
     }
@@ -262,7 +272,13 @@ public class Event {
     }
 
     public void setRegistrationStartDate(String registrationStartDate) {
+        Validator.validateNotEmpty(registrationStartDate, "Registration Start Date");
+        Validator.validateDateRelations(this.eventStartDate, this.eventEndDate,
+            registrationStartDate, this.registrationEndDate,
+            this.eventStartTime, this.eventEndTime);
 
+        this.registrationStartDate = registrationStartDate;
+        updateDatabase("registrationStartDate", registrationStartDate);
     }
 
     public void setRegistrationEndDate(String registrationEndDate)
