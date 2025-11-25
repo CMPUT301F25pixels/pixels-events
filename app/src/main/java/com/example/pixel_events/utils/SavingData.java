@@ -109,10 +109,11 @@ public class SavingData {
         String s = String.valueOf(val).trim();
         if (s.isEmpty()) return "null";
         if (s.contains("\"") || s.contains(",") || s.contains("\n")) {
-            s = s.replace("\"", "\"\"");}
+            s = s.replace("\"", "\"\"");
+        }
         if (s.contains(",") || s.contains("\n")) {
             return "\"" + s + "\"";
         }
         return s;
-        }
     }
+}

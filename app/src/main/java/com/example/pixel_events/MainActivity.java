@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private DatabaseHandler db;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to disable app verification", e);
         }
 
-        // ✅ Firebase Auth check - Auto login
         checkAuthState();
     }
 
