@@ -173,9 +173,6 @@
                     android:hint="City"
                     android:textColor="@color/white" />
             </LinearLayout>
-
-
-
         </LinearLayout>
 
     </ScrollView>
