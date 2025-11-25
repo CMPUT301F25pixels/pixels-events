@@ -4,12 +4,15 @@ import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class WaitingList {
+    private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
     private int eventId;    // Identifier of the event associated with this waitlist
     private String status;     // Status of the entrant in the waitlist (e.g., "waiting", "selected")
     private ArrayList<Integer> waitList; // The WaitingList
@@ -32,7 +35,7 @@ public class WaitingList {
     public WaitingList(int eventId) {
         this.eventId = eventId;
         this.status = "waiting";
-        this.maxWaitlistSize = 1000000;
+        this.maxWaitlistSize = DEFAULT_MAX_WAITLIST_SIZE;
         this.waitList = new ArrayList<>();
         this.selected = new ArrayList<>();
     }
@@ -52,7 +55,7 @@ public class WaitingList {
             waitList = new ArrayList<>();
         }
         if (isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + " already in waitlist");
+            return Tasks.forException(new IllegalArgumentException(userId + " already in waitlist"));
         }
         if (waitList.size() >= maxWaitlistSize) {
             throw new IllegalArgumentException("Waitlist is full. Maximum capacity of " + maxWaitlistSize + " reached.");
@@ -73,7 +76,7 @@ public class WaitingList {
             waitList = new ArrayList<>();
         }
         if (!isUserInWaitlist(userId)) {
-            throw new IllegalArgumentException(userId + " not present in waitlist");
+            return Tasks.forException(new IllegalArgumentException(userId + " not present in waitlist"));
         }
         return DatabaseHandler.getInstance()
                 .leaveWaitingList(eventId, userId)
