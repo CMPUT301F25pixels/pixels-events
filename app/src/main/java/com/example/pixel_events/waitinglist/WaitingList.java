@@ -8,6 +8,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 
 public class WaitingList {
+    private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
     private int eventId;    // Identifier of the event associated with this waitlist
     private String status;     // Status of the entrant in the waitlist (e.g., "waiting", "selected")
     private ArrayList<Integer> waitList; // The WaitingList
@@ -30,7 +31,7 @@ public class WaitingList {
     public WaitingList(int eventId) {
         this.eventId = eventId;
         this.status = "waiting";
-        this.maxWaitlistSize = 1000000;
+        this.maxWaitlistSize = DEFAULT_MAX_WAITLIST_SIZE;
         this.waitList = new ArrayList<>();
         this.selected = new ArrayList<>();
     }
