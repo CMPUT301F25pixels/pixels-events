@@ -1,5 +1,6 @@
 package com.example.pixel_events.waitinglist;
 
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;

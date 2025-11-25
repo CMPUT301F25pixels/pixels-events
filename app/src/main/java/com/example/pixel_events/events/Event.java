@@ -166,7 +166,7 @@ public class Event {
 
     public String getFullDescription(){
         String desc = description;
-        desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + "from "+ eventStartTime + " onwards to " + eventEndTime + ".";
+        desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + " from " + eventStartTime + " onwards to " + eventEndTime + ".";
         desc += "\n\nThe registration date starts from " + registrationStartDate + " to " + registrationEndDate + ".";
         desc += "\n\nThe event has a capacity of " + capacity + " people.";
         desc += "\n\nRegister now to increase your chances of joining the event.";
