@@ -55,7 +55,7 @@ public class WaitingList {
             throw new IllegalArgumentException(userId + " already in waitlist");
         }
         if (waitList.size() >= maxWaitlistSize) {
-            throw new IllegalArgumentException("Waitlist is full. Try again later.");
+            throw new IllegalArgumentException("Waitlist is full. Maximum capacity of " + maxWaitlistSize + " reached.");
         }
         // Use DatabaseHandler to update remote; update local list after success
         return DatabaseHandler.getInstance()

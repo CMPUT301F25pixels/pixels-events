@@ -281,7 +281,7 @@ public class EventDetailedFragment extends Fragment {
                     return;
                 }
                 joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
-                joinLeaveButton.setEnabled(waitingListCount < waitingListMaxCount);
+                joinLeaveButton.setEnabled(true);
             }
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
