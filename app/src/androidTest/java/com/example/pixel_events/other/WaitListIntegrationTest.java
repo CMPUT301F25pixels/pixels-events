@@ -1,4 +1,4 @@
-package com.example.pixel_events.waitlist;
+package com.example.pixel_events.other;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

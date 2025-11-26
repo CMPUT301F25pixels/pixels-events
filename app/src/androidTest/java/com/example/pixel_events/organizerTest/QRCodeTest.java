@@ -1,4 +1,4 @@
-package com.example.pixel_events.qr;
+package com.example.pixel_events.organizerTest;
 
 import android.graphics.Bitmap;
 

@@ -1,4 +1,4 @@
-package com.example.pixel_events.database;
+package com.example.pixel_events.other;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import com.google.firebase.FirebaseApp;

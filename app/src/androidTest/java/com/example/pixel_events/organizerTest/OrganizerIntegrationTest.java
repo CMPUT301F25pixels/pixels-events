@@ -1,4 +1,4 @@
-package com.example.pixel_events.organizer;
+package com.example.pixel_events.organizerTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

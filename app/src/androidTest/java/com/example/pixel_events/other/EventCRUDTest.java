@@ -1,10 +1,11 @@
-package com.example.pixel_events.events;
+package com.example.pixel_events.other;
 
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.events.Event;
 import com.google.firebase.FirebaseApp;
 
 import org.junit.Before;

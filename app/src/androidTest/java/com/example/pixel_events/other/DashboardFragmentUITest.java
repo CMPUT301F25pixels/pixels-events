@@ -1,4 +1,4 @@
-package com.example.pixel_events.ui;
+package com.example.pixel_events.other;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
