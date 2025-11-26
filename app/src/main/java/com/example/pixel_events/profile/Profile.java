@@ -25,6 +25,8 @@ public class Profile {
     private List<Integer> eventsPart; // list of past eventID that user participated in
     private List<Integer> eventsNPart; // list of past eventID that user did not participate in
     private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]
+    private Double latitude;
+    private Double longitude;
     private boolean autoUpdateDatabase = true;
 
     public Profile() {
@@ -217,4 +219,22 @@ public class Profile {
         this.notify = notify;
         updateDatabase("notify", notify);
     }
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+        updateDatabase("latitude", latitude);
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+        updateDatabase("longitude", longitude);
+    }
+
 }

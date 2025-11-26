@@ -14,6 +14,11 @@ import com.example.pixel_events.login.LoginFragment;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.content.pm.PackageManager;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -53,17 +58,22 @@ public class MainActivity extends AppCompatActivity {
         AuthManager authManager = AuthManager.getInstance();
         FirebaseUser user = authManager.getCurrentFirebaseUser();
         if (user == null) {
-            Log.d(TAG, "No user logged in — navigating to LoginFragment");
+            // ... existing code ...
             showLoginFragment();
         } else {
-            Log.d(TAG, "User already logged in: " + user.getEmail() + " — loading profile");
-
-            // Load user profile from database
+            // ... existing code ...
             db.getProfile(
                     user.getUid().hashCode(),
                     profile -> {
                         if (profile != null) {
-                            Log.d(TAG, "Profile loaded successfully for: " + profile.getUserId());
+                            Log.d(TAG, "Profile loaded successfully");
+
+                            // CRITICAL: Set the profile in AuthManager immediately
+                            AuthManager.getInstance().setCurrentUserProfile(profile);
+
+                            // NEW: Update Location automatically
+                            fetchUserLocation();
+
                             showDashboardActivity();
                         }
                     },
@@ -78,6 +88,32 @@ public class MainActivity extends AppCompatActivity {
                         showLoginFragment();
                     });
         }
+    }
+
+    private void fetchUserLocation() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission not granted? Request it.
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+            return;
+        }
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    if (location != null) {
+                        com.example.pixel_events.profile.Profile p =
+                                com.example.pixel_events.login.AuthManager.getInstance().getCurrentUserProfile();
+
+                        if (p != null) {
+                            // This automatically updates Firebase because of Profile.java logic
+                            p.setLatitude(location.getLatitude());
+                            p.setLongitude(location.getLongitude());
+                            Log.d(TAG, "Location updated: " + location.getLatitude() + ", " + location.getLongitude());
+                        }
+                    }
+                });
     }
 
     private void showLoginFragment() {

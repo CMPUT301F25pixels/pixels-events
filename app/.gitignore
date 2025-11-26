@@ -1,1 +1,34 @@
+# Ignore
+*.iml
+.idea/
+.vscode/
+/.idea
+
+# Ignore Gradle files
+.gradle
+/local.properties
+
+# Ignore OS-specific files
+.DS_Store
+
+# Ignore build output
 /build
+/captures
+.externalNativeBuild
+.cxx
+.log
+
+# Ignore additional IntelliJ settings
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# QR Feature documentation
+QR_FEATURE_README.md
+
+# Services
+/app/google-services.json
+
