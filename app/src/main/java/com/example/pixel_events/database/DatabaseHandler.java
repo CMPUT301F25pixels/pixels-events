@@ -92,11 +92,14 @@ public class DatabaseHandler {
      * Ensures the returned id is > 0.
      */
     public static int uidToId(String uid) {
-        if (uid == null) return 1;
+        if (uid == null)
+            return 1;
         int raw = uid.hashCode();
-        if (raw == Integer.MIN_VALUE) return Integer.MAX_VALUE;
+        if (raw == Integer.MIN_VALUE)
+            return Integer.MAX_VALUE;
         int v = Math.abs(raw);
-        if (v <= 0) v = 1;
+        if (v <= 0)
+            v = 1;
         return v;
     }
 
@@ -188,55 +191,113 @@ public class DatabaseHandler {
     }
 
     public void deleteAcc(int userID) {
-        accRef.document(String.valueOf(userID))
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
-                .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
-
-        // Also try to delete from Firebase Auth if it is the current user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null && uidToId(currentUser.getUid()) == userID) {
-            currentUser.delete()
-                    .addOnSuccessListener(aVoid -> Log.d("DB", "Deleted user from Firebase Auth"))
-                    .addOnFailureListener(e -> Log.e("DB", "Failed to delete user from Firebase Auth", e));
-        }
-
-        // Delete events organized by this user
+        // 1) Delete events organized by this user
         eventRef.whereEqualTo("organizerId", userID).get()
                 .addOnSuccessListener(querySnapshot -> {
                     for (QueryDocumentSnapshot doc : querySnapshot) {
                         try {
                             int eventId = Integer.parseInt(doc.getId());
                             deleteEvent(eventId);
-                        } catch (NumberFormatException e) {
-                            // ignore
+                        } catch (NumberFormatException ignored) {
                         }
                     }
                 });
 
-        // Remove user from all waitlists and selected lists
-        waitListRef.whereArrayContains("waitList", userID).get()
+        // 2) Remove user from waitlists and redraw if they had accepted
+        waitListRef.get()
                 .addOnSuccessListener(querySnapshot -> {
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        doc.getReference().update("waitList", FieldValue.arrayRemove(userID));
-                    }
-                });
+                    java.util.List<com.google.android.gms.tasks.Task<Void>> removals = new java.util.ArrayList<>();
+                    java.util.List<Integer> redrawEvents = new java.util.ArrayList<>();
 
-        waitListRef.whereArrayContains("selected", userID).get()
-                .addOnSuccessListener(querySnapshot -> {
                     for (QueryDocumentSnapshot doc : querySnapshot) {
-                        doc.getReference().update("selected", FieldValue.arrayRemove(userID));
+                        int eventId;
+                        try {
+                            eventId = Integer.parseInt(doc.getId());
+                        } catch (NumberFormatException ex) {
+                            continue;
+                        }
+
+                        // Coerce to WaitingList for simple inspection
+                        WaitingList wl = safeMapWaitingList(doc);
+                        if (wl == null || wl.getWaitList() == null)
+                            continue;
+
+                        boolean containsUser = false;
+                        boolean accepted = false;
+                        for (com.example.pixel_events.waitinglist.WaitlistUser u : wl.getWaitList()) {
+                            if (u.getUserId() == userID) {
+                                containsUser = true;
+                                if (u.getStatus() == 2)
+                                    accepted = true;
+                                break;
+                            }
+                        }
+
+                        if (containsUser) {
+                            removals.add(leaveWaitingList(eventId, userID));
+                            if (accepted)
+                                redrawEvents.add(eventId);
+                        }
                     }
+
+                    Tasks.whenAll(removals).addOnSuccessListener(unused -> {
+                        // Trigger redraws for freed accepted slots
+                        for (Integer eid : redrawEvents) {
+                            getWaitingList(eid, wl -> {
+                                if (wl != null) {
+                                    wl.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                                        @Override
+                                        public void onSuccess(int n) {
+                                            Log.d("DB", "Redrew lottery for " + eid + "; selected=" + n);
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Log.e("DB", "Redraw failed for " + eid, e);
+                                        }
+                                    });
+                                }
+                            }, e -> Log.e("DB", "Failed to load waitlist for redraw: " + eid, e));
+                        }
+
+                        // 3) Delete account document
+                        accRef.document(String.valueOf(userID)).delete()
+                                .addOnSuccessListener(unused2 -> Log.d("DB", "Deleted user: " + userID))
+                                .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+
+                        // 4) Delete from Firebase Auth if current user
+                        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (currentUser != null && uidToId(currentUser.getUid()) == userID) {
+                            currentUser.delete()
+                                    .addOnSuccessListener(aVoid -> Log.d("DB", "Deleted user from Firebase Auth"))
+                                    .addOnFailureListener(
+                                            e -> Log.e("DB", "Failed to delete user from Firebase Auth", e));
+                        }
+                    }).addOnFailureListener(e -> {
+                        Log.e("DB", "Failed to remove user from waitlists", e);
+                        accRef.document(String.valueOf(userID)).delete()
+                                .addOnSuccessListener(
+                                        unused2 -> Log.d("DB", "Deleted user (partial cleanup): " + userID))
+                                .addOnFailureListener(err -> Log.e("DB", "Error deleting user " + userID, err));
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Failed to scan waitlists for deletion: " + userID, e);
+                    accRef.document(String.valueOf(userID)).delete()
+                            .addOnSuccessListener(unused -> Log.d("DB", "Deleted user (fallback): " + userID))
+                            .addOnFailureListener(err -> Log.e("DB", "Error deleting user " + userID, err));
                 });
     }
 
     /**
      * Fetch all profiles in AccountData collection.
-     * @param listener success callback with list of Profile objects (empty list if none)
+     * 
+     * @param listener      success callback with list of Profile objects (empty
+     *                      list if none)
      * @param errorListener failure callback invoked on Firestore error
      */
     public void getAllProfile(OnSuccessListener<java.util.List<Profile>> listener,
-                              OnFailureListener errorListener) {
+            OnFailureListener errorListener) {
         accRef.get()
                 .addOnSuccessListener(querySnapshot -> {
                     java.util.List<Profile> profiles = new java.util.ArrayList<>();
@@ -368,21 +429,21 @@ public class DatabaseHandler {
                 .continueWithTask(t -> waitListRef.document(docId).get())
                 .continueWithTask(task -> {
                     if (!task.isSuccessful()) {
-                        return Tasks.forException(task.getException() != null ? 
-                            task.getException() : new RuntimeException("Failed to read waitlist"));
+                        return Tasks.forException(task.getException() != null ? task.getException()
+                                : new RuntimeException("Failed to read waitlist"));
                     }
-                    
+
                     DocumentSnapshot snapshot = task.getResult();
                     if (snapshot == null || !snapshot.exists()) {
                         return Tasks.forException(new RuntimeException("Waitlist not found"));
                     }
-                    
+
                     // Get current waitList
                     java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
                     if (waitList == null) {
                         waitList = new java.util.ArrayList<>();
                     }
-                    
+
                     // Check if user already exists
                     boolean userExists = false;
                     for (Object obj : waitList) {
@@ -405,7 +466,7 @@ public class DatabaseHandler {
                             }
                         }
                     }
-                    
+
                     // If user doesn't exist, add them
                     if (!userExists) {
                         java.util.Map<String, Object> newUser = new java.util.HashMap<>();
@@ -421,7 +482,8 @@ public class DatabaseHandler {
     }
 
     /**
-     * Removes the user from the event waitlist by finding and removing their WaitlistUser object.
+     * Removes the user from the event waitlist by finding and removing their
+     * WaitlistUser object.
      */
     public Task<Void> leaveWaitingList(int eventId, int userId) {
         String docId = String.valueOf(eventId);
@@ -429,21 +491,21 @@ public class DatabaseHandler {
                 .continueWithTask(t -> waitListRef.document(docId).get())
                 .continueWithTask(task -> {
                     if (!task.isSuccessful()) {
-                        return Tasks.forException(task.getException() != null ? 
-                            task.getException() : new RuntimeException("Failed to read waitlist"));
+                        return Tasks.forException(task.getException() != null ? task.getException()
+                                : new RuntimeException("Failed to read waitlist"));
                     }
-                    
+
                     DocumentSnapshot snapshot = task.getResult();
                     if (snapshot == null || !snapshot.exists()) {
                         return Tasks.forException(new RuntimeException("Waitlist not found"));
                     }
-                    
+
                     // Get current waitList
                     java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
                     if (waitList == null || waitList.isEmpty()) {
                         return Tasks.forResult(null); // Nothing to remove
                     }
-                    
+
                     // Find and remove the user's entry
                     java.util.List<Object> updatedWaitList = new java.util.ArrayList<>();
                     for (Object obj : waitList) {
@@ -466,7 +528,7 @@ public class DatabaseHandler {
                             }
                         }
                     }
-                    
+
                     // Update the waitlist with the filtered list
                     return waitListRef.document(docId).update("waitList", updatedWaitList);
                 });
@@ -474,19 +536,20 @@ public class DatabaseHandler {
 
     /**
      * Get all events that a user is part of (in any waitlist).
-     * @param userId The user ID to search for
-     * @param listener Success callback with list of Events
+     * 
+     * @param userId        The user ID to search for
+     * @param listener      Success callback with list of Events
      * @param errorListener Failure callback
      */
     public void getEventsForUser(int userId,
-                                 OnSuccessListener<java.util.List<Event>> listener,
-                                 OnFailureListener errorListener) {
+            OnSuccessListener<java.util.List<Event>> listener,
+            OnFailureListener errorListener) {
         // First get all waitlists
         waitListRef.get()
                 .addOnSuccessListener(waitlistSnapshot -> {
                     // Collect event IDs where user is in the waitlist
                     java.util.List<Integer> eventIds = new java.util.ArrayList<>();
-                    
+
                     for (QueryDocumentSnapshot doc : waitlistSnapshot) {
                         try {
                             java.util.List<Object> waitList = (java.util.List<Object>) doc.get("waitList");
@@ -522,13 +585,13 @@ public class DatabaseHandler {
                             Log.e("DB", "Error parsing waitlist document: " + doc.getId(), e);
                         }
                     }
-                    
+
                     // Now fetch all the events
                     if (eventIds.isEmpty()) {
                         listener.onSuccess(new java.util.ArrayList<>());
                         return;
                     }
-                    
+
                     getAllEvents(allEvents -> {
                         java.util.List<Event> userEvents = new java.util.ArrayList<>();
                         for (Event event : allEvents) {
@@ -700,13 +763,17 @@ public class DatabaseHandler {
                             int status = 0;
                             if (map.containsKey("userId")) {
                                 Object uid = map.get("userId");
-                                if (uid instanceof Number) userId = ((Number) uid).intValue();
-                                else if (uid instanceof String) userId = Integer.parseInt((String) uid);
+                                if (uid instanceof Number)
+                                    userId = ((Number) uid).intValue();
+                                else if (uid instanceof String)
+                                    userId = Integer.parseInt((String) uid);
                             }
                             if (map.containsKey("status")) {
                                 Object st = map.get("status");
-                                if (st instanceof Number) status = ((Number) st).intValue();
-                                else if (st instanceof String) status = Integer.parseInt((String) st);
+                                if (st instanceof Number)
+                                    status = ((Number) st).intValue();
+                                else if (st instanceof String)
+                                    status = Integer.parseInt((String) st);
                             }
                             coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(userId, status));
                         } catch (Exception e) {
@@ -717,14 +784,15 @@ public class DatabaseHandler {
                         coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(((Number) o).intValue(), 0));
                     } else if (o instanceof String) {
                         try {
-                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(Integer.parseInt((String) o), 0));
+                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(
+                                    Integer.parseInt((String) o), 0));
                         } catch (NumberFormatException ignored) {
                         }
                     }
                 }
                 data.put("waitList", coerced);
             }
-            
+
             // Remove selected field handling as it's deprecated
             data.remove("selected");
 

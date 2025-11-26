@@ -20,6 +20,7 @@ import com.example.pixel_events.events.EventInvitation;
 import com.example.pixel_events.events.InvitationAdapter;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.profile.Profile;
+import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
@@ -158,6 +159,23 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
     public void onDecline(EventInvitation invitation) {
         // 3 -> declined in new mapping
         updateInvitationStatus(invitation, 3);
+        DatabaseHandler.getInstance().getWaitingList(invitation.getEvent().getEventId(), waitingList -> {
+            if (waitingList != null) {
+                waitingList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                    @Override
+                    public void onSuccess(int numberDrawn) {
+                        Log.e(TAG, "Lottery drawn: " + numberDrawn);
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e(TAG, "Failed to draw lottery", e);
+                    }
+                });
+            }
+        }, e -> {
+            Log.e(TAG, "Failed to get waitlist for event " + invitation.getEvent().getEventId(), e);
+        });
     }
 
     private void updateInvitationStatus(EventInvitation invitation, int newStatus) {

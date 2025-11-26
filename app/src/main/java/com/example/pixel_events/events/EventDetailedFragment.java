@@ -1,5 +1,7 @@
 package com.example.pixel_events.events;
 
+import static android.view.View.GONE;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,28 +23,25 @@ import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.google.firebase.firestore.FieldValue;
 
 import android.graphics.Bitmap;
 import androidx.appcompat.app.AlertDialog;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 import com.example.pixel_events.utils.ImageConversion;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 public class EventDetailedFragment extends Fragment {
     private static final String TAG = "EventDetailedFragment";
     private Event event;
     private WaitingList waitList;
     private DatabaseHandler db;
-    private int userId; // String form of current profile id
+    private int userId; // current profile id
     private int eventId = -1;
     private boolean joined = false;
     private int waitingListCount = 0, waitingListMaxCount = 0;
@@ -50,7 +49,7 @@ public class EventDetailedFragment extends Fragment {
     // UI elements
     private ShapeableImageView poster;
     private TextView title, date, description;
-    private MaterialButton joinLeaveButton;
+    private MaterialButton joinButton, leaveButton, tagButton;
     private ImageButton backButton, qrButton;
     private LinearLayout tagsContainer;
 
@@ -91,21 +90,18 @@ public class EventDetailedFragment extends Fragment {
         title = view.findViewById(R.id.event_title);
         date = view.findViewById(R.id.event_date);
         description = view.findViewById(R.id.event_description);
-        joinLeaveButton = view.findViewById(R.id.event_jlbutton);
+        joinButton = view.findViewById(R.id.event_joinButton);
+        leaveButton = view.findViewById(R.id.event_leaveButton);
         backButton = view.findViewById(R.id.event_backbutton);
+        tagButton = view.findViewById(R.id.event_tag);
         qrButton = view.findViewById(R.id.event_qrcode_button);
         tagsContainer = view.findViewById(R.id.eventTagsContainer);
 
         backButton.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
-
         qrButton.setOnClickListener(v -> showQrDialog());
 
-        // While loading waitlist state, show a disabled loading state to avoid wrong
-        // initial text
-        if (joinLeaveButton != null) {
-            joinLeaveButton.setText("Loading…");
-            joinLeaveButton.setEnabled(false);
-        }
+        // Start with tag hidden
+        tagButton.setVisibility(GONE);
 
         // Load event data
         if (eventId >= 0) {
@@ -114,8 +110,7 @@ public class EventDetailedFragment extends Fragment {
                         evt -> {
                             event = evt;
                             if (isAdded())
-                                updateUI();
-                            // Re-evaluate CTA once event dates available
+                                requireActivity().runOnUiThread(this::updateUI);
                             if (isAdded()) {
                                 requireActivity().runOnUiThread(this::renderCTA);
                             }
@@ -135,13 +130,16 @@ public class EventDetailedFragment extends Fragment {
                 // Load waitlist state
                 db.getWaitingList(eventId, wl -> {
                     if (wl != null) {
-                        this.waitList = wl; // Update the class field
+                        this.waitList = wl;
                         List<WaitlistUser> ids = wl.getWaitList();
-                        if (ids == null) {
+                        if (ids == null)
                             ids = java.util.Collections.emptyList();
-                        }
-                        for (WaitlistUser user: ids){
-                            if (user.getUserId() == userId) joined = true;
+                        joined = false;
+                        for (WaitlistUser user : ids) {
+                            if (user.getUserId() == userId) {
+                                joined = true;
+                                break;
+                            }
                         }
                         waitingListCount = ids.size();
                         waitingListMaxCount = wl.getMaxWaitlistSize();
@@ -149,40 +147,52 @@ public class EventDetailedFragment extends Fragment {
                         joined = false;
                         waitingListCount = 0;
                     }
-                    renderCTA();
+                    if (isAdded())
+                        requireActivity().runOnUiThread(this::renderCTA);
                 }, e -> {
                     Log.e(TAG, "Failed to fetch waitlist", e);
                     joined = false;
                     waitingListCount = 0;
-                    renderCTA();
+                    if (isAdded())
+                        requireActivity().runOnUiThread(this::renderCTA);
                 });
             } else {
                 List<WaitlistUser> ids = waitList.getWaitList();
-                if (ids == null) {
+                if (ids == null)
                     ids = java.util.Collections.emptyList();
-                }
-                for (WaitlistUser user: ids){
-                    if (user.getUserId() == userId) joined = true;
+                joined = false;
+                for (WaitlistUser user : ids) {
+                    if (user.getUserId() == userId) {
+                        joined = true;
+                        break;
+                    }
                 }
                 waitingListCount = ids.size();
                 waitingListMaxCount = waitList.getMaxWaitlistSize();
-                renderCTA();
+                if (isAdded())
+                    requireActivity().runOnUiThread(this::renderCTA);
             }
         }
 
-        joinLeaveButton.setOnClickListener(v -> {
+        // Wire separate handlers for Join and Leave
+        joinButton.setOnClickListener(v -> {
             if (userId == -1) {
                 toast("You must be logged in to join the waitlist");
                 return;
             }
+            joinButton.setEnabled(false);
+            leaveButton.setEnabled(false);
+            joinWaitlist();
+        });
 
-            joinLeaveButton.setEnabled(false);
-
-            if (joined) {
-                leaveWaitlist();
-            } else {
-                joinWaitlist();
+        leaveButton.setOnClickListener(v -> {
+            if (userId == -1) {
+                toast("You must be logged in to leave the waitlist");
+                return;
             }
+            leaveButton.setEnabled(false);
+            joinButton.setEnabled(false);
+            leaveWaitlist();
         });
 
         return view;
@@ -199,62 +209,60 @@ public class EventDetailedFragment extends Fragment {
         // Load poster image
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
             Bitmap bitmap = ImageConversion.base64ToBitmap(event.getImageUrl());
-            if (bitmap != null) {
+            if (bitmap != null)
                 poster.setImageBitmap(bitmap);
-            }
         }
 
-        // Display tags
         displayTags();
     }
 
     private void displayTags() {
-        if (tagsContainer == null || event == null) return;
-        
+        if (tagsContainer == null || event == null)
+            return;
+
         tagsContainer.removeAllViews();
         List<String> tags = event.getTags();
-        
-        if (tags == null || tags.isEmpty()) {
+        if (tags == null || tags.isEmpty())
             return;
-        }
-        
+
         for (String tag : tags) {
-            if (tag == null || tag.trim().isEmpty()) continue;
-            
+            if (tag == null || tag.trim().isEmpty())
+                continue;
             TextView tagView = new TextView(requireContext());
             tagView.setText(tag);
             tagView.setTextColor(getResources().getColor(R.color.white, null));
             tagView.setTextSize(12);
             tagView.setPadding(16, 8, 16, 8);
             tagView.setBackground(getResources().getDrawable(R.drawable.view_tag_outline, null));
-            
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
             params.setMarginEnd(8);
             tagView.setLayoutParams(params);
-            
             tagsContainer.addView(tagView);
         }
     }
 
     private void renderCTA() {
-        if (!isAdded() || joinLeaveButton == null)
+        if (!isAdded() || joinButton == null || leaveButton == null || tagButton == null)
             return;
 
-        // If event not yet loaded, keep disabled loading state
+        // If event not yet loaded, show loading state
         if (event == null) {
-            joinLeaveButton.setText("Loading registration…");
-            joinLeaveButton.setEnabled(false);
+            tagButton.setVisibility(GONE);
+            joinButton.setText("Loading registration…");
+            joinButton.setEnabled(false);
+            leaveButton.setEnabled(false);
             return;
         }
 
-        // Determine registration state
+        // Determine registration window
         String startStr = event.getRegistrationStartDate();
         String endStr = event.getRegistrationEndDate();
-        if (startStr != null) startStr = startStr.trim();
-        if (endStr != null) endStr = endStr.trim();
+        if (startStr != null)
+            startStr = startStr.trim();
+        if (endStr != null)
+            endStr = endStr.trim();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         try {
             Date today = truncateToDay(new Date());
@@ -262,23 +270,36 @@ public class EventDetailedFragment extends Fragment {
             Date end = (endStr != null && !endStr.isEmpty()) ? truncateToDay(fmt.parse(endStr)) : null;
 
             if (start == null || end == null) {
-                joinLeaveButton.setText("Registration dates missing");
-                joinLeaveButton.setEnabled(false);
+                tagButton.setVisibility(View.VISIBLE);
+                joinButton.setVisibility(GONE);
+                leaveButton.setVisibility(GONE);
+                tagButton.setText("Registration dates missing");
+                tagButton.setEnabled(false);
                 return;
             }
 
             if (today.before(start)) {
-                joinLeaveButton.setText("Registration opens " + startStr);
-                joinLeaveButton.setEnabled(false);
+                tagButton.setVisibility(View.VISIBLE);
+                joinButton.setVisibility(GONE);
+                leaveButton.setVisibility(GONE);
+                tagButton.setText("Registration opens " + startStr);
+                tagButton.setEnabled(false);
                 return;
             }
             if (today.after(end)) {
-                joinLeaveButton.setText("Registration Closed");
-                joinLeaveButton.setEnabled(false);
+                tagButton.setVisibility(View.VISIBLE);
+                joinButton.setVisibility(GONE);
+                leaveButton.setVisibility(GONE);
+                tagButton.setText("Registration Closed");
+                tagButton.setEnabled(false);
                 return;
             }
-            
-            // Check if lottery has been drawn
+
+            // Lottery drawn? handle accept/decline/final states
+            tagButton.setVisibility(GONE);
+            joinButton.setVisibility(View.VISIBLE);
+            leaveButton.setVisibility(View.VISIBLE);
+
             if (this.waitList != null && Objects.equals(this.waitList.getStatus(), "drawn")) {
                 int userStatus = -1;
                 boolean wasInWaitlist = false;
@@ -291,65 +312,136 @@ public class EventDetailedFragment extends Fragment {
                         }
                     }
                 }
-                // Find user's status in waitlist
+
                 if (userStatus == 1) {
-                    // User was selected, show Accept button (will toggle to Decline after accepting)
-                    joinLeaveButton.setText("Accept Invitation");
-                    joinLeaveButton.setEnabled(true);
-                    joinLeaveButton.setOnClickListener(v -> {
-                        joinLeaveButton.setEnabled(false);
-                        updateUserStatus(2); // Accept
+                    // selected -> show Accept (join) and Decline (leave)
+                    joinButton.setText("Accept Invitation");
+                    joinButton.setEnabled(true);
+                    joinButton.setOnClickListener(v -> {
+                        joinButton.setEnabled(false);
+                        leaveButton.setEnabled(false);
+                        updateUserStatus(2);
+                    });
+
+                    leaveButton.setText("Decline Invitation");
+                    leaveButton.setEnabled(true);
+                    leaveButton.setOnClickListener(v -> {
+                        leaveButton.setEnabled(false);
+                        joinButton.setEnabled(false);
+                        updateUserStatus(3);
+                        waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                            @Override
+                            public void onSuccess(int numberDrawn) {
+                                Log.e(TAG, "Lottery drawn: " + numberDrawn);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Log.e(TAG, "Failed to draw lottery", e);
+                            }
+                        });
                     });
                     return;
-                } else if (userStatus == 2) {
-                    // User accepted, show Decline button
-                    joinLeaveButton.setText("Decline Invitation");
-                    joinLeaveButton.setEnabled(true);
-                    joinLeaveButton.setOnClickListener(v -> {
-                        joinLeaveButton.setEnabled(false);
-                        updateUserStatus(3); // Decline
-                    });
-                    return;
-                } else if (userStatus == 3) {
-                    // User declined, show Accept button
-                    joinLeaveButton.setText("Accept Invitation");
-                    joinLeaveButton.setEnabled(true);
-                    joinLeaveButton.setOnClickListener(v -> {
-                        joinLeaveButton.setEnabled(false);
-                        updateUserStatus(2); // Accept
-                    });
-                    return;
-                } else if (userStatus == 0) {
-                    // User was in waitlist but not selected
-                    joinLeaveButton.setText("Sorry, you were not selected");
-                    joinLeaveButton.setEnabled(false);
-                    return;
-                } else {
-                    // User was not in waitlist at all
-                    if (!wasInWaitlist) {
-                        joinLeaveButton.setText("Registration Closed");
-                        joinLeaveButton.setEnabled(false);
-                        return;
-                    }
                 }
-            } else {
-                if (joined) {
-                    joinLeaveButton.setText("Leave\n" + waitingListCount + " in waiting list");
-                    joinLeaveButton.setEnabled(true);
+
+                if (userStatus == 2) {
+                    // accepted -> final tag
+                    joinButton.setVisibility(GONE);
+                    leaveButton.setVisibility(GONE);
+                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setText("You accepted the invitation");
+                    tagButton.setEnabled(false);
+                    return;
+                }
+
+                if (userStatus == 3) {
+                    // declined -> final tag
+                    joinButton.setVisibility(GONE);
+                    leaveButton.setVisibility(GONE);
+                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setText("You declined the invitation");
+                    tagButton.setEnabled(false);
+                    return;
+                }
+
+                if (userStatus == 0 && today.after(end)) {
+                    joinButton.setVisibility(GONE);
+                    leaveButton.setVisibility(GONE);
+                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setText("Sorry, you were not selected");
+                    tagButton.setEnabled(false);
                 } else {
-                    if (waitingListCount >= waitingListMaxCount) {
-                        joinLeaveButton.setText("Waitlist full");
-                        joinLeaveButton.setEnabled(false);
+                    if (joined) {
+                        joinButton.setText("Join");
+                        joinButton.setEnabled(false);
+
+                        leaveButton.setText("Leave");
+                        leaveButton.setEnabled(true);
+                    } else {
+                        boolean canJoin = waitingListMaxCount <= 0 ? true : waitingListCount < waitingListMaxCount;
+                        if (!canJoin) {
+                            joinButton.setVisibility(GONE);
+                            leaveButton.setVisibility(GONE);
+                            tagButton.setVisibility(View.VISIBLE);
+                            tagButton.setText("Waitlist full");
+                            tagButton.setEnabled(false);
+                            return;
+                        }
+                        joinButton.setText("Join");
+                        joinButton.setEnabled(true);
+
+                        leaveButton.setText("Leave");
+                        leaveButton.setEnabled(false);
+                    }
+                    joinButton.setOnClickListener(v -> {
+                        waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                            @Override
+                            public void onSuccess(int numberDrawn) {
+                                Log.d(TAG, "Lottery drawn: " + numberDrawn);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                Log.e(TAG, "Failed to draw lottery", e);
+                            }
+                        });
+                    });
+                }
+
+
+            } else {
+                // Not drawn: normal join/leave behavior
+                if (joined) {
+                    joinButton.setText("Join");
+                    joinButton.setEnabled(false);
+
+                    leaveButton.setText("Leave");
+                    leaveButton.setEnabled(true);
+                } else {
+                    boolean canJoin = waitingListMaxCount <= 0 ? true : waitingListCount < waitingListMaxCount;
+                    if (!canJoin) {
+                        joinButton.setVisibility(GONE);
+                        leaveButton.setVisibility(GONE);
+                        tagButton.setVisibility(View.VISIBLE);
+                        tagButton.setText("Waitlist full");
+                        tagButton.setEnabled(false);
                         return;
                     }
-                    joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
-                    joinLeaveButton.setEnabled(true);
+                    joinButton.setText("Join");
+                    joinButton.setEnabled(true);
+
+                    leaveButton.setText("Leave");
+                    leaveButton.setEnabled(false);
                 }
             }
+
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
-            joinLeaveButton.setText("Registration dates invalid");
-            joinLeaveButton.setEnabled(false);
+            tagButton.setVisibility(View.VISIBLE);
+            joinButton.setVisibility(GONE);
+            leaveButton.setVisibility(GONE);
+            tagButton.setText("Registration dates invalid");
+            tagButton.setEnabled(false);
         }
     }
 
@@ -359,14 +451,21 @@ public class EventDetailedFragment extends Fragment {
                 .addOnSuccessListener(unused -> {
                     joined = true;
                     waitingListCount++;
-                    toast("Joined waitlist");
-                    renderCTA();
+                    if (isAdded())
+                        requireActivity().runOnUiThread(() -> {
+                            toast("Joined waitlist");
+                            renderCTA();
+                        });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Join failed", e);
-                    toast("Error: " + e.getMessage());
-                    if (joinLeaveButton != null)
-                        joinLeaveButton.setEnabled(true);
+                    if (isAdded())
+                        requireActivity().runOnUiThread(() -> {
+                            toast("Error: " + e.getMessage());
+                            joinButton.setEnabled(true);
+                            // leave stays disabled when not joined
+                            leaveButton.setEnabled(false);
+                        });
                 });
     }
 
@@ -377,21 +476,27 @@ public class EventDetailedFragment extends Fragment {
                     joined = false;
                     if (waitingListCount > 0)
                         waitingListCount--;
-                    toast("Left waitlist");
-                    renderCTA();
+                    if (isAdded())
+                        requireActivity().runOnUiThread(() -> {
+                            toast("Left waitlist");
+                            renderCTA();
+                        });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Leave failed", e);
-                    toast("Error: " + e.getMessage());
-                    if (joinLeaveButton != null)
-                        joinLeaveButton.setEnabled(true);
+                    if (isAdded())
+                        requireActivity().runOnUiThread(() -> {
+                            toast("Error: " + e.getMessage());
+                            leaveButton.setEnabled(true);
+                            joinButton.setEnabled(false);
+                        });
                 });
     }
 
     private void updateUserStatus(int newStatus) {
-        if (waitList == null) return;
-        
-        // Find user in waitlist and update status
+        if (waitList == null)
+            return;
+
         WaitlistUser currentUser = null;
         if (waitList.getWaitList() != null) {
             for (WaitlistUser user : waitList.getWaitList()) {
@@ -401,7 +506,7 @@ public class EventDetailedFragment extends Fragment {
                 }
             }
         }
-        
+
         if (currentUser != null) {
             currentUser.updateStatusInDb(eventId, newStatus, new WaitlistUser.OnStatusUpdateListener() {
                 @Override
@@ -409,7 +514,6 @@ public class EventDetailedFragment extends Fragment {
                     if (isAdded()) {
                         requireActivity().runOnUiThread(() -> {
                             toast(newStatus == 2 ? "Invitation accepted!" : "Invitation declined");
-                            // Reload waitlist and update UI
                             db.getWaitingList(eventId, wl -> {
                                 waitList = wl;
                                 renderCTA();
@@ -473,7 +577,8 @@ public class EventDetailedFragment extends Fragment {
     }
 
     private Date truncateToDay(Date d) {
-        if (d == null) return null;
+        if (d == null)
+            return null;
         SimpleDateFormat dayFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         try {
             return dayFmt.parse(dayFmt.format(d));

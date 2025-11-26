@@ -34,7 +34,7 @@ public class EventFragment extends Fragment {
     private DatabaseHandler db;
     private Button previewButton, notificationPreferencesButton, viewWaitlistButton,
             deleteEventButton, editEventButton, setRegistrationButton, setWaitlistButton,
-            drawLotteryButton;
+            drawLotteryButton, finalParticipantsButton, cancelledParticipantsButton;
     private TextView eventTextView;
     private ImageView eventImageView;
     private ImageButton backButton;
@@ -93,6 +93,8 @@ public class EventFragment extends Fragment {
         setRegistrationButton = view.findViewById(R.id.event_fragment_set_registration);
         setWaitlistButton = view.findViewById(R.id.event_fragment_SetWaitlistSize);
         eventTextView = view.findViewById(R.id.event_fragment_title);
+        finalParticipantsButton = view.findViewById(R.id.event_fragment_final_participants);
+        cancelledParticipantsButton = view.findViewById(R.id.event_fragment_cancelled_participants);
         drawLotteryButton = view.findViewById(R.id.event_fragment_draw_lottery);
         eventImageView = view.findViewById(R.id.event_fragment_poster);
         backButton = view.findViewById(R.id.event_fragment_backbutton);
@@ -108,8 +110,26 @@ public class EventFragment extends Fragment {
         });
 
         viewWaitlistButton.setOnClickListener(v -> {
-            if (waitList != null)
-                replaceFragment(new WaitingListFragment(waitList));
+            if (waitList == null) return;
+            if ("drawn".equals(waitList.getStatus())) {
+                // show selected (1) then waiting (0)
+                replaceFragment(WaitingListFragment.newInstance(waitList, new int[]{1, 0}, true));
+            } else {
+                // show waiting only
+                replaceFragment(WaitingListFragment.newInstance(waitList, new int[]{0}, false));
+            }
+        });
+
+        finalParticipantsButton.setOnClickListener(v -> {
+            if (waitList == null) return;
+            // show accepted (2)
+            replaceFragment(WaitingListFragment.newInstance(waitList, new int[]{2}, false));
+        });
+
+        cancelledParticipantsButton.setOnClickListener(v -> {
+            if (waitList == null) return;
+            // show declined (3)
+            replaceFragment(WaitingListFragment.newInstance(waitList, new int[]{3}, false));
         });
 
         notificationPreferencesButton.setOnClickListener(v -> {
@@ -158,7 +178,8 @@ public class EventFragment extends Fragment {
                     @Override
                     public void onFailure(Exception e) {
                         Log.e("EventFragment", "Error during lottery draw", e);
-                        Toast.makeText(getContext(), "Failed to draw lottery: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Failed to draw lottery: " + e.getMessage(), Toast.LENGTH_SHORT)
+                                .show();
                     }
                 });
             } catch (Exception e) {
@@ -204,7 +225,7 @@ public class EventFragment extends Fragment {
 
         // Enable buttons now that we have an event
         setButtonsEnabled(true);
-        
+
         // Update UI based on waitlist status
         updateUIBasedOnWaitlistStatus();
     }
@@ -251,14 +272,18 @@ public class EventFragment extends Fragment {
         if (waitList != null && Objects.equals(waitList.getStatus(), "drawn")) {
             setRegistrationButton.setVisibility(GONE);
             setWaitlistButton.setVisibility(GONE);
-            viewWaitlistButton.setText("View Selected List");
+            viewWaitlistButton.setText("View Selected/Waiting");
             drawLotteryButton.setVisibility(GONE);
-            // Show event status in title
-            if (eventTextView != null && event != null) {
-                eventTextView.setText(event.getTitle());
-            }
+            if (finalParticipantsButton != null)
+                finalParticipantsButton.setVisibility(VISIBLE);
+            if (cancelledParticipantsButton != null)
+                cancelledParticipantsButton.setVisibility(VISIBLE);
         } else {
             drawLotteryButton.setVisibility(VISIBLE);
+            if (finalParticipantsButton != null)
+                finalParticipantsButton.setVisibility(GONE);
+            if (cancelledParticipantsButton != null)
+                cancelledParticipantsButton.setVisibility(GONE);
             if (eventTextView != null && event != null) {
                 eventTextView.setText(event.getTitle());
             }

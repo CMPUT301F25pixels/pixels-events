@@ -25,6 +25,11 @@ import java.util.List;
 
 public class WaitingListFragment extends Fragment {
     private WaitingList waitingList;
+    // Filter which statuses to include (e.g., {0} for waiting, {1,0} for
+    // selected+waiting, {2} for accepted, {3} for declined)
+    private int[] filterStatuses = null;
+    // If showing selected + waiting, sort selected first
+    private boolean sortSelectedFirst = false;
     private ImageButton backButton, shareButton;
     private int eventId = -1;
     private DatabaseHandler db;
@@ -33,7 +38,8 @@ public class WaitingListFragment extends Fragment {
     private WaitingListAdapter adapter;
     private final List<Profile> profiles = new ArrayList<>();
 
-    public WaitingListFragment() {}
+    public WaitingListFragment() {
+    }
 
     public WaitingListFragment(int eventId) {
         this.eventId = eventId;
@@ -42,6 +48,13 @@ public class WaitingListFragment extends Fragment {
     public WaitingListFragment(WaitingList waitingList) {
         this.waitingList = waitingList;
         this.eventId = waitingList != null ? waitingList.getEventId() : -1;
+    }
+
+    public static WaitingListFragment newInstance(WaitingList wl, int[] statuses, boolean sortSelectedFirst) {
+        WaitingListFragment f = new WaitingListFragment(wl);
+        f.filterStatuses = statuses;
+        f.sortSelectedFirst = sortSelectedFirst;
+        return f;
     }
 
     @Nullable
@@ -74,10 +87,11 @@ public class WaitingListFragment extends Fragment {
                         .replace(containerId, new ViewProfileFragment(profile))
                         .addToBackStack(null)
                         .commit();
-                
+
                 if (containerId == R.id.overlay_fragment_container) {
                     View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
-                    if (overlay != null) overlay.setVisibility(View.VISIBLE);
+                    if (overlay != null)
+                        overlay.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -95,16 +109,14 @@ public class WaitingListFragment extends Fragment {
             loadProfilesFromWaitingList();
         }
 
-        backButton.setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().popBackStack()
-        );
+        backButton.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
 
         shareButton.setOnClickListener(v -> {
             if (waitingList == null || waitingList.getWaitList() == null || waitingList.getWaitList().isEmpty()) {
                 showInfoDialog("Nothing to export");
                 return;
             }
-            
+
             // Filter users based on lottery status
             List<WaitlistUser> usersToExport;
             if ("drawn".equals(waitingList.getStatus())) {
@@ -123,7 +135,7 @@ public class WaitingListFragment extends Fragment {
                 // If lottery not drawn, export all people in waitlist
                 usersToExport = waitingList.getWaitList();
             }
-            
+
             // Use utility to export
             new SavingData(usersToExport)
                     .exportProfiles(requireContext(), eventId, message -> {
@@ -138,7 +150,6 @@ public class WaitingListFragment extends Fragment {
 
     private void loadProfilesFromWaitingList() {
         if (waitingList == null) {
-            // Nothing to show
             return;
         }
 
@@ -151,27 +162,63 @@ public class WaitingListFragment extends Fragment {
         profiles.clear();
         adapter.notifyDataSetChanged();
 
-        for (WaitlistUser user : ids) {
-            if (user == null) continue;
-            // Only show selected participants (status > 0)
-            if (user.getStatus() == 0) continue;
-            
-            int pid = user.getUserId();
-            int status = user.getStatus();
-            db.getProfile(pid,
-                    prof -> {
-                        if (prof != null) {
-                            profiles.add(prof);
-                            if (isAdded()) {
-                                requireActivity().runOnUiThread(() -> adapter.notifyItemInserted(profiles.size() - 1));
-                            }
-                        }
-                    }, e -> Log.e("WaitingListFragment", "Failed to load profile " + pid, e));
+        // Build filtered list of user IDs based on filterStatuses
+        java.util.List<WaitlistUser> filtered = new java.util.ArrayList<>();
+        if (filterStatuses == null || filterStatuses.length == 0) {
+            // Default: if lottery drawn, show selected+waiting; else show waiting only
+            if ("drawn".equals(waitingList.getStatus())) {
+                filterStatuses = new int[] { 1, 0 };
+                sortSelectedFirst = true;
+            } else {
+                filterStatuses = new int[] { 0 };
+            }
         }
+
+        java.util.Set<Integer> allowed = new java.util.HashSet<>();
+        for (int s : filterStatuses)
+            allowed.add(s);
+
+        for (WaitlistUser user : ids) {
+            if (user == null)
+                continue;
+            if (!allowed.contains(user.getStatus()))
+                continue;
+            filtered.add(user);
+        }
+
+        if (sortSelectedFirst) {
+            filtered.sort((a, b) -> Integer.compare(a.getStatus() == 1 ? 0 : 1, b.getStatus() == 1 ? 0 : 1));
+        }
+
+        // Fetch profiles sequentially to preserve filtered order
+        fetchProfilesSequentially(filtered, 0);
+    }
+
+    // Helper that fetches profiles one-by-one so that the adapter list order
+    // matches filtered order
+    private void fetchProfilesSequentially(java.util.List<WaitlistUser> filtered, int idx) {
+        if (idx >= filtered.size())
+            return;
+        int pid = filtered.get(idx).getUserId();
+        db.getProfile(pid, prof -> {
+            if (prof != null) {
+                profiles.add(prof);
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> adapter.notifyItemInserted(profiles.size() - 1));
+                }
+            }
+            // fetch next
+            fetchProfilesSequentially(filtered, idx + 1);
+        }, e -> {
+            Log.e("WaitingListFragment", "Failed to load profile " + pid, e);
+            // continue even on error
+            fetchProfilesSequentially(filtered, idx + 1);
+        });
     }
 
     private void showInfoDialog(String message) {
-        if (!isAdded()) return;
+        if (!isAdded())
+            return;
         new Builder(requireContext())
                 .setMessage(message)
                 .setPositiveButton("OK", null)
