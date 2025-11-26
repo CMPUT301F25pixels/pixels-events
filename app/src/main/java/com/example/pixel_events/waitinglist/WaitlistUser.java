@@ -7,7 +7,12 @@ import java.util.List;
 public class WaitlistUser {
     private static final String TAG = "WaitlistUser";
     private int userId;
-    private int status; // 0: undecided, 1: accepted, 2: declined
+    // Status mapping:
+    // 0 - waiting (not chosen yet)
+    // 1 - chosen (selected by lottery, awaiting response)
+    // 2 - accepted
+    // 3 - declined
+    private int status;
 
     public WaitlistUser() {}
 
@@ -37,10 +42,11 @@ public class WaitlistUser {
     }
 
     public void updateStatusInDb(int eventId, int newStatus, OnStatusUpdateListener listener) {
+        // Load the waitlist document, update the existing waitList array in-place
         DatabaseHandler.getInstance().getWaitingList(eventId, waitingList -> {
-            if (waitingList != null && waitingList.getSelected() != null) {
+            if (waitingList != null && waitingList.getWaitList() != null) {
                 boolean found = false;
-                for (WaitlistUser u : waitingList.getSelected()) {
+                for (WaitlistUser u : waitingList.getWaitList()) {
                     if (u.getUserId() == this.userId) {
                         u.setStatus(newStatus);
                         found = true;
@@ -50,7 +56,7 @@ public class WaitlistUser {
                 if (found) {
                     DatabaseHandler.getInstance().getWaitListCollection()
                             .document(String.valueOf(eventId))
-                            .update("selected", waitingList.getSelected())
+                            .update("waitList", waitingList.getWaitList())
                             .addOnSuccessListener(aVoid -> {
                                 Log.d(TAG, "Waitlist status updated for user in event " + eventId);
                                 this.status = newStatus;
@@ -61,7 +67,7 @@ public class WaitlistUser {
                                 if (listener != null) listener.onFailure(e);
                             });
                 } else {
-                    if (listener != null) listener.onFailure(new Exception("User not found in selected list"));
+                    if (listener != null) listener.onFailure(new Exception("User not found in waitList"));
                 }
             } else {
                 if (listener != null) listener.onFailure(new Exception("Waitlist not found or empty"));

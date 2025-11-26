@@ -54,9 +54,18 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
         });
         holder.location.setText(event.getLocation());
 
-        if (event.getEventStartDate() != null && event.getEventEndDate() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("h:mm a", Locale.getDefault());
-            holder.date.setText(String.format("%s - %s", sdf.format(event.getEventStartDate()), sdf.format(event.getEventEndDate())));
+        // Format date and time strings
+        String startDate = event.getEventStartDate();
+        String endDate = event.getEventEndDate();
+        String startTime = event.getEventStartTime();
+        String endTime = event.getEventEndTime();
+        
+        if (startDate != null && endDate != null) {
+            if (startTime != null && endTime != null) {
+                holder.date.setText(String.format("%s %s - %s %s", startDate, startTime, endDate, endTime));
+            } else {
+                holder.date.setText(String.format("%s - %s", startDate, endDate));
+            }
         }
 
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {

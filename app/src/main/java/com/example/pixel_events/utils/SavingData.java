@@ -24,15 +24,12 @@ import java.util.function.Consumer;
  * Construct with a list of profile IDs; call exportProfiles to perform asynchronous export.
  */
 public class SavingData {
-    private final List<Integer> profileIds;
+    private final List<WaitlistUser> waitlistUsers;
     private final List<Profile> loadedProfiles = Collections.synchronizedList(new ArrayList<>());
     private final DatabaseHandler db = DatabaseHandler.getInstance();
 
     public SavingData(List<WaitlistUser> profiles) {
-        this.profileIds = Collections.emptyList();
-        for (WaitlistUser ids: profiles){
-            this.profileIds.add(ids.getUserId());
-        }
+        this.waitlistUsers = new ArrayList<>(profiles);
     }
 
     /**
@@ -46,16 +43,17 @@ public class SavingData {
             if (callback != null) callback.accept("Context unavailable");
             return;
         }
-        if (profileIds.isEmpty()) {
+        if (waitlistUsers.isEmpty()) {
             if (callback != null) callback.accept("Nothing to export");
             return;
         }
-        AtomicInteger remaining = new AtomicInteger(profileIds.size());
-        for (Integer id : profileIds) {
-            if (id == null) {
+        AtomicInteger remaining = new AtomicInteger(waitlistUsers.size());
+        for (WaitlistUser user : waitlistUsers) {
+            if (user == null) {
                 if (remaining.decrementAndGet() == 0) finishExport(context, eventId, callback);
                 continue;
             }
+            int id = user.getUserId();
             db.getProfile(id, profile -> {
                 if (profile != null) {
                     loadedProfiles.add(profile);
@@ -89,8 +87,20 @@ public class SavingData {
         File outFile = new File(exportDir, fileName);
 
         try (FileWriter writer = new FileWriter(outFile)) {
-            writer.write("UserID,Name,Email,Phone Number,Gender,City,Province,Postal Code\n");
+            writer.write("UserID,Name,Email,Phone Number,Gender,City,Province,Postal Code,Status\n");
             for (Profile p : loadedProfiles) {
+                // Find status for this profile
+                String statusLabel = "Didn't Choose";
+                for (WaitlistUser user : waitlistUsers) {
+                    if (user.getUserId() == p.getUserId()) {
+                        int status = user.getStatus();
+                        if (status == 2) statusLabel = "Accepted";
+                        else if (status == 3) statusLabel = "Declined";
+                        else if (status == 1) statusLabel = "Selected";
+                        else statusLabel = "Didn't Choose";
+                        break;
+                    }
+                }
                 writer.write(csvField(p.getUserId()) + "," +
                         csvField(p.getUserName()) + "," +
                         csvField(p.getEmail()) + "," +
@@ -98,7 +108,8 @@ public class SavingData {
                         csvField(p.getGender()) + "," +
                         csvField(p.getCity()) + "," +
                         csvField(p.getProvince()) + "," +
-                        csvField(p.getPostalcode()) + "\n");
+                        csvField(p.getPostalcode()) + "," +
+                        csvField(statusLabel) + "\n");
             }
         } catch (IOException e) {
             if (callback != null) callback.accept("Failed to export: " + e.getMessage());

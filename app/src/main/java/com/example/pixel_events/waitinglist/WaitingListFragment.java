@@ -33,8 +33,7 @@ public class WaitingListFragment extends Fragment {
     private WaitingListAdapter adapter;
     private final List<Profile> profiles = new ArrayList<>();
 
-    public WaitingListFragment() {
-    }
+    public WaitingListFragment() {}
 
     public WaitingListFragment(int eventId) {
         this.eventId = eventId;
@@ -56,7 +55,7 @@ public class WaitingListFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.waitinglist_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new WaitingListAdapter(profiles, profile -> {
+        adapter = new WaitingListAdapter(profiles, waitingList, profile -> {
             // Open ViewProfileFragment when user taps a profile
             if (isAdded()) {
                 int containerId;
@@ -105,8 +104,28 @@ public class WaitingListFragment extends Fragment {
                 showInfoDialog("Nothing to export");
                 return;
             }
+            
+            // Filter users based on lottery status
+            List<WaitlistUser> usersToExport;
+            if ("drawn".equals(waitingList.getStatus())) {
+                // If lottery drawn, only export accepted people (status == 2)
+                usersToExport = new ArrayList<>();
+                for (WaitlistUser user : waitingList.getWaitList()) {
+                    if (user.getStatus() == 2) {
+                        usersToExport.add(user);
+                    }
+                }
+                if (usersToExport.isEmpty()) {
+                    showInfoDialog("No accepted participants to export");
+                    return;
+                }
+            } else {
+                // If lottery not drawn, export all people in waitlist
+                usersToExport = waitingList.getWaitList();
+            }
+            
             // Use utility to export
-            new SavingData(waitingList.getWaitList())
+            new SavingData(usersToExport)
                     .exportProfiles(requireContext(), eventId, message -> {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() -> showInfoDialog(message));
@@ -134,7 +153,11 @@ public class WaitingListFragment extends Fragment {
 
         for (WaitlistUser user : ids) {
             if (user == null) continue;
+            // Only show selected participants (status > 0)
+            if (user.getStatus() == 0) continue;
+            
             int pid = user.getUserId();
+            int status = user.getStatus();
             db.getProfile(pid,
                     prof -> {
                         if (prof != null) {

@@ -16,7 +16,7 @@ import java.util.Map;
 public class WaitingList {
     private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
     private int eventId;    // Identifier of the event associated with this waitlist
-    private String status;     // Status of the event ("waiting", "selected")
+    private String status;     // Status of the event ("waiting", "drawn")
     private ArrayList<WaitlistUser> waitList; // The WaitingList
     private int maxWaitlistSize;
     private boolean autoUpdateDatabase = true;
@@ -62,6 +62,7 @@ public class WaitingList {
         ArrayList<WaitlistUser> selected = new ArrayList<>();
         if (waitList != null) {
             for (WaitlistUser user : waitList) {
+                // status == 1 represents 'chosen' (selected by lottery, awaiting response)
                 if (user.getStatus() == 1) {
                     selected.add(user);
                 }
@@ -86,7 +87,8 @@ public class WaitingList {
         ArrayList<WaitlistUser> cancelled = new ArrayList<>();
         if (waitList != null) {
             for (WaitlistUser user : waitList) {
-                if (user.getStatus() == 2) {
+                // status == 3 represents declined
+                if (user.getStatus() == 3) {
                     cancelled.add(user);
                 }
             }
@@ -118,53 +120,67 @@ public class WaitingList {
         }
     }
 
-    public void drawLottery() {
+    public interface OnLotteryDrawnListener {
+        void onSuccess(int numberDrawn);
+        void onFailure(Exception e);
+    }
+
+    public void drawLottery(OnLotteryDrawnListener listener) {
         DatabaseHandler.getInstance().getEvent(eventId, e -> {
             int capacity = e.getCapacity();
 
             if (waitList == null) waitList = new ArrayList<>();
 
             if (capacity <= 0) {
-                throw new IllegalArgumentException("Capacity must be positive");
+                if (listener != null) listener.onFailure(new IllegalArgumentException("Capacity must be positive"));
+                return;
+            }
+            // Count users who are already chosen (1) or already accepted (2)
+            int occupied = 0;
+            java.util.List<Integer> waitingIndices = new java.util.ArrayList<>();
+            for (int i = 0; i < waitList.size(); i++) {
+                WaitlistUser user = waitList.get(i);
+                int st = user.getStatus();
+                if (st == 1 || st == 2) {
+                    occupied++;
+                } else if (st == 0) {
+                    waitingIndices.add(i);
+                }
             }
 
-            ArrayList<WaitlistUser> selected = getSelected();
-            int currentSelectedSize = selected.size();
-            if (currentSelectedSize >= capacity) {
+            if (occupied >= capacity) {
                 Log.d("WaitingList", "Lottery already drawn or capacity full.");
+                if (listener != null) listener.onFailure(new IllegalStateException("Lottery already drawn or capacity full"));
                 return;
             }
 
-            int slotsAvailable = capacity - currentSelectedSize;
+            int slotsAvailable = capacity - occupied;
 
-            ArrayList<WaitlistUser> waiting = getWaiting();
-            if (waiting.isEmpty()) {
-                throw new IllegalStateException("No participants in the waiting list to draw from.");
+            if (waitingIndices.isEmpty()) {
+                if (listener != null) listener.onFailure(new IllegalStateException("No participants in the waiting list to draw from"));
+                return;
             }
 
-            int numberToDraw = Math.min(slotsAvailable, waiting.size());
+            int numberToDraw = Math.min(slotsAvailable, waitingIndices.size());
 
-            // Shuffle to ensure random selection
-            Collections.shuffle(waiting);
-
+            // Shuffle indices to pick random waiting users and update in-place
+            Collections.shuffle(waitingIndices);
             for (int i = 0; i < numberToDraw; i++) {
-                WaitlistUser winner = waiting.get(i);
-                // Find this user in the main waitList and update status
-                for (WaitlistUser user : waitList) {
-                    if (user.getUserId() == winner.getUserId()) {
-                        user.setStatus(1); // Set to selected
-                        break;
-                    }
-                }
+                int idx = waitingIndices.get(i);
+                WaitlistUser winner = waitList.get(idx);
+                winner.setStatus(1); // mark as chosen
             }
 
             // Update database
             updateDatabase("waitList", waitList);
 
-            status = "selected";
+            status = "drawn";
             updateDatabase("status", status);
+            
+            if (listener != null) listener.onSuccess(numberToDraw);
         }, e -> {
             Log.e("WaitingList", "Failed to get event", e);
+            if (listener != null) listener.onFailure(e);
         });
     }
 

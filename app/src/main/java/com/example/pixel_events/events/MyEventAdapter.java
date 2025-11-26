@@ -1,5 +1,7 @@
 package com.example.pixel_events.events;
 
+import static android.view.View.GONE;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +17,6 @@ import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 import com.example.pixel_events.waitinglist.WaitlistUser;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,7 @@ public class MyEventAdapter extends RecyclerView.Adapter<MyEventAdapter.EventVie
             if (currentUser != null) {
                 db.getWaitingList(event.getEventId(), waitingList -> {
                     if (waitingList != null) {
-                        checkAndSetStatus(waitingList.getWaitList(), currentUser.getUserId());
+                        checkAndSetStatus(waitingList.getWaitList(), currentUser.getUserId(), event.getEventId());
                     }
                 }, e -> {});
             }
@@ -106,21 +106,26 @@ public class MyEventAdapter extends RecyclerView.Adapter<MyEventAdapter.EventVie
             });
         }
 
-        private void checkAndSetStatus(List<WaitlistUser> list, int userId) {
+        private void checkAndSetStatus(List<WaitlistUser> list, int userId, int eventId) {
             if (list != null) {
                 boolean found = false;
                 for (WaitlistUser user : list) {
                     if (user.getUserId() == userId) {
                         int s = user.getStatus();
                         if (s == 0) status.setText("Waiting");
-                        else if (s == 1) status.setText("Accepted");
-                        else if (s == 2) status.setText("Declined");
+                        else if (s == 1) status.setText("Selected");
+                        else if (s == 2) status.setText("Accepted");
+                        else if (s == 3) status.setText("Declined");
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    status.setText("Waiting");
+                    db.getWaitingList(eventId, waitingList -> {
+                        status.setText(waitingList.getStatus());
+                    }, e -> {
+                        status.setVisibility(GONE);
+                    });
                 }
             }
         }

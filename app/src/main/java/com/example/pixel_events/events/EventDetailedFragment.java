@@ -133,9 +133,10 @@ public class EventDetailedFragment extends Fragment {
 
             if (waitList == null) {
                 // Load waitlist state
-                db.getWaitingList(eventId, waitList -> {
-                    if (waitList != null) {
-                        List<WaitlistUser> ids = waitList.getWaitList();
+                db.getWaitingList(eventId, wl -> {
+                    if (wl != null) {
+                        this.waitList = wl; // Update the class field
+                        List<WaitlistUser> ids = wl.getWaitList();
                         if (ids == null) {
                             ids = java.util.Collections.emptyList();
                         }
@@ -143,7 +144,7 @@ public class EventDetailedFragment extends Fragment {
                             if (user.getUserId() == userId) joined = true;
                         }
                         waitingListCount = ids.size();
-                        waitingListMaxCount = waitList.getMaxWaitlistSize();
+                        waitingListMaxCount = wl.getMaxWaitlistSize();
                     } else {
                         joined = false;
                         waitingListCount = 0;
@@ -241,6 +242,7 @@ public class EventDetailedFragment extends Fragment {
     private void renderCTA() {
         if (!isAdded() || joinLeaveButton == null)
             return;
+
         // If event not yet loaded, keep disabled loading state
         if (event == null) {
             joinLeaveButton.setText("Loading registration…");
@@ -270,24 +272,79 @@ public class EventDetailedFragment extends Fragment {
                 joinLeaveButton.setEnabled(false);
                 return;
             }
-            if (today.after(end) || (waitList != null && Objects.equals(waitList.getStatus(), "selected"))) {
+            if (today.after(end)) {
                 joinLeaveButton.setText("Registration Closed");
                 joinLeaveButton.setEnabled(false);
                 return;
             }
-
-            // Open window
-            if (joined) {
-                joinLeaveButton.setText("Leave\n" + waitingListCount + " in waiting list");
-                joinLeaveButton.setEnabled(true);
-            } else {
-                if (waitingListCount >= waitingListMaxCount) {
-                    joinLeaveButton.setText("Waitlist full");
+            
+            // Check if lottery has been drawn
+            if (this.waitList != null && Objects.equals(this.waitList.getStatus(), "drawn")) {
+                int userStatus = -1;
+                boolean wasInWaitlist = false;
+                if (this.waitList.getWaitList() != null) {
+                    for (WaitlistUser user : this.waitList.getWaitList()) {
+                        if (user.getUserId() == userId) {
+                            userStatus = user.getStatus();
+                            wasInWaitlist = true;
+                            break;
+                        }
+                    }
+                }
+                // Find user's status in waitlist
+                if (userStatus == 1) {
+                    // User was selected, show Accept button (will toggle to Decline after accepting)
+                    joinLeaveButton.setText("Accept Invitation");
+                    joinLeaveButton.setEnabled(true);
+                    joinLeaveButton.setOnClickListener(v -> {
+                        joinLeaveButton.setEnabled(false);
+                        updateUserStatus(2); // Accept
+                    });
+                    return;
+                } else if (userStatus == 2) {
+                    // User accepted, show Decline button
+                    joinLeaveButton.setText("Decline Invitation");
+                    joinLeaveButton.setEnabled(true);
+                    joinLeaveButton.setOnClickListener(v -> {
+                        joinLeaveButton.setEnabled(false);
+                        updateUserStatus(3); // Decline
+                    });
+                    return;
+                } else if (userStatus == 3) {
+                    // User declined, show Accept button
+                    joinLeaveButton.setText("Accept Invitation");
+                    joinLeaveButton.setEnabled(true);
+                    joinLeaveButton.setOnClickListener(v -> {
+                        joinLeaveButton.setEnabled(false);
+                        updateUserStatus(2); // Accept
+                    });
+                    return;
+                } else if (userStatus == 0) {
+                    // User was in waitlist but not selected
+                    joinLeaveButton.setText("Sorry, you were not selected");
                     joinLeaveButton.setEnabled(false);
                     return;
+                } else {
+                    // User was not in waitlist at all
+                    if (!wasInWaitlist) {
+                        joinLeaveButton.setText("Registration Closed");
+                        joinLeaveButton.setEnabled(false);
+                        return;
+                    }
                 }
-                joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
-                joinLeaveButton.setEnabled(true);
+            } else {
+                if (joined) {
+                    joinLeaveButton.setText("Leave\n" + waitingListCount + " in waiting list");
+                    joinLeaveButton.setEnabled(true);
+                } else {
+                    if (waitingListCount >= waitingListMaxCount) {
+                        joinLeaveButton.setText("Waitlist full");
+                        joinLeaveButton.setEnabled(false);
+                        return;
+                    }
+                    joinLeaveButton.setText("Join\n" + waitingListCount + " in waiting list");
+                    joinLeaveButton.setEnabled(true);
+                }
             }
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
@@ -329,6 +386,49 @@ public class EventDetailedFragment extends Fragment {
                     if (joinLeaveButton != null)
                         joinLeaveButton.setEnabled(true);
                 });
+    }
+
+    private void updateUserStatus(int newStatus) {
+        if (waitList == null) return;
+        
+        // Find user in waitlist and update status
+        WaitlistUser currentUser = null;
+        if (waitList.getWaitList() != null) {
+            for (WaitlistUser user : waitList.getWaitList()) {
+                if (user.getUserId() == userId) {
+                    currentUser = user;
+                    break;
+                }
+            }
+        }
+        
+        if (currentUser != null) {
+            currentUser.updateStatusInDb(eventId, newStatus, new WaitlistUser.OnStatusUpdateListener() {
+                @Override
+                public void onSuccess() {
+                    if (isAdded()) {
+                        requireActivity().runOnUiThread(() -> {
+                            toast(newStatus == 2 ? "Invitation accepted!" : "Invitation declined");
+                            // Reload waitlist and update UI
+                            db.getWaitingList(eventId, wl -> {
+                                waitList = wl;
+                                renderCTA();
+                            }, e -> Log.e(TAG, "Failed to reload waitlist", e));
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    if (isAdded()) {
+                        requireActivity().runOnUiThread(() -> {
+                            toast("Failed to update invitation: " + e.getMessage());
+                            Log.e(TAG, "Failed to update status", e);
+                        });
+                    }
+                }
+            });
+        }
     }
 
     private void toast(String msg) {

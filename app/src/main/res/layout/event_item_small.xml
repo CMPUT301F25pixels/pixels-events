@@ -69,6 +69,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Paid"
+        android:layout_gravity="center"
+        android:layout_marginEnd="8dp"
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:textStyle="bold"/>

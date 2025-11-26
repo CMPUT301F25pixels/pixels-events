@@ -20,10 +20,12 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
     }
 
     private final List<Profile> items;
+    private final WaitingList waitingList;
     private final OnItemClick listener;
 
-    public WaitingListAdapter(List<Profile> items, OnItemClick listener) {
+    public WaitingListAdapter(List<Profile> items, WaitingList waitingList, OnItemClick listener) {
         this.items = items;
+        this.waitingList = waitingList;
         this.listener = listener;
     }
 
@@ -40,6 +42,35 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         holder.title.setText(p.getUserName() != null ? p.getUserName() : "Unknown");
         holder.subtitle.setText(p.getEmail() != null ? p.getEmail() : "");
         holder.avatar.setImageResource(R.drawable.ic_launcher_foreground);
+        
+        // Find status for this user
+        int status = 0;
+        if (waitingList != null && waitingList.getWaitList() != null) {
+            for (WaitlistUser user : waitingList.getWaitList()) {
+                if (user.getUserId() == p.getUserId()) {
+                    status = user.getStatus();
+                    break;
+                }
+            }
+        }
+        
+        // Show status with color: 1-Selected(white), 2-Accepted(green), 3-Declined(red)
+        if (status == 1) {
+            holder.statusText.setText("Selected");
+            holder.statusText.setTextColor(holder.itemView.getContext().getResources().getColor(android.R.color.white, null));
+            holder.statusText.setVisibility(View.VISIBLE);
+        } else if (status == 2) {
+            holder.statusText.setText("Accepted");
+            holder.statusText.setTextColor(holder.itemView.getContext().getResources().getColor(android.R.color.holo_green_light, null));
+            holder.statusText.setVisibility(View.VISIBLE);
+        } else if (status == 3) {
+            holder.statusText.setText("Declined");
+            holder.statusText.setTextColor(holder.itemView.getContext().getResources().getColor(android.R.color.holo_red_light, null));
+            holder.statusText.setVisibility(View.VISIBLE);
+        } else {
+            holder.statusText.setVisibility(View.GONE);
+        }
+        
         holder.itemView.setOnClickListener(v -> listener.onClick(p));
     }
 
@@ -52,12 +83,14 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         final ImageView avatar;
         final TextView title;
         final TextView subtitle;
+        final TextView statusText;
 
         VH(@NonNull View itemView) {
             super(itemView);
             avatar = itemView.findViewById(R.id.item_profile_image);
             title = itemView.findViewById(R.id.item_profile_title);
             subtitle = itemView.findViewById(R.id.item_profile_email);
+            statusText = itemView.findViewById(R.id.item_profile_status);
         }
     }
 }

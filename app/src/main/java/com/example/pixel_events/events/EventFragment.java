@@ -34,7 +34,7 @@ public class EventFragment extends Fragment {
     private DatabaseHandler db;
     private Button previewButton, notificationPreferencesButton, viewWaitlistButton,
             deleteEventButton, editEventButton, setRegistrationButton, setWaitlistButton,
-            drawLotteryButton, cancelledParticipantsButton;
+            drawLotteryButton;
     private TextView eventTextView;
     private ImageView eventImageView;
     private ImageButton backButton;
@@ -94,7 +94,6 @@ public class EventFragment extends Fragment {
         setWaitlistButton = view.findViewById(R.id.event_fragment_SetWaitlistSize);
         eventTextView = view.findViewById(R.id.event_fragment_title);
         drawLotteryButton = view.findViewById(R.id.event_fragment_draw_lottery);
-        cancelledParticipantsButton = view.findViewById(R.id.event_fragment_cancelled_participants);
         eventImageView = view.findViewById(R.id.event_fragment_poster);
         backButton = view.findViewById(R.id.event_fragment_backbutton);
 
@@ -102,17 +101,6 @@ public class EventFragment extends Fragment {
 
         // Populate UI if event already loaded
         populateEventUI();
-
-        if (waitList != null && Objects.equals(waitList.getStatus(), "selected")) {
-            setRegistrationButton.setVisibility(GONE);
-            setWaitlistButton.setVisibility(GONE);
-            viewWaitlistButton.setText("View Selected List");
-            cancelledParticipantsButton.setVisibility(VISIBLE);
-            drawLotteryButton.setVisibility(GONE);
-        } else {
-            cancelledParticipantsButton.setVisibility(GONE);
-            drawLotteryButton.setVisibility(VISIBLE);
-        }
 
         previewButton.setOnClickListener(v -> {
             if (event != null)
@@ -153,7 +141,26 @@ public class EventFragment extends Fragment {
                 return;
             }
             try {
-                waitList.drawLottery();
+                waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                    @Override
+                    public void onSuccess(int numberDrawn) {
+                        // Show success dialog
+                        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                                .setTitle("Lottery Drawn")
+                                .setMessage(numberDrawn + " participant(s) have been randomly selected!")
+                                .setPositiveButton("OK", (dialog, which) -> {
+                                    // Reload waitlist and update UI
+                                    refreshWaitlistAndUI();
+                                })
+                                .show();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Log.e("EventFragment", "Error during lottery draw", e);
+                        Toast.makeText(getContext(), "Failed to draw lottery: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             } catch (Exception e) {
                 Log.e("EventFragment", "Error during lottery draw", e);
                 Toast.makeText(getContext(), "Failed to draw lottery.", Toast.LENGTH_SHORT).show();
@@ -197,6 +204,9 @@ public class EventFragment extends Fragment {
 
         // Enable buttons now that we have an event
         setButtonsEnabled(true);
+        
+        // Update UI based on waitlist status
+        updateUIBasedOnWaitlistStatus();
     }
 
     private void setButtonsEnabled(boolean enabled) {
@@ -218,6 +228,41 @@ public class EventFragment extends Fragment {
             drawLotteryButton.setEnabled(enabled);
         if (backButton != null)
             backButton.setEnabled(enabled);
+    }
+
+    private void refreshWaitlistAndUI() {
+        // Reload waitlist from database
+        db.getWaitingList(eventId, wlst -> {
+            if (wlst != null) {
+                waitList = wlst;
+                // Update UI based on new waitlist status
+                if (isAdded() && getView() != null) {
+                    requireActivity().runOnUiThread(() -> {
+                        updateUIBasedOnWaitlistStatus();
+                    });
+                }
+            }
+        }, e -> {
+            Log.e("EventFragment", "Failed to refresh waitlist", e);
+        });
+    }
+
+    private void updateUIBasedOnWaitlistStatus() {
+        if (waitList != null && Objects.equals(waitList.getStatus(), "drawn")) {
+            setRegistrationButton.setVisibility(GONE);
+            setWaitlistButton.setVisibility(GONE);
+            viewWaitlistButton.setText("View Selected List");
+            drawLotteryButton.setVisibility(GONE);
+            // Show event status in title
+            if (eventTextView != null && event != null) {
+                eventTextView.setText(event.getTitle());
+            }
+        } else {
+            drawLotteryButton.setVisibility(VISIBLE);
+            if (eventTextView != null && event != null) {
+                eventTextView.setText(event.getTitle());
+            }
+        }
     }
 
     private void replaceFragment(Fragment fragment) {

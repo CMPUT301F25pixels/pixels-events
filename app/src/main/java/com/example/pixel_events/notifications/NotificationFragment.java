@@ -72,9 +72,11 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.notifications_invitations) {
+                    // Ensure the invitations adapter is attached before loading
+                    notificationRecyclerView.setAdapter(invitationAdapter);
                     loadUserInvitations();
                 } else {
-                    // Placeholder for notifications
+                    // Placeholder for notifications - detach the invitations adapter
                     notificationRecyclerView.setAdapter(null); // Or a different adapter for notifications
                 }
             }
@@ -89,6 +91,8 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         super.onResume();
         // Refresh data when fragment becomes visible
         if (toggleGroup.getCheckedButtonId() == R.id.notifications_invitations) {
+            // Reattach adapter in case it was detached
+            notificationRecyclerView.setAdapter(invitationAdapter);
             loadUserInvitations();
         }
     }
@@ -100,9 +104,12 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         }
 
         DatabaseHandler.getInstance().getAllEvents(events -> {
-            currentInvitations.clear();
+            // Use a local list and set to deduplicate while building results to avoid race conditions
+            List<EventInvitation> newInvitations = new ArrayList<>();
+            java.util.Set<Integer> seenEventIds = new java.util.HashSet<>();
+
             if (events.isEmpty()) {
-                invitationAdapter.updateInvitations(new ArrayList<>());
+                invitationAdapter.updateInvitations(newInvitations);
                 return;
             }
 
@@ -113,19 +120,25 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                         List<WaitlistUser> selectedUsers = waitingList.getSelected();
                         if (selectedUsers != null) {
                             for (WaitlistUser user : selectedUsers) {
-                                if (user.getUserId() == currentUser.getUserId() && user.getStatus() == 1) { // Check for status 1 (selected)
-                                    currentInvitations.add(new EventInvitation(event, user));
+                                if (user.getUserId() == currentUser.getUserId() && user.getStatus() == 1) { // selected
+                                    // Avoid adding the same event twice
+                                    if (!seenEventIds.contains(event.getEventId())) {
+                                        seenEventIds.add(event.getEventId());
+                                        newInvitations.add(new EventInvitation(event, user));
+                                    }
                                 }
                             }
                         }
                     }
                     if (eventsProcessed.incrementAndGet() == events.size()) {
-                        invitationAdapter.updateInvitations(currentInvitations);
+                        currentInvitations = newInvitations; // replace backing field
+                        invitationAdapter.updateInvitations(new ArrayList<>(currentInvitations));
                     }
                 }, e -> {
                     Log.e(TAG, "Failed to get waitlist for event " + event.getEventId(), e);
                     if (eventsProcessed.incrementAndGet() == events.size()) {
-                        invitationAdapter.updateInvitations(currentInvitations);
+                        currentInvitations = newInvitations;
+                        invitationAdapter.updateInvitations(new ArrayList<>(currentInvitations));
                     }
                 });
             }
@@ -137,12 +150,14 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
 
     @Override
     public void onAccept(EventInvitation invitation) {
-        updateInvitationStatus(invitation, 1);
+        // 2 -> accepted in new mapping
+        updateInvitationStatus(invitation, 2);
     }
 
     @Override
     public void onDecline(EventInvitation invitation) {
-        updateInvitationStatus(invitation, 2);
+        // 3 -> declined in new mapping
+        updateInvitationStatus(invitation, 3);
     }
 
     private void updateInvitationStatus(EventInvitation invitation, int newStatus) {
