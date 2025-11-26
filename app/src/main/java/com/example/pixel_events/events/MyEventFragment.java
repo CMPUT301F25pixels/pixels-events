@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.home.DashboardAdapter;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -23,11 +22,15 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Calendar;
 
 public class MyEventFragment extends Fragment {
     private static final String TAG = "MyEventFragment";
     private RecyclerView eventsRecyclerView;
-    private DashboardAdapter adapter;
+    private MyEventAdapter adapter;
     private MaterialButtonToggleGroup toggleGroup;
     private Profile currentUser;
 
@@ -69,7 +72,7 @@ public class MyEventFragment extends Fragment {
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Initialize adapter
-        adapter = new DashboardAdapter(new ArrayList<>(), event -> {
+        adapter = new MyEventAdapter(new ArrayList<>(), event -> {
             if (!isAdded())
                 return;
             Fragment detail;
@@ -115,13 +118,8 @@ public class MyEventFragment extends Fragment {
             // For organizers, show their created upcoming events
             loadOrganizerEvents(true);
         } else {
-            // For users, show events they're signed up for
-            List<Integer> upcomingEventIds = currentUser.getEventsUpcoming();
-            if (upcomingEventIds == null || upcomingEventIds.isEmpty()) {
-                adapter.updateEvents(new ArrayList<>());
-                return;
-            }
-            loadEventsByIds(upcomingEventIds);
+            // For users, show events they're signed up for (in any waitlist)
+            loadUserEvents(true);
         }
     }
 
@@ -136,12 +134,7 @@ public class MyEventFragment extends Fragment {
             loadOrganizerEvents(false);
         } else {
             // For users, show past events they participated in
-            List<Integer> previousEventIds = currentUser.getEventsPart();
-            if (previousEventIds == null || previousEventIds.isEmpty()) {
-                adapter.updateEvents(new ArrayList<>());
-                return;
-            }
-            loadEventsByIds(previousEventIds);
+            loadUserEvents(false);
         }
     }
 
@@ -149,19 +142,26 @@ public class MyEventFragment extends Fragment {
         DatabaseHandler db = DatabaseHandler.getInstance();
         int organizerId = currentUser.getUserId();
 
-        // Get all events and filter by organizer ID
+        // Get all events and filter by organizer ID and date
         db.getAllEvents(
                 allEvents -> {
                     List<Event> filteredEvents = new ArrayList<>();
+                    Date today = getTodayDate();
+                    
                     for (Event event : allEvents) {
                         if (event.getOrganizerId() == organizerId) {
-                            // TODO: Add proper date comparison to determine if event is upcoming or past
-                            // For now, show all organizer events
-                            filteredEvents.add(event);
+                            Date eventEndDate = parseDate(event.getEventEndDate());
+                            if (eventEndDate != null) {
+                                if (isUpcoming && !eventEndDate.before(today)) {
+                                    filteredEvents.add(event);
+                                } else if (!isUpcoming && eventEndDate.before(today)) {
+                                    filteredEvents.add(event);
+                                }
+                            }
                         }
                     }
                     adapter.updateEvents(filteredEvents);
-                    Log.d(TAG, "Loaded " + filteredEvents.size() + " events for organizer");
+                    Log.d(TAG, "Loaded " + filteredEvents.size() + " " + (isUpcoming ? "upcoming" : "previous") + " events for organizer");
                 },
                 e -> {
                     Log.e(TAG, "Error loading organizer events", e);
@@ -169,25 +169,55 @@ public class MyEventFragment extends Fragment {
                 });
     }
 
-    private void loadEventsByIds(List<Integer> eventIds) {
+    private void loadUserEvents(boolean isUpcoming) {
         DatabaseHandler db = DatabaseHandler.getInstance();
+        int userId = currentUser.getUserId();
 
-        // Get all events and filter by IDs
-        db.getAllEvents(
-                allEvents -> {
+        // Get all events user is part of (from waitlists) and filter by date
+        db.getEventsForUser(userId,
+                userEvents -> {
                     List<Event> filteredEvents = new ArrayList<>();
-                    for (Event event : allEvents) {
-                        if (eventIds.contains(event.getEventId())) {
-                            filteredEvents.add(event);
+                    Date today = getTodayDate();
+                    
+                    for (Event event : userEvents) {
+                        Date eventEndDate = parseDate(event.getEventEndDate());
+                        if (eventEndDate != null) {
+                            if (isUpcoming && !eventEndDate.before(today)) {
+                                filteredEvents.add(event);
+                            } else if (!isUpcoming && eventEndDate.before(today)) {
+                                filteredEvents.add(event);
+                            }
                         }
                     }
                     adapter.updateEvents(filteredEvents);
-                    Log.d(TAG, "Loaded " + filteredEvents.size() + " events from user's list");
+                    Log.d(TAG, "Loaded " + filteredEvents.size() + " " + (isUpcoming ? "upcoming" : "previous") + " events for user");
                 },
                 e -> {
-                    Log.e(TAG, "Error loading events by IDs", e);
+                    Log.e(TAG, "Error loading user events", e);
                     Toast.makeText(getContext(), "Failed to load events", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private Date getTodayDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+
+    private Date parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            return null;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            return sdf.parse(dateStr);
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing date: " + dateStr, e);
+            return null;
+        }
     }
 
     @Override

@@ -38,7 +38,7 @@
             android:layout_weight="1"
             app:backgroundTint="@color/toggle_button_bg_tint_card"
             android:fontFamily="@font/poppins_bold"
-            android:text="Previous"
+            android:text="Invitations"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold" />

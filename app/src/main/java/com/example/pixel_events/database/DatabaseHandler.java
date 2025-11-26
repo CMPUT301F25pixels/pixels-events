@@ -365,18 +365,184 @@ public class DatabaseHandler {
     public Task<Void> joinWaitingList(int eventId, int userId) {
         String docId = String.valueOf(eventId);
         return ensureWaitListExists(eventId)
-                .continueWithTask(t -> waitListRef.document(docId)
-                        .update("waitList", com.google.firebase.firestore.FieldValue.arrayUnion(userId)));
+                .continueWithTask(t -> waitListRef.document(docId).get())
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        return Tasks.forException(task.getException() != null ? 
+                            task.getException() : new RuntimeException("Failed to read waitlist"));
+                    }
+                    
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot == null || !snapshot.exists()) {
+                        return Tasks.forException(new RuntimeException("Waitlist not found"));
+                    }
+                    
+                    // Get current waitList
+                    java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
+                    if (waitList == null) {
+                        waitList = new java.util.ArrayList<>();
+                    }
+                    
+                    // Check if user already exists
+                    boolean userExists = false;
+                    for (Object obj : waitList) {
+                        if (obj instanceof java.util.Map) {
+                            java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                            Object uid = userMap.get("userId");
+                            int existingUserId = 0;
+                            if (uid instanceof Number) {
+                                existingUserId = ((Number) uid).intValue();
+                            } else if (uid instanceof String) {
+                                try {
+                                    existingUserId = Integer.parseInt((String) uid);
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+                            if (existingUserId == userId) {
+                                userExists = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // If user doesn't exist, add them
+                    if (!userExists) {
+                        java.util.Map<String, Object> newUser = new java.util.HashMap<>();
+                        newUser.put("userId", userId);
+                        newUser.put("status", 0); // 0 = waiting/undecided
+                        return waitListRef.document(docId)
+                                .update("waitList", com.google.firebase.firestore.FieldValue.arrayUnion(newUser));
+                    } else {
+                        // User already exists, do nothing
+                        return Tasks.forResult(null);
+                    }
+                });
     }
 
     /**
-     * Removes the user id from the event waitlist (no-op if absent).
+     * Removes the user from the event waitlist by finding and removing their WaitlistUser object.
      */
     public Task<Void> leaveWaitingList(int eventId, int userId) {
         String docId = String.valueOf(eventId);
         return ensureWaitListExists(eventId)
-                .continueWithTask(t -> waitListRef.document(docId)
-                        .update("waitList", com.google.firebase.firestore.FieldValue.arrayRemove(userId)));
+                .continueWithTask(t -> waitListRef.document(docId).get())
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        return Tasks.forException(task.getException() != null ? 
+                            task.getException() : new RuntimeException("Failed to read waitlist"));
+                    }
+                    
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot == null || !snapshot.exists()) {
+                        return Tasks.forException(new RuntimeException("Waitlist not found"));
+                    }
+                    
+                    // Get current waitList
+                    java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
+                    if (waitList == null || waitList.isEmpty()) {
+                        return Tasks.forResult(null); // Nothing to remove
+                    }
+                    
+                    // Find and remove the user's entry
+                    java.util.List<Object> updatedWaitList = new java.util.ArrayList<>();
+                    for (Object obj : waitList) {
+                        if (obj instanceof java.util.Map) {
+                            java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                            Object uid = userMap.get("userId");
+                            int existingUserId = 0;
+                            if (uid instanceof Number) {
+                                existingUserId = ((Number) uid).intValue();
+                            } else if (uid instanceof String) {
+                                try {
+                                    existingUserId = Integer.parseInt((String) uid);
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+                            // Keep all users except the one leaving
+                            if (existingUserId != userId) {
+                                updatedWaitList.add(obj);
+                            }
+                        }
+                    }
+                    
+                    // Update the waitlist with the filtered list
+                    return waitListRef.document(docId).update("waitList", updatedWaitList);
+                });
+    }
+
+    /**
+     * Get all events that a user is part of (in any waitlist).
+     * @param userId The user ID to search for
+     * @param listener Success callback with list of Events
+     * @param errorListener Failure callback
+     */
+    public void getEventsForUser(int userId,
+                                 OnSuccessListener<java.util.List<Event>> listener,
+                                 OnFailureListener errorListener) {
+        // First get all waitlists
+        waitListRef.get()
+                .addOnSuccessListener(waitlistSnapshot -> {
+                    // Collect event IDs where user is in the waitlist
+                    java.util.List<Integer> eventIds = new java.util.ArrayList<>();
+                    
+                    for (QueryDocumentSnapshot doc : waitlistSnapshot) {
+                        try {
+                            java.util.List<Object> waitList = (java.util.List<Object>) doc.get("waitList");
+                            if (waitList != null) {
+                                for (Object obj : waitList) {
+                                    if (obj instanceof java.util.Map) {
+                                        java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                                        Object uid = userMap.get("userId");
+                                        int existingUserId = 0;
+                                        if (uid instanceof Number) {
+                                            existingUserId = ((Number) uid).intValue();
+                                        } else if (uid instanceof String) {
+                                            try {
+                                                existingUserId = Integer.parseInt((String) uid);
+                                            } catch (NumberFormatException e) {
+                                                // ignore
+                                            }
+                                        }
+                                        if (existingUserId == userId) {
+                                            // Get event ID from document ID
+                                            try {
+                                                int eventId = Integer.parseInt(doc.getId());
+                                                eventIds.add(eventId);
+                                            } catch (NumberFormatException e) {
+                                                // ignore
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("DB", "Error parsing waitlist document: " + doc.getId(), e);
+                        }
+                    }
+                    
+                    // Now fetch all the events
+                    if (eventIds.isEmpty()) {
+                        listener.onSuccess(new java.util.ArrayList<>());
+                        return;
+                    }
+                    
+                    getAllEvents(allEvents -> {
+                        java.util.List<Event> userEvents = new java.util.ArrayList<>();
+                        for (Event event : allEvents) {
+                            if (eventIds.contains(event.getEventId())) {
+                                userEvents.add(event);
+                            }
+                        }
+                        listener.onSuccess(userEvents);
+                    }, errorListener);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting waitlists for user", e);
+                    errorListener.onFailure(e);
+                });
     }
 
     // Map a Firestore snapshot to Event while coercing types (e.g., String -> int)
@@ -522,44 +688,51 @@ public class DatabaseHandler {
                 }
             }
 
-            // Coerce arrays to ArrayList<Integer>
+            // Coerce arrays to ArrayList<WaitlistUser>
             Object wl = data.get("waitList");
             if (wl instanceof java.util.List) {
-                java.util.ArrayList<Integer> coerced = new java.util.ArrayList<>();
+                java.util.ArrayList<com.example.pixel_events.waitinglist.WaitlistUser> coerced = new java.util.ArrayList<>();
                 for (Object o : (java.util.List<?>) wl) {
-                    if (o instanceof Number)
-                        coerced.add(((Number) o).intValue());
-                    else if (o instanceof String) {
+                    if (o instanceof java.util.Map) {
                         try {
-                            coerced.add(Integer.parseInt((String) o));
+                            java.util.Map<String, Object> map = (java.util.Map<String, Object>) o;
+                            int userId = 0;
+                            int status = 0;
+                            if (map.containsKey("userId")) {
+                                Object uid = map.get("userId");
+                                if (uid instanceof Number) userId = ((Number) uid).intValue();
+                                else if (uid instanceof String) userId = Integer.parseInt((String) uid);
+                            }
+                            if (map.containsKey("status")) {
+                                Object st = map.get("status");
+                                if (st instanceof Number) status = ((Number) st).intValue();
+                                else if (st instanceof String) status = Integer.parseInt((String) st);
+                            }
+                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(userId, status));
+                        } catch (Exception e) {
+                            Log.e("DB", "Failed to parse WaitlistUser map", e);
+                        }
+                    } else if (o instanceof Number) {
+                        // Handle legacy data where waitList was just a list of user IDs
+                        coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(((Number) o).intValue(), 0));
+                    } else if (o instanceof String) {
+                        try {
+                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(Integer.parseInt((String) o), 0));
                         } catch (NumberFormatException ignored) {
                         }
                     }
                 }
                 data.put("waitList", coerced);
             }
-            Object sel = data.get("selected");
-            if (sel instanceof java.util.List) {
-                java.util.ArrayList<Integer> coerced = new java.util.ArrayList<>();
-                for (Object o : (java.util.List<?>) sel) {
-                    if (o instanceof Number)
-                        coerced.add(((Number) o).intValue());
-                    else if (o instanceof String) {
-                        try {
-                            coerced.add(Integer.parseInt((String) o));
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                }
-                data.put("selected", coerced);
-            }
+            
+            // Remove selected field handling as it's deprecated
+            data.remove("selected");
 
             WaitingList wlObj = new WaitingList();
             wlObj.setAutoUpdateDatabase(false);
             setIfPresent(wlObj, data, "eventId");
             setIfPresent(wlObj, data, "status");
             setIfPresent(wlObj, data, "waitList");
-            setIfPresent(wlObj, data, "selected");
             setIfPresent(wlObj, data, "maxWaitlistSize");
             return wlObj;
         }

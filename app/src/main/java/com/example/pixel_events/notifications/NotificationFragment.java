@@ -16,15 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
+import com.example.pixel_events.events.EventInvitation;
+import com.example.pixel_events.events.InvitationAdapter;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.profile.Profile;
-import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NotificationFragment extends Fragment implements InvitationAdapter.OnInvitationInteractionListener {
@@ -109,10 +109,13 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
             AtomicInteger eventsProcessed = new AtomicInteger(0);
             for (Event event : events) {
                 DatabaseHandler.getInstance().getWaitingList(event.getEventId(), waitingList -> {
-                    if (waitingList != null && waitingList.getSelected() != null) {
-                        for (WaitlistUser user : waitingList.getSelected()) {
-                            if (user.getUserId() == currentUser.getUserId() && user.getStatus() == 0) {
-                                currentInvitations.add(new EventInvitation(event, user));
+                    if (waitingList != null) {
+                        List<WaitlistUser> selectedUsers = waitingList.getSelected();
+                        if (selectedUsers != null) {
+                            for (WaitlistUser user : selectedUsers) {
+                                if (user.getUserId() == currentUser.getUserId() && user.getStatus() == 1) { // Check for status 1 (selected)
+                                    currentInvitations.add(new EventInvitation(event, user));
+                                }
                             }
                         }
                     }
@@ -134,40 +137,28 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
 
     @Override
     public void onAccept(EventInvitation invitation) {
-        updateUserStatus(invitation, 1);
+        updateInvitationStatus(invitation, 1);
     }
 
     @Override
     public void onDecline(EventInvitation invitation) {
-        updateUserStatus(invitation, 2);
+        updateInvitationStatus(invitation, 2);
     }
 
-    private void updateUserStatus(EventInvitation invitation, int newStatus) {
-        Event event = invitation.getEvent();
-        WaitlistUser userToUpdate = invitation.getWaitlistUser();
-
-        DatabaseHandler.getInstance().getWaitingList(event.getEventId(), waitingList -> {
-            if (waitingList != null && waitingList.getSelected() != null) {
-                for (WaitlistUser u : waitingList.getSelected()) {
-                    if (u.getUserId() == userToUpdate.getUserId()) {
-                        u.setStatus(newStatus);
-                        break;
-                    }
-                }
-                updateUserStatusInDb(event.getEventId(), waitingList.getSelected());
-                // Remove from local list and update adapter
+    private void updateInvitationStatus(EventInvitation invitation, int newStatus) {
+        invitation.getWaitlistUser().updateStatusInDb(invitation.getEvent().getEventId(), newStatus, new WaitlistUser.OnStatusUpdateListener() {
+            @Override
+            public void onSuccess() {
                 currentInvitations.remove(invitation);
                 invitationAdapter.updateInvitations(new ArrayList<>(currentInvitations));
                 Toast.makeText(getContext(), "Invitation updated.", Toast.LENGTH_SHORT).show();
             }
-        }, e -> Log.e(TAG, "Failed to get waitlist for status update", e));
-    }
 
-    private void updateUserStatusInDb(int eventId, List<WaitlistUser> updatedSelectedList) {
-        DatabaseHandler.getInstance().getWaitListCollection()
-                .document(String.valueOf(eventId))
-                .update("selected", updatedSelectedList)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Waitlist status updated for user in event " + eventId))
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to update waitlist status", e));
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "Failed to update status", e);
+                Toast.makeText(getContext(), "Failed to update invitation.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

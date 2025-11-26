@@ -1,4 +1,4 @@
-package com.example.pixel_events.notifications;
+package com.example.pixel_events.events;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.events.Event;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.text.SimpleDateFormat;

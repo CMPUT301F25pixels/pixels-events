@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class EventDetailedFragment extends Fragment {
     private static final String TAG = "EventDetailedFragment";
@@ -269,7 +270,7 @@ public class EventDetailedFragment extends Fragment {
                 joinLeaveButton.setEnabled(false);
                 return;
             }
-            if (today.after(end)) {
+            if (today.after(end) || (waitList != null && Objects.equals(waitList.getStatus(), "selected"))) {
                 joinLeaveButton.setText("Registration Closed");
                 joinLeaveButton.setEnabled(false);
                 return;

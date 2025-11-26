@@ -112,6 +112,31 @@
                 android:textSize="16sp" />
 
             <Button
+                android:id="@+id/event_fragment_cancelled_participants"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Cancelled Participants"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                android:textSize="16sp" />
+
+
+            <Button
+                android:id="@+id/event_fragment_draw_lottery"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Draw Lottery"
+                android:clickable="false"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
                 android:id="@+id/event_fragment_notificationspreferences"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"

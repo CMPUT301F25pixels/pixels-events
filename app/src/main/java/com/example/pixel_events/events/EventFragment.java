@@ -1,5 +1,8 @@
 package com.example.pixel_events.events;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +25,16 @@ import com.example.pixel_events.utils.ImageConversion;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitingListFragment;
 
+import java.util.Objects;
+
 public class EventFragment extends Fragment {
     private Event event;
     private WaitingList waitList;
     private int eventId = -1;
     private DatabaseHandler db;
     private Button previewButton, notificationPreferencesButton, viewWaitlistButton,
-            deleteEventButton, editEventButton, setRegistrationButton, setWaitlistButton;
+            deleteEventButton, editEventButton, setRegistrationButton, setWaitlistButton,
+            drawLotteryButton, cancelledParticipantsButton;
     private TextView eventTextView;
     private ImageView eventImageView;
     private ImageButton backButton;
@@ -87,6 +93,8 @@ public class EventFragment extends Fragment {
         setRegistrationButton = view.findViewById(R.id.event_fragment_set_registration);
         setWaitlistButton = view.findViewById(R.id.event_fragment_SetWaitlistSize);
         eventTextView = view.findViewById(R.id.event_fragment_title);
+        drawLotteryButton = view.findViewById(R.id.event_fragment_draw_lottery);
+        cancelledParticipantsButton = view.findViewById(R.id.event_fragment_cancelled_participants);
         eventImageView = view.findViewById(R.id.event_fragment_poster);
         backButton = view.findViewById(R.id.event_fragment_backbutton);
 
@@ -94,6 +102,17 @@ public class EventFragment extends Fragment {
 
         // Populate UI if event already loaded
         populateEventUI();
+
+        if (waitList != null && Objects.equals(waitList.getStatus(), "selected")) {
+            setRegistrationButton.setVisibility(GONE);
+            setWaitlistButton.setVisibility(GONE);
+            viewWaitlistButton.setText("View Selected List");
+            cancelledParticipantsButton.setVisibility(VISIBLE);
+            drawLotteryButton.setVisibility(GONE);
+        } else {
+            cancelledParticipantsButton.setVisibility(GONE);
+            drawLotteryButton.setVisibility(VISIBLE);
+        }
 
         previewButton.setOnClickListener(v -> {
             if (event != null)
@@ -126,6 +145,19 @@ public class EventFragment extends Fragment {
         setWaitlistButton.setOnClickListener(v -> {
             SetWaitlistFragment.newInstance(eventId)
                     .show(getParentFragmentManager(), "setWaitlistSize");
+        });
+
+        drawLotteryButton.setOnClickListener(v -> {
+            if (waitList == null) {
+                Toast.makeText(getContext(), "Waiting list not loaded yet.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                waitList.drawLottery();
+            } catch (Exception e) {
+                Log.e("EventFragment", "Error during lottery draw", e);
+                Toast.makeText(getContext(), "Failed to draw lottery.", Toast.LENGTH_SHORT).show();
+            }
         });
 
         deleteEventButton.setOnClickListener(v -> {
@@ -176,6 +208,16 @@ public class EventFragment extends Fragment {
             viewWaitlistButton.setEnabled(enabled);
         if (deleteEventButton != null)
             deleteEventButton.setEnabled(enabled);
+        if (editEventButton != null)
+            editEventButton.setEnabled(enabled);
+        if (setRegistrationButton != null)
+            setRegistrationButton.setEnabled(enabled);
+        if (setWaitlistButton != null)
+            setWaitlistButton.setEnabled(enabled);
+        if (drawLotteryButton != null)
+            drawLotteryButton.setEnabled(enabled);
+        if (backButton != null)
+            backButton.setEnabled(enabled);
     }
 
     private void replaceFragment(Fragment fragment) {

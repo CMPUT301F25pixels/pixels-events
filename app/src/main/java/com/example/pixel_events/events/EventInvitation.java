@@ -1,6 +1,5 @@
-package com.example.pixel_events.notifications;
+package com.example.pixel_events.events;
 
-import com.example.pixel_events.events.Event;
 import com.example.pixel_events.waitinglist.WaitlistUser;
 
 public class EventInvitation {
