@@ -56,6 +56,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation(libs.firebase.firestore) // If version catalog duplicates, keep – Gradle will unify.
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 
     // --- Imaging ---
     implementation("com.github.bumptech.glide:glide:5.0.5")
