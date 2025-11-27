@@ -8,6 +8,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.databinding.ActivityDashboardBinding;
 import com.example.pixel_events.events.CreateEventFragment;
 import com.example.pixel_events.login.AuthManager;
@@ -15,8 +16,67 @@ import com.example.pixel_events.notifications.NotificationFragment;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.example.pixel_events.notifications.Notification;
+import com.google.firebase.firestore.DocumentChange;
+import androidx.appcompat.app.AlertDialog;
+
 public class DashboardActivity extends AppCompatActivity {
     private ActivityDashboardBinding binding;
+    private com.google.firebase.firestore.ListenerRegistration notificationListener;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNotificationListener();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (notificationListener != null) {
+            notificationListener.remove();
+            notificationListener = null;
+        }
+    }
+
+    private void setupNotificationListener() {
+        Profile user = AuthManager.getInstance().getCurrentUserProfile();
+        if (user != null) {
+            notificationListener = DatabaseHandler.getInstance().getAccountCollection()
+                .document(String.valueOf(user.getUserId()))
+                .collection("Notifications")
+                .whereEqualTo("read", false) // Only listen to unread
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        android.util.Log.w("Dashboard", "Listen failed.", e);
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            if (dc.getType() == DocumentChange.Type.ADDED) {
+                                Notification n = dc.getDocument().toObject(Notification.class);
+                                showNotificationAlert(n, user.getUserId());
+                            }
+                        }
+                    }
+                });
+        }
+    }
+
+    private void showNotificationAlert(Notification n, int userId) {
+        if (n == null) return;
+        
+        new AlertDialog.Builder(this)
+               .setTitle(n.getTitle())
+               .setMessage(n.getMessage())
+               .setPositiveButton("OK", (dialog, id) -> {
+                   DatabaseHandler.getInstance().markNotificationRead(userId, n.getNotificationId());
+                   dialog.dismiss();
+               })
+               .setCancelable(false)
+               .show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

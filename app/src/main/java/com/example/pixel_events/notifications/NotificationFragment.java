@@ -24,17 +24,25 @@ import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * NotificationFragment combines two features:
+ * 1. System Notifications (admin alerts, deletions, lottery results)
+ * 2. Event Invitations (accept/decline lottery wins)
+ */
 public class NotificationFragment extends Fragment implements InvitationAdapter.OnInvitationInteractionListener {
     private static final String TAG = "NotificationFragment";
     private RecyclerView notificationRecyclerView;
     private Profile currentUser;
     private MaterialButtonToggleGroup toggleGroup;
     private InvitationAdapter invitationAdapter;
+    private NotificationAdapter notificationAdapter;
     private List<EventInvitation> currentInvitations = new ArrayList<>();
+    private List<Notification> systemNotifications = new ArrayList<>();
 
     public NotificationFragment() {
         // Required empty public constructor
@@ -61,9 +69,9 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         toggleGroup = view.findViewById(R.id.notification_selection);
         notificationRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize adapter
+        // Initialize both adapters
         invitationAdapter = new InvitationAdapter(new ArrayList<>(), this);
-        notificationRecyclerView.setAdapter(invitationAdapter);
+        notificationAdapter = new NotificationAdapter();
 
         if (currentUser == null) {
             Toast.makeText(getContext(), "Please log in to see notifications.", Toast.LENGTH_SHORT).show();
@@ -76,28 +84,38 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                     // Ensure the invitations adapter is attached before loading
                     notificationRecyclerView.setAdapter(invitationAdapter);
                     loadUserInvitations();
-                } else {
-                    // Placeholder for notifications - detach the invitations adapter
-                    notificationRecyclerView.setAdapter(null); // Or a different adapter for notifications
+                } else if (checkedId == R.id.notifications_notification) {
+                    // Show system notifications (my feature)
+                    notificationRecyclerView.setAdapter(notificationAdapter);
+                    loadSystemNotifications();
                 }
             }
         });
 
-        // Set default selection
+        // Set default selection to invitations
         toggleGroup.check(R.id.notifications_invitations);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh data when fragment becomes visible
-        if (toggleGroup.getCheckedButtonId() == R.id.notifications_invitations) {
-            // Reattach adapter in case it was detached
+
+        // Reattach adapter based on which button is checked
+        int checkedId = toggleGroup.getCheckedButtonId();
+
+        if (checkedId == R.id.notifications_invitations) {
             notificationRecyclerView.setAdapter(invitationAdapter);
             loadUserInvitations();
+        } else if (checkedId == R.id.notifications_notification) {
+            // If you have a separate adapter for notifications, attach it here
+            // notificationRecyclerView.setAdapter(notificationAdapter);
+            loadSystemNotifications();
         }
     }
 
+    /**
+     * Load event invitations (Krupal's feature - lottery accept/decline)
+     */
     private void loadUserInvitations() {
         if (currentUser == null) {
             invitationAdapter.updateInvitations(new ArrayList<>());
@@ -146,6 +164,31 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         }, e -> {
             Log.e(TAG, "Failed to get all events", e);
             Toast.makeText(getContext(), "Error loading events.", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    /**
+     * Load system notifications (my feature - admin alerts, lottery results, etc.)
+     */
+    private void loadSystemNotifications() {
+        if (currentUser == null) return;
+
+        DatabaseHandler.getInstance().listenToNotifications(currentUser.getUserId(), (snapshots, error) -> {
+            if (error != null) {
+                Log.e(TAG, "Error listening to notifications", error);
+                return;
+            }
+            if (snapshots != null) {
+                systemNotifications.clear();
+                for (com.google.firebase.firestore.DocumentSnapshot doc : snapshots.getDocuments()) {
+                    Notification n = doc.toObject(Notification.class);
+                    if (n != null) systemNotifications.add(n);
+                }
+                
+                if (notificationAdapter != null) {
+                    notificationAdapter.setNotifications(systemNotifications);
+                }
+            }
         });
     }
 
