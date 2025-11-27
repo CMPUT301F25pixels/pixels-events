@@ -14,6 +14,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.example.pixel_events.notifications.Notification;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -158,6 +162,81 @@ public class DatabaseHandler {
                 });
     }
 
+    // NOTIFICATION FUNCTIONS
+    // -----------------------------------------------------------------------
+
+    /**
+     * Adds a notification to a specific user's notification collection.
+     */
+    public void addNotification(int userId, Notification notification) {
+        // Ensure recipientId is set
+        if (notification.getRecipientId() == 0) {
+            notification.setRecipientId(userId);
+        }
+
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notification.getNotificationId())
+                .set(notification)
+                .addOnFailureListener(e -> Log.e("DB", "Failed to send notification to user " + userId, e));
+        
+        // Log globally
+        db.collection("NotificationLogs")
+            .document(notification.getNotificationId())
+            .set(notification);
+    }
+
+    /**
+     * Listens for real-time notifications for a specific user.
+     */
+    public void listenToNotifications(int userId, EventListener<QuerySnapshot> listener) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener(listener);
+    }
+
+    /**
+     * Mark a notification as read/deleted (or just delete it from DB).
+     */
+    public void deleteNotification(int userId, String notificationId) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notificationId)
+                .delete();
+    }
+
+    public void markNotificationRead(int userId, String notificationId) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notificationId)
+                .update("read", true);
+    }
+
+    // NOTIFICATION HELPERS
+    // -----------------------------------------------------------------------
+
+    public void sendInviteNotification(int eventId, String eventTitle, int userId) {
+        Notification n = new Notification("Event Invitation", 
+            "You have been invited to sign up for " + eventTitle, 
+            "INVITE", eventId, userId);
+        addNotification(userId, n);
+    }
+
+    public void sendWinNotification(int eventId, String eventTitle, int userId) {
+        Notification n = new Notification("Lottery Won!", 
+            "You have been selected for " + eventTitle + ". Please sign up!", 
+            "LOTTERY_WIN", eventId, userId);
+        addNotification(userId, n);
+    }
+    
+    public void sendLossNotification(int eventId, String eventTitle, int userId) {
+        Notification n = new Notification("Lottery Result", 
+            "Unfortunately you were not selected for " + eventTitle + ".", 
+            "LOTTERY_LOSS", eventId, userId);
+        addNotification(userId, n);
+    }
+
     // ACCOUNT INFO FUNCTIONS
     // ---------------------------------------------------------------------
 
@@ -188,6 +267,16 @@ public class DatabaseHandler {
     }
 
     public void deleteAcc(int userID) {
+        // 1. Notify User
+        Notification notice = new Notification(
+            "Profile Deleted",
+            "Your profile has been deleted by the Admin.",
+            "ADMIN_DELETE",
+            -1,
+            userID
+        );
+        addNotification(userID, notice);
+
         accRef.document(String.valueOf(userID))
                 .delete()
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
@@ -322,14 +411,48 @@ public class DatabaseHandler {
     }
 
     public void deleteEvent(int eventID) {
-        eventRef.document(String.valueOf(eventID))
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("DB", "Deleted event: " + eventID))
-                .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
-        waitListRef.document(String.valueOf(eventID))
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("DB", "Deleted Waitlist for event: " + eventID))
-                .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+        // 1. Notify all entrants in waitlist and selected list
+        getWaitingList(eventID, waitList -> {
+            if (waitList != null) {
+                // Notify waitlist
+                if (waitList.getWaitList() != null) {
+                    for (Integer uid : waitList.getWaitList()) {
+                        Notification notice = new Notification(
+                            "Event Cancelled",
+                            "The event you interacted with has been cancelled by the Admin.",
+                            "ADMIN_DELETE",
+                            eventID,
+                            uid
+                        );
+                        addNotification(uid, notice);
+                    }
+                }
+                // Notify selected
+                if (waitList.getSelected() != null) {
+                    for (Integer uid : waitList.getSelected()) {
+                        Notification notice = new Notification(
+                            "Event Cancelled",
+                            "The event you interacted with has been cancelled by the Admin.",
+                            "ADMIN_DELETE",
+                            eventID,
+                            uid
+                        );
+                        addNotification(uid, notice);
+                    }
+                }
+            }
+            
+            // 2. Delete event and waitlist after notifying
+            eventRef.document(String.valueOf(eventID))
+                    .delete()
+                    .addOnSuccessListener(unused -> Log.d("DB", "Deleted event: " + eventID))
+                    .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+            waitListRef.document(String.valueOf(eventID))
+                    .delete()
+                    .addOnSuccessListener(unused -> Log.d("DB", "Deleted Waitlist for event: " + eventID))
+                    .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+            
+        }, e -> Log.e("DB", "Error fetching waitlist for delete notification", e));
     }
 
     // WAITING LIST PUBLIC OPERATIONS (Task-based)
