@@ -12,6 +12,7 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.databinding.ActivityDashboardBinding;
 import com.example.pixel_events.events.CreateEventFragment;
 import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.notifications.NotificationFragment;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -133,7 +134,7 @@ public class DashboardActivity extends AppCompatActivity {
                 }
 
                 // Update the add button visibility for current user role
-                updateAddButtonVisibility();
+                updateButtonVisibility();
             });
 
             // Hook up add button click once
@@ -149,6 +150,22 @@ public class DashboardActivity extends AppCompatActivity {
                             .beginTransaction()
                             .setReorderingAllowed(true)
                             .add(R.id.overlay_fragment_container, new CreateEventFragment())
+                            .addToBackStack("overlay")
+                            .commit();
+                });
+            }
+            if (binding.dashboardShowNotifications != null){
+                binding.dashboardShowNotifications.setOnClickListener(v -> {
+                    if (binding.dashboardTitle != null) {
+                        binding.dashboardTitle.setText("Notifications");
+                    }
+                    if (binding.overlayFragmentContainer != null) {
+                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                    }
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.overlay_fragment_container, new NotificationFragment())
                             .addToBackStack("overlay")
                             .commit();
                 });
@@ -195,7 +212,7 @@ public class DashboardActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    updateAddButtonVisibility();
+                    updateButtonVisibility();
                     if (binding.dashboardAddevent != null) {
                         binding.dashboardAddevent.setOnClickListener(v -> {
                             if (binding.dashboardTitle != null) {
@@ -220,14 +237,15 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        updateAddButtonVisibility();
+        updateButtonVisibility();
     }
 
-    private void updateAddButtonVisibility() {
+    private void updateButtonVisibility() {
         if (binding == null || binding.dashboardAddevent == null)
             return;
         Profile profile = AuthManager.getInstance().getCurrentUserProfile();
         boolean isOrganizer = profile != null && "org".equalsIgnoreCase(profile.getRole());
         binding.dashboardAddevent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
+        binding.dashboardShowNotifications.setVisibility(isOrganizer ? View.GONE : View.VISIBLE);
     }
 }
