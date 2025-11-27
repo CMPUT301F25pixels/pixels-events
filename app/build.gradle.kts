@@ -65,6 +65,8 @@ dependencies {
     // --- QR / ZXing ---
     implementation("com.journeyapps:zxing-android-embedded:4.3.0") // keep single occurrence
     implementation("com.google.zxing:core:3.5.3")
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // --- Unit Testing ---
     // Use a single JUnit 4 dependency (version catalog or explicit). Remove duplicate.

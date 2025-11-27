@@ -22,7 +22,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Toggle Group (List vs Map) -->
-    <!-- Using a simple ToggleGroup centered at the top -->
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/toggle_group"
         android:layout_width="wrap_content"
@@ -66,10 +65,9 @@
         app:layout_constraintTop_toBottomOf="@+id/waitinglist_backbutton"
         tools:listitem="@layout/user_item" />
 
-    <!-- The Map View -->
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/map_container"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <!-- CHANGE: Replaced FragmentContainerView with OSM MapView -->
+    <org.osmdroid.views.MapView
+        android:id="@+id/osm_map"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
