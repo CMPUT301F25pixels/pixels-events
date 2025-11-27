@@ -45,6 +45,18 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/item_profile_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paid"
+        android:layout_gravity="center"
+        android:layout_marginEnd="8dp"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:textStyle="bold"/>
+
     <ImageButton
         android:id="@+id/item_profile_delete"
         android:layout_width="40dp"
@@ -53,7 +65,7 @@
         android:background="@android:color/transparent"
         android:contentDescription="Delete profile"
         android:src="@android:drawable/ic_menu_delete"
-        android:visibility="gone"
+        android:visibility="visible"
         app:tint="@color/red" />
 
 </LinearLayout>

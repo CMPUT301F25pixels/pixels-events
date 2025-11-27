@@ -102,25 +102,68 @@
                         android:id="@+id/eventTagsContainer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"></LinearLayout>
+                        android:orientation="horizontal"/>
                 </HorizontalScrollView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/event_joinButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="16dp"
+                        android:backgroundTint="@color/accent_blue_darker"
+                        android:text="Join"
+                        android:textColor="@color/white"
+                        app:iconTint="@color/white"
+                        app:strokeColor="#3B82F6" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/event_leaveButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/accent_blue_darker"
+                        android:text="Leave"
+                        android:textColor="@color/white"
+                        app:iconTint="@color/white"
+                        app:strokeColor="#3B82F6" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/event_tag"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/accent_blue_darker"
+                        android:text="Loading..."
+                        android:clickable="false"
+                        android:visibility="gone"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/event_waitinglistcount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="There are currently x amount of poeple in the waiting list"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"/>
 
             </LinearLayout>
 
-            <!-- Join / Leave Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/event_jlbutton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:backgroundTint="@color/accent_blue_darker"
-                android:text="Join\n0 in waiting list"
-                android:textColor="@color/white"
-                app:iconTint="@color/white"
-                app:strokeColor="#3B82F6" />
 
             <!-- Divider -->
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

@@ -30,7 +30,7 @@ public class AdminProfileFragment extends Fragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_admin_profiles, container, false);
-		recyclerView = view.findViewById(R.id.myevents_RecyclerView);
+		recyclerView = view.findViewById(R.id.admin_RecyclerView);
 		toggleGroup = view.findViewById(R.id.admin_profile_selection);
 		btnEntrants = view.findViewById(R.id.admin_profiles_entrants);
 		btnOrganizers = view.findViewById(R.id.admin_profiles_organizers);

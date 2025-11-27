@@ -25,6 +25,11 @@ import java.util.List;
 
 public class WaitingListFragment extends Fragment {
     private WaitingList waitingList;
+    // Filter which statuses to include (e.g., {0} for waiting, {1,0} for
+    // selected+waiting, {2} for accepted, {3} for declined)
+    private int[] filterStatuses = null;
+    // If showing selected + waiting, sort selected first
+    private boolean sortSelectedFirst = false;
     private ImageButton backButton, shareButton;
     private int eventId = -1;
     private DatabaseHandler db;
@@ -45,6 +50,13 @@ public class WaitingListFragment extends Fragment {
         this.eventId = waitingList != null ? waitingList.getEventId() : -1;
     }
 
+    public static WaitingListFragment newInstance(WaitingList wl, int[] statuses, boolean sortSelectedFirst) {
+        WaitingListFragment f = new WaitingListFragment(wl);
+        f.filterStatuses = statuses;
+        f.sortSelectedFirst = sortSelectedFirst;
+        return f;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -56,30 +68,97 @@ public class WaitingListFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.waitinglist_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new WaitingListAdapter(profiles, profile -> {
-            // Open ViewProfileFragment when user taps a profile
-            if (isAdded()) {
-                int containerId;
-                if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
-                    containerId = R.id.overlay_fragment_container;
-                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
-                    containerId = R.id.nav_host_fragment_activity_admin;
-                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
-                    containerId = R.id.nav_host_fragment_activity_dashboard;
-                } else {
-                    containerId = android.R.id.content;
-                }
+        adapter = new WaitingListAdapter(profiles, waitingList, new WaitingListAdapter.OnItemClick() {
+            @Override
+            public void onClick(Profile profile) {
+                // Open ViewProfileFragment when user taps a profile
+                if (isAdded()) {
+                    int containerId;
+                    if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
+                        containerId = R.id.overlay_fragment_container;
+                    } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+                        containerId = R.id.nav_host_fragment_activity_admin;
+                    } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
+                        containerId = R.id.nav_host_fragment_activity_dashboard;
+                    } else {
+                        containerId = android.R.id.content;
+                    }
 
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(containerId, new ViewProfileFragment(profile))
-                        .addToBackStack(null)
-                        .commit();
-                
-                if (containerId == R.id.overlay_fragment_container) {
-                    View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
-                    if (overlay != null) overlay.setVisibility(View.VISIBLE);
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(containerId, new ViewProfileFragment(profile))
+                            .addToBackStack(null)
+                            .commit();
+
+                    if (containerId == R.id.overlay_fragment_container) {
+                        View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
+                        if (overlay != null)
+                            overlay.setVisibility(View.VISIBLE);
+                    }
                 }
+            }
+
+            @Override
+            public void onDelete(Profile profile) {
+                // Confirm remove and mark user as declined (status = 3)
+                if (!isAdded())
+                    return;
+                new Builder(requireContext())
+                        .setTitle("Remove from waitlist")
+                        .setMessage("Remove this user from the waitlist and mark them as declined?")
+                        .setPositiveButton("Remove", (dialog, which) -> {
+                            if (waitingList == null || waitingList.getWaitList() == null) {
+                                showInfoDialog("Waitlist not loaded");
+                                return;
+                            }
+                            // Find corresponding WaitlistUser
+                            WaitlistUser target = null;
+                            for (WaitlistUser u : waitingList.getWaitList()) {
+                                if (u.getUserId() == profile.getUserId()) {
+                                    target = u;
+                                    break;
+                                }
+                            }
+                            if (target == null) {
+                                showInfoDialog("User not found in waitlist");
+                                return;
+                            }
+
+                            // Update status to declined (3)
+                            target.updateStatusInDb(eventId, 3, new WaitlistUser.OnStatusUpdateListener() {
+                                @Override
+                                public void onSuccess() {
+                                    // Reload waitlist and refresh UI
+                                    db.getWaitingList(eventId, wl -> {
+                                        if (wl != null) {
+                                            waitingList = wl;
+                                            // refresh profiles list
+                                            requireActivity().runOnUiThread(() -> {
+                                                profiles.clear();
+                                                adapter.notifyDataSetChanged();
+                                                loadProfilesFromWaitingList();
+                                                showInfoDialog("User removed and marked as declined.");
+                                            });
+                                        }
+                                    }, e -> {
+                                        Log.e("WaitingListFragment", "Failed to reload waitlist after remove", e);
+                                        if (isAdded())
+                                            requireActivity().runOnUiThread(() -> showInfoDialog(
+                                                    "Removed user but failed to reload waitlist."));
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Log.e("WaitingListFragment", "Failed to update user status", e);
+                                    if (isAdded())
+                                        requireActivity().runOnUiThread(
+                                                () -> showInfoDialog("Failed to remove user: " + e.getMessage()));
+                                }
+                            });
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             }
         });
         recyclerView.setAdapter(adapter);
@@ -96,17 +175,35 @@ public class WaitingListFragment extends Fragment {
             loadProfilesFromWaitingList();
         }
 
-        backButton.setOnClickListener(v ->
-            requireActivity().getSupportFragmentManager().popBackStack()
-        );
+        backButton.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
 
         shareButton.setOnClickListener(v -> {
             if (waitingList == null || waitingList.getWaitList() == null || waitingList.getWaitList().isEmpty()) {
                 showInfoDialog("Nothing to export");
                 return;
             }
+
+            // Filter users based on lottery status
+            List<WaitlistUser> usersToExport;
+            if ("drawn".equals(waitingList.getStatus())) {
+                // If lottery drawn, only export accepted people (status == 2)
+                usersToExport = new ArrayList<>();
+                for (WaitlistUser user : waitingList.getWaitList()) {
+                    if (user.getStatus() == 2) {
+                        usersToExport.add(user);
+                    }
+                }
+                if (usersToExport.isEmpty()) {
+                    showInfoDialog("No accepted participants to export");
+                    return;
+                }
+            } else {
+                // If lottery not drawn, export all people in waitlist
+                usersToExport = waitingList.getWaitList();
+            }
+
             // Use utility to export
-            new SavingData(waitingList.getWaitList())
+            new SavingData(usersToExport)
                     .exportProfiles(requireContext(), eventId, message -> {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() -> showInfoDialog(message));
@@ -119,13 +216,11 @@ public class WaitingListFragment extends Fragment {
 
     private void loadProfilesFromWaitingList() {
         if (waitingList == null) {
-            // Nothing to show
             return;
         }
 
-        List<Integer> ids = waitingList.getWaitList();
+        List<WaitlistUser> ids = waitingList.getWaitList();
         if (ids == null || ids.isEmpty()) {
-            // nothing to load
             return;
         }
 
@@ -133,23 +228,63 @@ public class WaitingListFragment extends Fragment {
         profiles.clear();
         adapter.notifyDataSetChanged();
 
-        for (Integer pid : ids) {
-            if (pid == null)
-                continue;
-            db.getProfile(pid,
-                    prof -> {
-                        if (prof != null) {
-                            profiles.add(prof);
-                            if (isAdded()) {
-                                requireActivity().runOnUiThread(() -> adapter.notifyItemInserted(profiles.size() - 1));
-                            }
-                        }
-                    }, e -> Log.e("WaitingListFragment", "Failed to load profile " + pid, e));
+        // Build filtered list of user IDs based on filterStatuses
+        java.util.List<WaitlistUser> filtered = new java.util.ArrayList<>();
+        if (filterStatuses == null || filterStatuses.length == 0) {
+            // Default: if lottery drawn, show selected+waiting; else show waiting only
+            if ("drawn".equals(waitingList.getStatus())) {
+                filterStatuses = new int[] { 1, 0 };
+                sortSelectedFirst = true;
+            } else {
+                filterStatuses = new int[] { 0 };
+            }
         }
+
+        java.util.Set<Integer> allowed = new java.util.HashSet<>();
+        for (int s : filterStatuses)
+            allowed.add(s);
+
+        for (WaitlistUser user : ids) {
+            if (user == null)
+                continue;
+            if (!allowed.contains(user.getStatus()))
+                continue;
+            filtered.add(user);
+        }
+
+        if (sortSelectedFirst) {
+            filtered.sort((a, b) -> Integer.compare(a.getStatus() == 1 ? 0 : 1, b.getStatus() == 1 ? 0 : 1));
+        }
+
+        // Fetch profiles sequentially to preserve filtered order
+        fetchProfilesSequentially(filtered, 0);
+    }
+
+    // Helper that fetches profiles one-by-one so that the adapter list order
+    // matches filtered order
+    private void fetchProfilesSequentially(java.util.List<WaitlistUser> filtered, int idx) {
+        if (idx >= filtered.size())
+            return;
+        int pid = filtered.get(idx).getUserId();
+        db.getProfile(pid, prof -> {
+            if (prof != null) {
+                profiles.add(prof);
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> adapter.notifyItemInserted(profiles.size() - 1));
+                }
+            }
+            // fetch next
+            fetchProfilesSequentially(filtered, idx + 1);
+        }, e -> {
+            Log.e("WaitingListFragment", "Failed to load profile " + pid, e);
+            // continue even on error
+            fetchProfilesSequentially(filtered, idx + 1);
+        });
     }
 
     private void showInfoDialog(String message) {
-        if (!isAdded()) return;
+        if (!isAdded())
+            return;
         new Builder(requireContext())
                 .setMessage(message)
                 .setPositiveButton("OK", null)

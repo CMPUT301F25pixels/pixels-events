@@ -5,8 +5,10 @@ import android.util.Log;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.Exclude;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,9 +16,8 @@ import java.util.Map;
 public class WaitingList {
     private static final int DEFAULT_MAX_WAITLIST_SIZE = 1000000;
     private int eventId;    // Identifier of the event associated with this waitlist
-    private String status;     // Status of the entrant in the waitlist (e.g., "waiting", "selected")
-    private ArrayList<Integer> waitList; // The WaitingList
-    private ArrayList<Integer> selected;
+    private String status;     // Status of the event ("waiting", "drawn")
+    private ArrayList<WaitlistUser> waitList; // The WaitingList
     private int maxWaitlistSize;
     private boolean autoUpdateDatabase = true;
 
@@ -28,7 +29,6 @@ public class WaitingList {
         this.status = "waiting";
         this.maxWaitlistSize = maxWaitlistSize;
         this.waitList = new ArrayList<>();
-        this.selected = new ArrayList<>();
     }
 
     // Constructor without waitlist max size
@@ -37,53 +37,18 @@ public class WaitingList {
         this.status = "waiting";
         this.maxWaitlistSize = DEFAULT_MAX_WAITLIST_SIZE;
         this.waitList = new ArrayList<>();
-        this.selected = new ArrayList<>();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
 
     public boolean isUserInWaitlist(int userId) {
-        return waitList.contains(userId);
+        for (WaitlistUser user : waitList) {
+            if (user.getUserId() == userId) {
+                return true;
+            }
+        }
+        return false;
     }
-
-    /**
-     * Asynchronously joins the waitlist in Firestore and updates local list on success.
-     * Throws IllegalArgumentException immediately for duplicate or full list conditions.
-     */
-    public Task<Void> addEntrantInWaitList(int userId) {
-        if (waitList == null) {
-            waitList = new ArrayList<>();
-        }
-        if (isUserInWaitlist(userId)) {
-            return Tasks.forException(new IllegalArgumentException(userId + " already in waitlist"));
-        }
-        if (waitList.size() >= maxWaitlistSize) {
-            throw new IllegalArgumentException("Waitlist is full. Maximum capacity of " + maxWaitlistSize + " reached.");
-        }
-        // Use DatabaseHandler to update remote; update local list after success
-        return DatabaseHandler.getInstance()
-                .joinWaitingList(eventId, userId)
-                .addOnSuccessListener(unused -> waitList.add(userId))
-                .addOnFailureListener(e -> Log.e("WaitingList", "Failed to join waitlist", e));
-    }
-
-    /**
-     * Asynchronously removes entrant from waitlist in Firestore and updates local list on success.
-     * Throws IllegalArgumentException if user not present.
-     */
-    public Task<Void> removeEntrantInWaitList(int userId) {
-        if (waitList == null) {
-            waitList = new ArrayList<>();
-        }
-        if (!isUserInWaitlist(userId)) {
-            return Tasks.forException(new IllegalArgumentException(userId + " not present in waitlist"));
-        }
-        return DatabaseHandler.getInstance()
-                .leaveWaitingList(eventId, userId)
-                .addOnSuccessListener(unused -> waitList.remove(Integer.valueOf(userId)))
-                .addOnFailureListener(e -> Log.e("WaitingList", "Failed to leave waitlist", e));
-    }
-
 
     // Getters
     public int getEventId() {
@@ -92,10 +57,45 @@ public class WaitingList {
     public String getStatus() {
         return status;
     }
-    public ArrayList<Integer> getSelected() {
+    @Exclude
+    public ArrayList<WaitlistUser> getSelected() {
+        ArrayList<WaitlistUser> selected = new ArrayList<>();
+        if (waitList != null) {
+            for (WaitlistUser user : waitList) {
+                // status == 1 represents 'chosen' (selected by lottery, awaiting response)
+                if (user.getStatus() == 1) {
+                    selected.add(user);
+                }
+            }
+        }
         return selected;
     }
-    public ArrayList<Integer> getWaitList() {
+    @Exclude
+    public ArrayList<WaitlistUser> getWaiting() {
+        ArrayList<WaitlistUser> waiting = new ArrayList<>();
+        if (waitList != null) {
+            for (WaitlistUser user : waitList) {
+                if (user.getStatus() == 0) {
+                    waiting.add(user);
+                }
+            }
+        }
+        return waiting;
+    }
+    @Exclude
+    public ArrayList<WaitlistUser> getCancelled() {
+        ArrayList<WaitlistUser> cancelled = new ArrayList<>();
+        if (waitList != null) {
+            for (WaitlistUser user : waitList) {
+                // status == 3 represents declined
+                if (user.getStatus() == 3) {
+                    cancelled.add(user);
+                }
+            }
+        }
+        return cancelled;
+    }
+    public ArrayList<WaitlistUser> getWaitList() {
         return waitList;
     }
     public int getMaxWaitlistSize() {
@@ -106,6 +106,82 @@ public class WaitingList {
     public void setStatus(String status) {
         this.status = status;
         updateDatabase("status", status);
+    }
+
+    public void updateUserStatus(int userId, int newStatus) {
+        if (waitList != null) {
+            for (WaitlistUser user : waitList) {
+                if (user.getUserId() == userId) {
+                    user.setStatus(newStatus);
+                    updateDatabase("waitList", waitList);
+                    break;
+                }
+            }
+        }
+    }
+
+    public interface OnLotteryDrawnListener {
+        void onSuccess(int numberDrawn);
+        void onFailure(Exception e);
+    }
+
+    public void drawLottery(OnLotteryDrawnListener listener) {
+        DatabaseHandler.getInstance().getEvent(eventId, e -> {
+            int capacity = e.getCapacity();
+
+            if (waitList == null) waitList = new ArrayList<>();
+
+            if (capacity <= 0) {
+                if (listener != null) listener.onFailure(new IllegalArgumentException("Capacity must be positive"));
+                return;
+            }
+            // Count users who are already chosen (1) or already accepted (2)
+            int occupied = 0;
+            java.util.List<Integer> waitingIndices = new java.util.ArrayList<>();
+            for (int i = 0; i < waitList.size(); i++) {
+                WaitlistUser user = waitList.get(i);
+                int st = user.getStatus();
+                if (st == 1 || st == 2) {
+                    occupied++;
+                } else if (st == 0) {
+                    waitingIndices.add(i);
+                }
+            }
+
+            if (occupied >= capacity) {
+                Log.d("WaitingList", "Lottery already drawn or capacity full.");
+                if (listener != null) listener.onFailure(new IllegalStateException("Lottery already drawn or capacity full"));
+                return;
+            }
+
+            int slotsAvailable = capacity - occupied;
+
+            if (waitingIndices.isEmpty()) {
+                if (listener != null) listener.onFailure(new IllegalStateException("No participants in the waiting list to draw from"));
+                return;
+            }
+
+            int numberToDraw = Math.min(slotsAvailable, waitingIndices.size());
+
+            // Shuffle indices to pick random waiting users and update in-place
+            Collections.shuffle(waitingIndices);
+            for (int i = 0; i < numberToDraw; i++) {
+                int idx = waitingIndices.get(i);
+                WaitlistUser winner = waitList.get(idx);
+                winner.setStatus(1); // mark as chosen
+            }
+
+            // Update database
+            updateDatabase("waitList", waitList);
+
+            status = "drawn";
+            updateDatabase("status", status);
+            
+            if (listener != null) listener.onSuccess(numberToDraw);
+        }, e -> {
+            Log.e("WaitingList", "Failed to get event", e);
+            if (listener != null) listener.onFailure(e);
+        });
     }
 
     public void setMaxWaitlistSize(int maxWaitlistSize) {
