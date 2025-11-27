@@ -43,7 +43,7 @@ public class WaitListIntegrationTest {
         await(db.leaveWaitingList(EVENT_ID, USER_2));
     }
 
-    // --- 🔹 Test 1: Correct user added and count increments ---
+    // Test 1: Correct user added and count increments
     @Test
     public void join_addsCorrectUser_andIncrementsCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -55,7 +55,7 @@ public class WaitListIntegrationTest {
         assertEquals("List size should be 1", 1, waitList.size());
     }
 
-    // --- 🔹 Test 2: Second user also added, count updates correctly ---
+    // Test 2: Second user also added, count updates correctly
     @Test
     public void join_multipleUsers_incrementsCorrectly() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -69,7 +69,7 @@ public class WaitListIntegrationTest {
         assertEquals("Count should equal 2", 2, waitList.size());
     }
 
-    // --- 🔹 Test 3: Leaving removes correct user and decrements count ---
+    // Test 3: Leaving removes correct user and decrements count
     @Test
     public void leave_removesCorrectUser_andDecrementsCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -84,7 +84,7 @@ public class WaitListIntegrationTest {
         assertEquals("Count should be 1", 1, waitList.size());
     }
 
-    // --- 🔹 Test 4: Duplicate joins should not increase count ---
+    // Test 4: Duplicate joins should not increase count
     @Test
     public void join_duplicateUser_doesNotIncrementCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -96,7 +96,7 @@ public class WaitListIntegrationTest {
         assertEquals("Duplicate join should not increase list size", 1, waitList.size());
     }
 
-    // --- 🔹 Test 5: Leaving non-existent user does not change anything ---
+    // Test 5: Leaving non-existent user does not change anything
     @Test
     public void leave_nonexistentUser_doesNothing() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));

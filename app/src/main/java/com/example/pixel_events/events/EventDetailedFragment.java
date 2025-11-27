@@ -78,10 +78,23 @@ public class EventDetailedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_event_detailed, container, false);
 
         db = DatabaseHandler.getInstance();
-        if (AuthManager.getInstance().getCurrentUserProfile() != null) {
+
+        userId = -1;
+        eventId = -1;
+
+        // Check for Test Arguments (Backdoor)
+        if (getArguments() != null) {
+            if (getArguments().containsKey("userId")) {
+                userId = getArguments().getInt("userId");
+            }
+            if (getArguments().containsKey("eventId")) {
+                eventId = getArguments().getInt("eventId");
+            }
+        }
+
+        // If Test Arguments didn't provide a User, try AuthManager (Production)
+        if (userId == -1 && AuthManager.getInstance().getCurrentUserProfile() != null) {
             userId = AuthManager.getInstance().getCurrentUserProfile().getUserId();
-        } else {
-            userId = -1;
         }
 
         // Initialize UI
