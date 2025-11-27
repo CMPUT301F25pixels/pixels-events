@@ -217,24 +217,46 @@ public class DatabaseHandler {
     // -----------------------------------------------------------------------
 
     public void sendInviteNotification(int eventId, String eventTitle, int userId) {
-        Notification n = new Notification("Event Invitation", 
-            "You have been invited to sign up for " + eventTitle, 
-            "INVITE", eventId, userId);
-        addNotification(userId, n);
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 1 || prefs.get(0)) {
+                Notification n = new Notification("Event Invitation", 
+                    "You have been invited to sign up for " + eventTitle, 
+                    "INVITE", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
     }
 
     public void sendWinNotification(int eventId, String eventTitle, int userId) {
-        Notification n = new Notification("Lottery Won!", 
-            "You have been selected for " + eventTitle + ". Please sign up!", 
-            "LOTTERY_WIN", eventId, userId);
-        addNotification(userId, n);
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 2 || prefs.get(1)) {
+                Notification n = new Notification("Lottery Won!", 
+                    "You have been selected for " + eventTitle + ". Please sign up!", 
+                    "LOTTERY_WIN", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
     }
     
     public void sendLossNotification(int eventId, String eventTitle, int userId) {
-        Notification n = new Notification("Lottery Result", 
-            "Unfortunately you were not selected for " + eventTitle + ".", 
-            "LOTTERY_LOSS", eventId, userId);
-        addNotification(userId, n);
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 3 || prefs.get(2)) {
+                Notification n = new Notification("Lottery Result", 
+                    "Unfortunately you were not selected for " + eventTitle + ".", 
+                    "LOTTERY_LOSS", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
+    }
+
+    private void checkNotificationPreferences(int userId, java.util.function.Consumer<java.util.List<Boolean>> callback) {
+        getProfile(userId, profile -> {
+            if (profile != null && profile.getNotify() != null) {
+                callback.accept(profile.getNotify());
+            } else {
+                callback.accept(null); // Default: send all notifications
+            }
+        }, e -> callback.accept(null)); // On error, send notifications anyway
     }
 
     // ACCOUNT INFO FUNCTIONS
