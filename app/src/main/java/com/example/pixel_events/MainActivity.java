@@ -25,60 +25,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try {
-            FirebaseApp app = FirebaseApp.getInstance();
-            Log.d(TAG, "Firebase is initialized: " + (app != null));
-
-            FirebaseFirestore.getInstance();
-            Log.d(TAG, "Firestore instance retrieved successfully");
-        } catch (Exception e) {
-            Log.e(TAG, "Firebase initialization error", e);
-        }
-
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
-        try {
-            AuthManager.getInstance().getAuth().getFirebaseAuthSettings()
-                    .setAppVerificationDisabledForTesting(true);
-            Log.d(TAG, "App verification disabled for testing");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to disable app verification", e);
-        }
-
-        checkAuthState();
-    }
-
-    private void checkAuthState() {
-        AuthManager authManager = AuthManager.getInstance();
-        FirebaseUser user = authManager.getCurrentFirebaseUser();
-        if (user == null) {
-            Log.d(TAG, "No user logged in — navigating to LoginFragment");
-            showLoginFragment();
-        } else {
-            Log.d(TAG, "User already logged in: " + user.getEmail() + " — loading profile");
-
-            // Load user profile from database
-            db.getProfile(
-                    DatabaseHandler.uidToId(user.getUid()),
-                    profile -> {
-                        if (profile != null) {
-                            Log.d(TAG, "Profile loaded successfully for: " + profile.getUserId());
-                            if (profile.getRole().equals("admin")) showAdminActivity();
-                            else showDashboardActivity();
-                        }
-                    },
-                    e -> {
-                        Log.e(TAG, "Failed to load profile: " + e);
-                        Toast.makeText(MainActivity.this,
-                                "Failed to load profile. Please login again.",
-                                Toast.LENGTH_LONG).show();
-
-                        // Sign out and show login
-                        authManager.signOut();
-                        showLoginFragment();
-                    });
-        }
+        // Show LoginFragment which handles auto-login
+        showLoginFragment();
     }
 
     private void showLoginFragment() {

@@ -190,6 +190,69 @@ public class DatabaseHandler {
                 });
     }
 
+    /**
+     * Fetch a profile by email address.
+     *
+     * @param email         The email to search for
+     * @param listener      Success callback with the Profile object (or null if not
+     *                      found)
+     * @param errorListener Failure callback
+     */
+    public void getProfileByEmail(String email,
+            OnSuccessListener<Profile> listener,
+            OnFailureListener errorListener) {
+        accRef.whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                        try {
+                            // Manually map fields to avoid strict type issues if any
+                            int id = 0;
+                            Object idObj = document.get("userId"); // Try "userId" first
+                            if (idObj == null)
+                                idObj = document.get("id"); // Fallback to "id"
+
+                            if (idObj instanceof Number) {
+                                id = ((Number) idObj).intValue();
+                            } else if (idObj instanceof String) {
+                                try {
+                                    id = Integer.parseInt((String) idObj);
+                                } catch (NumberFormatException e) {
+                                    id = 0;
+                                }
+                            }
+
+                            if (id == 0) {
+                                // Try to parse from document ID if it's an int
+                                try {
+                                    id = Integer.parseInt(document.getId());
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+
+                            Profile profile = document.toObject(Profile.class);
+                            // Ensure ID is set if toObject didn't catch it (e.g. if field name mismatch)
+                            if (profile != null && profile.getUserId() == 0) {
+                                profile.setUserId(id);
+                            }
+                            listener.onSuccess(profile);
+                        } catch (Exception e) {
+                            Log.e("DB", "Error parsing profile", e);
+                            errorListener.onFailure(e);
+                        }
+                    } else {
+                        listener.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error finding profile by email", e);
+                    errorListener.onFailure(e);
+                });
+    }
+
     public void deleteAcc(int userID) {
         // 1) Delete events organized by this user
         eventRef.whereEqualTo("organizerId", userID).get()

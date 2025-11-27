@@ -43,7 +43,6 @@ public class MyEventFragment extends Fragment {
         currentUser = AuthManager.getInstance().getCurrentUserProfile();
         if (currentUser == null) {
             if (AuthManager.getInstance().isUserLoggedIn()) {
-                AuthManager.getInstance().refreshCurrentUserProfile();
                 Toast.makeText(getContext(), "Loading profile...", Toast.LENGTH_SHORT).show();
                 view.postDelayed(() -> {
                     currentUser = AuthManager.getInstance().getCurrentUserProfile();
