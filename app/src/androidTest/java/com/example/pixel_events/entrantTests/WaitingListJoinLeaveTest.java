@@ -38,8 +38,8 @@ import java.util.List;
 
 /*
     Tests:
-        US 01.01.01 As an entrant, I want to join the waiting list for a specific event
-        US 01.01.02 As an entrant, I want to leave the waiting list for a specific event
+        US 01.01.01: As an entrant, I want to join the waiting list for a specific event
+        US 01.01.02: As an entrant, I want to leave the waiting list for a specific event
 */
 @RunWith(AndroidJUnit4.class)
 public class WaitingListJoinLeaveTest {
@@ -121,7 +121,7 @@ public class WaitingListJoinLeaveTest {
      */
     @Test
     public void joinLeaveWaitingList() throws Exception {
-        // SETUP: Pass the userId explicitly
+        // Pass the userId and eventId explicitly
         Bundle args = new Bundle();
         args.putInt("eventId", eventId);
         args.putInt("userId", userId);
@@ -134,19 +134,19 @@ public class WaitingListJoinLeaveTest {
                 );
         scenario.moveToState(Lifecycle.State.RESUMED);
 
-        // 1. Wait for "Loading..." to turn into "Join" (Max wait 5 seconds)
+        // Wait for "Loading..." to turn into "Join"
         waitForText(R.id.event_jlbutton, "Join", 5000);
 
-        // 2. Click Join
+        // Click Join
         onView(withId(R.id.event_jlbutton)).perform(click());
 
-        // 3. Wait for database update: "Join" should turn into "Leave"
+        // Wait for "Join" to turn into "Leave"
         waitForText(R.id.event_jlbutton, "Leave", 5000);
 
-        // 4. Click Leave
+        // Click Leave
         onView(withId(R.id.event_jlbutton)).perform(click());
 
-        // 5. Wait for database update: "Leave" should turn into "Join"
+        // Wait for "Leave" to turn into "Join"
         waitForText(R.id.event_jlbutton, "Join", 5000);
     }
 
@@ -159,10 +159,9 @@ public class WaitingListJoinLeaveTest {
             try {
                 // Check if the view has the expected text
                 onView(withId(viewId)).check(matches(withText(containsString(expectedText))));
-                return; // Success!
-            } catch (Throwable t) {
-                // Failure means the text isn't there yet.
-                // We sleep a tiny bit and try again.
+                return;
+            } catch (Throwable t) {         // Failed
+                // We sleep and try again.
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -170,11 +169,9 @@ public class WaitingListJoinLeaveTest {
                 }
             }
         }
-
-        // If we reach here, we timed out. Throw the error to fail the test.
+        // Timed out. Throw the error to fail the test.
         throw new RuntimeException("Timed out waiting for text '" + expectedText + "' on view " + viewId);
     }
-
 
     @After
     public void cleanup() {
