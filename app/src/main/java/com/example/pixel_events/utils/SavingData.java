@@ -97,6 +97,7 @@ public class SavingData {
                         if (status == 2) statusLabel = "Accepted";
                         else if (status == 3) statusLabel = "Declined";
                         else if (status == 1) statusLabel = "Selected";
+                        else if (status == 0) statusLabel = "Waiting";
                         else statusLabel = "Didn't Choose";
                         break;
                     }
