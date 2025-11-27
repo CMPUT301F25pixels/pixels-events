@@ -99,16 +99,16 @@ public class MyEventFragment extends Fragment {
         toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.myevents_upcoming) {
-                    loadUpcomingEvents();
+                    loadEvents(true);
                 } else if (checkedId == R.id.myevents_previous) {
-                    loadPreviousEvents();
+                    loadEvents(false);
                 }
             }
         });
-        loadUpcomingEvents();
+        loadEvents(true);
     }
 
-    private void loadUpcomingEvents() {
+    private void loadEvents(boolean isUpcoming) {
         if (currentUser == null)
             return;
 
@@ -116,25 +116,10 @@ public class MyEventFragment extends Fragment {
 
         if ("org".equalsIgnoreCase(role)) {
             // For organizers, show their created upcoming events
-            loadOrganizerEvents(true);
+            loadOrganizerEvents(isUpcoming);
         } else {
             // For users, show events they're signed up for (in any waitlist)
-            loadUserEvents(true);
-        }
-    }
-
-    private void loadPreviousEvents() {
-        if (currentUser == null)
-            return;
-
-        String role = currentUser.getRole();
-
-        if ("org".equalsIgnoreCase(role)) {
-            // For organizers, show their created past events
-            loadOrganizerEvents(false);
-        } else {
-            // For users, show past events they participated in
-            loadUserEvents(false);
+            loadUserEvents(isUpcoming);
         }
     }
 
