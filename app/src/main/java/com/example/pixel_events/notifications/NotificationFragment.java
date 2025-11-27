@@ -164,7 +164,7 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                 waitingList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
                     @Override
                     public void onSuccess(int numberDrawn) {
-                        Log.e(TAG, "Lottery drawn: " + numberDrawn);
+                        Log.d(TAG, "Lottery drawn: " + numberDrawn);
                     }
 
                     @Override

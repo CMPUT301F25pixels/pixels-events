@@ -21,7 +21,12 @@ import com.example.pixel_events.profile.ViewProfileFragment;
 import com.example.pixel_events.utils.SavingData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class WaitingListFragment extends Fragment {
     private WaitingList waitingList;
@@ -229,7 +234,7 @@ public class WaitingListFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         // Build filtered list of user IDs based on filterStatuses
-        java.util.List<WaitlistUser> filtered = new java.util.ArrayList<>();
+        List<WaitlistUser> filtered = new ArrayList<>();
         if (filterStatuses == null || filterStatuses.length == 0) {
             // Default: if lottery drawn, show selected+waiting; else show waiting only
             if ("drawn".equals(waitingList.getStatus())) {
@@ -240,7 +245,7 @@ public class WaitingListFragment extends Fragment {
             }
         }
 
-        java.util.Set<Integer> allowed = new java.util.HashSet<>();
+        Set<Integer> allowed = new HashSet<>();
         for (int s : filterStatuses)
             allowed.add(s);
 
@@ -253,34 +258,40 @@ public class WaitingListFragment extends Fragment {
         }
 
         if (sortSelectedFirst) {
-            filtered.sort((a, b) -> Integer.compare(a.getStatus() == 1 ? 0 : 1, b.getStatus() == 1 ? 0 : 1));
+            filtered.sort(Comparator.comparingInt(a -> a.getStatus() == 1 ? 0 : 1));
         }
 
         // Fetch profiles sequentially to preserve filtered order
-        fetchProfilesSequentially(filtered, 0);
+        loadProfilesSorted(filtered);
     }
 
-    // Helper that fetches profiles one-by-one so that the adapter list order
-    // matches filtered order
-    private void fetchProfilesSequentially(java.util.List<WaitlistUser> filtered, int idx) {
-        if (idx >= filtered.size())
-            return;
-        int pid = filtered.get(idx).getUserId();
-        db.getProfile(pid, prof -> {
-            if (prof != null) {
-                profiles.add(prof);
-                if (isAdded()) {
-                    requireActivity().runOnUiThread(() -> adapter.notifyItemInserted(profiles.size() - 1));
+    private void loadProfilesSorted(List<WaitlistUser> filtered) {
+        db.getAllProfile(allProfiles -> {
+            // Map <id, Profile>
+            Map<Integer, Profile> map = new HashMap<>();
+            for (Profile p : allProfiles) {
+                map.put(p.getUserId(), p);
+            }
+
+            profiles.clear();
+
+            // Sort by filtered list order
+            for (WaitlistUser w : filtered) {
+                Profile p = map.get(w.getUserId());
+                if (p != null) {
+                    profiles.add(p);
                 }
             }
-            // fetch next
-            fetchProfilesSequentially(filtered, idx + 1);
+
+            if (isAdded()) {
+                requireActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+            }
+
         }, e -> {
-            Log.e("WaitingListFragment", "Failed to load profile " + pid, e);
-            // continue even on error
-            fetchProfilesSequentially(filtered, idx + 1);
+            Log.e("WaitingListFragment", "Failed to load profiles", e);
         });
     }
+
 
     private void showInfoDialog(String message) {
         if (!isAdded())

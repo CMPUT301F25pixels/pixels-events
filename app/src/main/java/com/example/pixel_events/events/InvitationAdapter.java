@@ -18,13 +18,14 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.ViewHolder> {
+public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.InvitationViewHolder> {
 
     private List<EventInvitation> invitations;
     private OnInvitationInteractionListener listener;
 
     public interface OnInvitationInteractionListener {
         void onAccept(EventInvitation invitation);
+
         void onDecline(EventInvitation invitation);
     }
 
@@ -35,13 +36,13 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public InvitationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_item_invitations, parent, false);
-        return new ViewHolder(view);
+        return new InvitationViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull InvitationViewHolder holder, int position) {
         EventInvitation invitation = invitations.get(position);
         Event event = invitation.getEvent();
 
@@ -59,7 +60,7 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
         String endDate = event.getEventEndDate();
         String startTime = event.getEventStartTime();
         String endTime = event.getEventEndTime();
-        
+
         if (startDate != null && endDate != null) {
             if (startTime != null && endTime != null) {
                 holder.date.setText(String.format("%s %s - %s %s", startDate, startTime, endDate, endTime));
@@ -88,12 +89,12 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class InvitationViewHolder extends RecyclerView.ViewHolder {
         ImageView eventImage;
         TextView organizerName, eventName, date, location;
         ImageButton acceptButton, declineButton;
 
-        public ViewHolder(@NonNull View itemView) {
+        public InvitationViewHolder(@NonNull View itemView) {
             super(itemView);
             eventImage = itemView.findViewById(R.id.invitation_image);
             organizerName = itemView.findViewById(R.id.invitation_org_name);

@@ -7,13 +7,10 @@ import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -328,14 +325,6 @@ public class DatabaseHandler {
                                 .addOnSuccessListener(unused2 -> Log.d("DB", "Deleted user: " + userID))
                                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
 
-                        // 4) Delete from Firebase Auth if current user
-                        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                        if (currentUser != null && uidToId(currentUser.getUid()) == userID) {
-                            currentUser.delete()
-                                    .addOnSuccessListener(aVoid -> Log.d("DB", "Deleted user from Firebase Auth"))
-                                    .addOnFailureListener(
-                                            e -> Log.e("DB", "Failed to delete user from Firebase Auth", e));
-                        }
                     }).addOnFailureListener(e -> {
                         Log.e("DB", "Failed to remove user from waitlists", e);
                         accRef.document(String.valueOf(userID)).delete()

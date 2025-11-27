@@ -23,6 +23,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Fragment for user signup
@@ -142,10 +143,9 @@ public class SignupFragment extends Fragment {
         if (binding != null)
             binding.signupUserSave.setEnabled(false);
 
-        // Generate a random ID for the user since we don't have Firebase UID
-        int userId = (int) (System.currentTimeMillis() % Integer.MAX_VALUE);
-        if (userId <= 0)
-            userId = 1; // Ensure positive
+        // Generate a userId from a UUID-derived positive value, ensure > 100000
+        long uuidBits = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+        int userId = (int) (uuidBits % (Integer.MAX_VALUE - 100000)) + 100001;
 
         List<Boolean> notify = new ArrayList<>();
         notify.add(true);

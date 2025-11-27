@@ -41,6 +41,10 @@ public class AuthManager {
         this.currentUserProfile = profile;
     }
 
+    public void setCurrentEmail(String email) {
+        this.currentUserProfile.setEmail(email);
+    }
+
     /**
      * Sign up a new user.
      * 
