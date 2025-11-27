@@ -123,9 +123,8 @@ public class WaitingListFragment extends Fragment {
             return;
         }
 
-        List<Integer> ids = waitingList.getWaitList();
+        List<WaitlistUser> ids = waitingList.getWaitList();
         if (ids == null || ids.isEmpty()) {
-            // nothing to load
             return;
         }
 
@@ -133,9 +132,9 @@ public class WaitingListFragment extends Fragment {
         profiles.clear();
         adapter.notifyDataSetChanged();
 
-        for (Integer pid : ids) {
-            if (pid == null)
-                continue;
+        for (WaitlistUser user : ids) {
+            if (user == null) continue;
+            int pid = user.getUserId();
             db.getProfile(pid,
                     prof -> {
                         if (prof != null) {

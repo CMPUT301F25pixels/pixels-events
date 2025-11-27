@@ -45,6 +45,17 @@ public class AdminImageFragment extends Fragment {
 	}
 
 	private void onDeleteImage(Event e) {
+		// Notify Organizer
+		int orgId = e.getOrganizerId();
+		com.example.pixel_events.notifications.Notification notice = new com.example.pixel_events.notifications.Notification(
+			"Image Removed",
+			"The poster for your event '" + e.getTitle() + "' has been removed by the Admin.",
+			"ADMIN_DELETE",
+			e.getEventId(),
+			orgId
+		);
+		DatabaseHandler.getInstance().addNotification(orgId, notice);
+
 		java.util.Map<String, Object> updates = new java.util.HashMap<>();
 		updates.put("imageUrl", "");
 		DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getEventCollection(), e.getEventId(), updates, err -> {

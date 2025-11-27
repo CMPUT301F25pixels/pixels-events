@@ -8,14 +8,75 @@ import androidx.navigation.NavController;
 import androidx.navigation.ui.NavigationUI;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.databinding.ActivityDashboardBinding;
 import com.example.pixel_events.events.CreateEventFragment;
 import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.notifications.NotificationFragment;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.example.pixel_events.notifications.Notification;
+import com.google.firebase.firestore.DocumentChange;
+import androidx.appcompat.app.AlertDialog;
+
 public class DashboardActivity extends AppCompatActivity {
     private ActivityDashboardBinding binding;
+    private com.google.firebase.firestore.ListenerRegistration notificationListener;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNotificationListener();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (notificationListener != null) {
+            notificationListener.remove();
+            notificationListener = null;
+        }
+    }
+
+    private void setupNotificationListener() {
+        Profile user = AuthManager.getInstance().getCurrentUserProfile();
+        if (user != null) {
+            notificationListener = DatabaseHandler.getInstance().getAccountCollection()
+                .document(String.valueOf(user.getUserId()))
+                .collection("Notifications")
+                .whereEqualTo("read", false) // Only listen to unread
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        android.util.Log.w("Dashboard", "Listen failed.", e);
+                        return;
+                    }
+
+                    if (snapshots != null) {
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            if (dc.getType() == DocumentChange.Type.ADDED) {
+                                Notification n = dc.getDocument().toObject(Notification.class);
+                                showNotificationAlert(n, user.getUserId());
+                            }
+                        }
+                    }
+                });
+        }
+    }
+
+    private void showNotificationAlert(Notification n, int userId) {
+        if (n == null) return;
+        
+        new AlertDialog.Builder(this)
+               .setTitle(n.getTitle())
+               .setMessage(n.getMessage())
+               .setPositiveButton("OK", (dialog, id) -> {
+                   DatabaseHandler.getInstance().markNotificationRead(userId, n.getNotificationId());
+                   dialog.dismiss();
+               })
+               .setCancelable(false)
+               .show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +134,7 @@ public class DashboardActivity extends AppCompatActivity {
                 }
 
                 // Update the add button visibility for current user role
-                updateAddButtonVisibility();
+                updateButtonVisibility();
             });
 
             // Hook up add button click once
@@ -89,6 +150,22 @@ public class DashboardActivity extends AppCompatActivity {
                             .beginTransaction()
                             .setReorderingAllowed(true)
                             .add(R.id.overlay_fragment_container, new CreateEventFragment())
+                            .addToBackStack("overlay")
+                            .commit();
+                });
+            }
+            if (binding.dashboardShowNotifications != null){
+                binding.dashboardShowNotifications.setOnClickListener(v -> {
+                    if (binding.dashboardTitle != null) {
+                        binding.dashboardTitle.setText("Notifications");
+                    }
+                    if (binding.overlayFragmentContainer != null) {
+                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                    }
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.overlay_fragment_container, new NotificationFragment())
                             .addToBackStack("overlay")
                             .commit();
                 });
@@ -135,7 +212,7 @@ public class DashboardActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    updateAddButtonVisibility();
+                    updateButtonVisibility();
                     if (binding.dashboardAddevent != null) {
                         binding.dashboardAddevent.setOnClickListener(v -> {
                             if (binding.dashboardTitle != null) {
@@ -160,14 +237,15 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        updateAddButtonVisibility();
+        updateButtonVisibility();
     }
 
-    private void updateAddButtonVisibility() {
+    private void updateButtonVisibility() {
         if (binding == null || binding.dashboardAddevent == null)
             return;
         Profile profile = AuthManager.getInstance().getCurrentUserProfile();
         boolean isOrganizer = profile != null && "org".equalsIgnoreCase(profile.getRole());
         binding.dashboardAddevent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
+        binding.dashboardShowNotifications.setVisibility(isOrganizer ? View.GONE : View.VISIBLE);
     }
 }

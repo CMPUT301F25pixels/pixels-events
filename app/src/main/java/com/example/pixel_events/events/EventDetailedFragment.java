@@ -18,6 +18,7 @@ import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.waitinglist.WaitingList;
+import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.firestore.FieldValue;
@@ -133,11 +134,13 @@ public class EventDetailedFragment extends Fragment {
                 // Load waitlist state
                 db.getWaitingList(eventId, waitList -> {
                     if (waitList != null) {
-                        List<Integer> ids = waitList.getWaitList();
+                        List<WaitlistUser> ids = waitList.getWaitList();
                         if (ids == null) {
                             ids = java.util.Collections.emptyList();
                         }
-                        joined = (userId != -1 && ids.contains(userId));
+                        for (WaitlistUser user: ids){
+                            if (user.getUserId() == userId) joined = true;
+                        }
                         waitingListCount = ids.size();
                         waitingListMaxCount = waitList.getMaxWaitlistSize();
                     } else {
@@ -152,11 +155,13 @@ public class EventDetailedFragment extends Fragment {
                     renderCTA();
                 });
             } else {
-                List<Integer> ids = waitList.getWaitList();
+                List<WaitlistUser> ids = waitList.getWaitList();
                 if (ids == null) {
                     ids = java.util.Collections.emptyList();
                 }
-                joined = (userId != -1 && ids.contains(userId));
+                for (WaitlistUser user: ids){
+                    if (user.getUserId() == userId) joined = true;
+                }
                 waitingListCount = ids.size();
                 waitingListMaxCount = waitList.getMaxWaitlistSize();
                 renderCTA();
