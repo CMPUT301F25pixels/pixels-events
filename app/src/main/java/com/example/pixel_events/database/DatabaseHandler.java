@@ -438,28 +438,28 @@ public class DatabaseHandler {
             if (waitList != null) {
                 // Notify waitlist
                 if (waitList.getWaitList() != null) {
-                    for (Integer uid : waitList.getWaitList()) {
+                    for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getWaitList()) {
                         Notification notice = new Notification(
                             "Event Cancelled",
                             "The event you interacted with has been cancelled by the Admin.",
                             "ADMIN_DELETE",
                             eventID,
-                            uid
+                            user.getUserId()
                         );
-                        addNotification(uid, notice);
+                        addNotification(user.getUserId(), notice);
                     }
                 }
                 // Notify selected
                 if (waitList.getSelected() != null) {
-                    for (Integer uid : waitList.getSelected()) {
+                    for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getSelected()) {
                         Notification notice = new Notification(
                             "Event Cancelled",
                             "The event you interacted with has been cancelled by the Admin.",
                             "ADMIN_DELETE",
                             eventID,
-                            uid
+                            user.getUserId()
                         );
-                        addNotification(uid, notice);
+                        addNotification(user.getUserId(), notice);
                     }
                 }
             }
