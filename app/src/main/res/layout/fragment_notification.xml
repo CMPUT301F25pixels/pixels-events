@@ -5,10 +5,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/dark_bg"
-    tools:context=".events.MyEventFragment">
+    tools:context=".notifications.NotificationFragment">
 
     <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/myevents_selection"
+        android:id="@+id/notification_selection"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="16dp"
@@ -20,41 +20,41 @@
         app:singleSelection="true">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/myevents_upcoming"
+            android:id="@+id/notifications_notification"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
             app:backgroundTint="@color/toggle_button_bg_tint_card"
             android:fontFamily="@font/poppins_bold"
-            android:text="Upcoming"
+            android:text="Notifications"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/myevents_previous"
+            android:id="@+id/notifications_invitations"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
             app:backgroundTint="@color/toggle_button_bg_tint_card"
             android:fontFamily="@font/poppins_bold"
-            android:text="Previous"
+            android:text="Invitations"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <View
-        android:id="@+id/myevents_divider"
+        android:id="@+id/notifications_divider"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/gray"
-        app:layout_constraintTop_toBottomOf="@id/myevents_selection"
+        app:layout_constraintTop_toBottomOf="@id/notification_selection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/myevents_RecyclerView"
+        android:id="@+id/notifications_recycler_view"
         tools:listitem="@layout/event_item_small"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -63,6 +63,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/myevents_divider" />
+        app:layout_constraintTop_toBottomOf="@id/notifications_divider" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

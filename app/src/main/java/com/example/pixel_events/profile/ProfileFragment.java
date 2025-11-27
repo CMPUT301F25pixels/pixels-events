@@ -62,7 +62,7 @@ public class ProfileFragment extends Fragment {
         });
 
         logoutButton.setOnClickListener(v -> {
-            AuthManager.getInstance().signOut();
+            AuthManager.getInstance().signOut(requireContext());
             AuthManager.getInstance().setCurrentUserProfile(null);
             Intent intent = new Intent(requireContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -72,13 +72,14 @@ public class ProfileFragment extends Fragment {
 
         deleteAccountButton.setOnClickListener(v -> {
             DatabaseHandler.getInstance().deleteAcc(profile.getUserId());
-            AuthManager.getInstance().signOut();
+            AuthManager.getInstance().signOut(requireContext());
             AuthManager.getInstance().setCurrentUserProfile(null);
             Intent intent = new Intent(requireContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             requireActivity().finishAffinity();
         });
+
     }
 
     private void replaceFragment(Fragment fragment) {

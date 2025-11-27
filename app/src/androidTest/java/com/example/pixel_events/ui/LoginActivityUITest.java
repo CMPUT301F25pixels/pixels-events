@@ -32,9 +32,6 @@ public class LoginActivityUITest {
                 onView(withId(R.id.login_user_email))
                                 .check(matches(isDisplayed()));
 
-                onView(withId(R.id.login_user_password))
-                                .check(matches(isDisplayed()));
-
                 onView(withId(R.id.login_user_save))
                                 .check(matches(isDisplayed()))
                                 .check(matches(withText("Sign In")));

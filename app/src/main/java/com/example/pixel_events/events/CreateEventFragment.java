@@ -175,7 +175,7 @@ public class CreateEventFragment extends Fragment {
     private void populateFormFields(Event event) {
         titleField.setText(event.getTitle());
         locationField.setText(event.getLocation());
-        capacityField.setText(event.getCapacity());
+        capacityField.setText(Integer.toString(event.getCapacity()));
         descriptionField.setText(event.getDescription());
         feeField.setText(event.getFee());
         startDate.setText(event.getEventStartDate());
@@ -250,7 +250,7 @@ public class CreateEventFragment extends Fragment {
             }
 
             Event event = new Event(eventId, organizerId, title, imageURL, location,
-                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
+                    Integer.parseInt(capacity), description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
 
             event.saveToDatabase();
 

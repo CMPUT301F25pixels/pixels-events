@@ -6,6 +6,7 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.qrcode.QRCode;
 import com.example.pixel_events.utils.Validator;
+import com.google.firebase.firestore.Exclude;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class Event {
     private String title;
     private String imageUrl;
     private String location;
-    private String capacity;
+    private int capacity;
     private String description;
     private int organizerId;
     private String qrCode;
@@ -39,7 +40,7 @@ public class Event {
         String title,
         String imageUrl,
         String location,
-        String capacity,
+        Integer capacity,
         String description,
         String fee,
         String eventStartDate,
@@ -54,7 +55,6 @@ public class Event {
         // Validate required fields
         Validator.validateNotEmpty(title, "Title");
         Validator.validateNotEmpty(location, "Location");
-        Validator.validateNotEmpty(capacity, "Capacity");
         Validator.validateNotEmpty(description, "Description");
         Validator.validateNotEmpty(eventStartDate, "Event Start Date");
         Validator.validateNotEmpty(eventEndDate, "Event End Date");
@@ -69,6 +69,9 @@ public class Event {
         }
         if (organizerId <= 0) {
             throw new IllegalArgumentException("Organizer ID must be positive");
+        }
+        if (capacity <= 0){
+            throw new IllegalArgumentException("Capacity must be positive");
         }
 
         this.eventId = eventId;
@@ -156,13 +159,12 @@ public class Event {
     public String getLocation() {
         return location;
     }
-    public String getCapacity() {
-        return capacity;
-    }
+    public int getCapacity() { return capacity; }
     public String getDescription() {
         return description;
     }
 
+    @Exclude
     public String getFullDescription(){
         String desc = description;
         desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + " from " + eventStartTime + " onwards to " + eventEndTime + ".";
@@ -174,7 +176,6 @@ public class Event {
     public int getOrganizerId() {
         return organizerId;
     }
-
     public String getQrCode() {
         return qrCode;
     }
@@ -201,6 +202,10 @@ public class Event {
     }
     public ArrayList<String> getTags() {
         return tags;
+    }
+    @Exclude
+    public String getDateString() {
+        return this.eventStartDate + " - " + this.eventEndDate + " from  " + this.eventStartTime + " to " + this.eventEndTime;
     }
 
     // Setters / Modify event
@@ -233,9 +238,11 @@ public class Event {
         updateDatabase("location", location);
     }
 
-    public void setCapacity(String capacity)
+    public void setCapacity(Integer capacity)
     {
-        Validator.validateNotEmpty(capacity, "Capacity");
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
         this.capacity = capacity;
         updateDatabase("capacity", capacity);
     }
@@ -291,7 +298,5 @@ public class Event {
         updateDatabase("registrationEndDate", registrationEndDate);
     }
 
-    public String getDateString() {
-        return this.eventStartDate + " - " + this.eventEndDate + " from  " + this.eventStartTime + " to " + this.eventEndTime;
-    }
+
 }

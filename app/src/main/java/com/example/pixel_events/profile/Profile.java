@@ -21,9 +21,6 @@ public class Profile {
     private String postalcode; // user's postal code
     private String province; // user's province
     private String city; // user's city
-    private List<Integer> eventsUpcoming; // list of upcoming eventID
-    private List<Integer> eventsPart; // list of past eventID that user participated in
-    private List<Integer> eventsNPart; // list of past eventID that user did not participate in
     private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]
     private boolean autoUpdateDatabase = true;
 
@@ -55,11 +52,6 @@ public class Profile {
         this.postalcode = postalcode;
         this.province = province;
         this.city = city;
-
-        // assign an empty events list
-        this.eventsUpcoming = new ArrayList<>();
-        this.eventsPart = new ArrayList<>();
-        this.eventsNPart = new ArrayList<>();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) {
@@ -124,18 +116,6 @@ public class Profile {
         return phoneNum;
     }
 
-    public List<Integer> getEventsUpcoming() {
-        return eventsUpcoming;
-    }
-
-    public List<Integer> getEventsPart() {
-        return eventsPart;
-    }
-
-    public List<Integer> getEventsNPart() {
-        return eventsNPart;
-    }
-
     public List<Boolean> getNotify() {
         return notify;
     }
@@ -196,21 +176,6 @@ public class Profile {
     public void setCity(String city) {
         this.city = city;
         updateDatabase("city", city);
-    }
-
-    public void setEventsUpcoming(List<Integer> eventsUpcoming) {
-        this.eventsUpcoming = eventsUpcoming;
-        updateDatabase("eventsUpcoming", eventsUpcoming);
-    }
-
-    public void setEventsPart(List<Integer> eventsPart) {
-        this.eventsPart = eventsPart;
-        updateDatabase("eventsPart", eventsPart);
-    }
-
-    public void setEventsNPart(List<Integer> eventsNPart) {
-        this.eventsNPart = eventsNPart;
-        updateDatabase("eventsNPart", eventsNPart);
     }
 
     public void setNotify(List<Boolean> notify) {
