@@ -1,8 +1,10 @@
 package com.example.pixel_events.waitinglist;
 
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +19,7 @@ import java.util.List;
 public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.VH> {
     public interface OnItemClick {
         void onClick(Profile profile);
+        void onDelete(Profile profile);
     }
 
     private final List<Profile> items;
@@ -42,6 +45,7 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         holder.title.setText(p.getUserName() != null ? p.getUserName() : "Unknown");
         holder.subtitle.setText(p.getEmail() != null ? p.getEmail() : "");
         holder.avatar.setImageResource(R.drawable.ic_launcher_foreground);
+        holder.deleteButton.setVisibility(View.VISIBLE);
 
         // Find status for this user
         int status = 0;
@@ -81,6 +85,7 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         }
 
         holder.itemView.setOnClickListener(v -> listener.onClick(p));
+        holder.deleteButton.setOnClickListener(v -> listener.onDelete(p));
     }
 
     @Override
@@ -93,6 +98,7 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
         final TextView title;
         final TextView subtitle;
         final TextView statusText;
+        final ImageButton deleteButton;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -100,6 +106,7 @@ public class WaitingListAdapter extends RecyclerView.Adapter<WaitingListAdapter.
             title = itemView.findViewById(R.id.item_profile_title);
             subtitle = itemView.findViewById(R.id.item_profile_email);
             statusText = itemView.findViewById(R.id.item_profile_status);
+            deleteButton = itemView.findViewById(R.id.item_profile_delete);
         }
     }
 }

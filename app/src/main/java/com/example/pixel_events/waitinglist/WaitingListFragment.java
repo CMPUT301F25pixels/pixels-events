@@ -68,31 +68,97 @@ public class WaitingListFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.waitinglist_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new WaitingListAdapter(profiles, waitingList, profile -> {
-            // Open ViewProfileFragment when user taps a profile
-            if (isAdded()) {
-                int containerId;
-                if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
-                    containerId = R.id.overlay_fragment_container;
-                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
-                    containerId = R.id.nav_host_fragment_activity_admin;
-                } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
-                    containerId = R.id.nav_host_fragment_activity_dashboard;
-                } else {
-                    containerId = android.R.id.content;
-                }
+        adapter = new WaitingListAdapter(profiles, waitingList, new WaitingListAdapter.OnItemClick() {
+            @Override
+            public void onClick(Profile profile) {
+                // Open ViewProfileFragment when user taps a profile
+                if (isAdded()) {
+                    int containerId;
+                    if (requireActivity().findViewById(R.id.overlay_fragment_container) != null) {
+                        containerId = R.id.overlay_fragment_container;
+                    } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+                        containerId = R.id.nav_host_fragment_activity_admin;
+                    } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
+                        containerId = R.id.nav_host_fragment_activity_dashboard;
+                    } else {
+                        containerId = android.R.id.content;
+                    }
 
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(containerId, new ViewProfileFragment(profile))
-                        .addToBackStack(null)
-                        .commit();
+                    requireActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(containerId, new ViewProfileFragment(profile))
+                            .addToBackStack(null)
+                            .commit();
 
-                if (containerId == R.id.overlay_fragment_container) {
-                    View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
-                    if (overlay != null)
-                        overlay.setVisibility(View.VISIBLE);
+                    if (containerId == R.id.overlay_fragment_container) {
+                        View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
+                        if (overlay != null)
+                            overlay.setVisibility(View.VISIBLE);
+                    }
                 }
+            }
+
+            @Override
+            public void onDelete(Profile profile) {
+                // Confirm remove and mark user as declined (status = 3)
+                if (!isAdded())
+                    return;
+                new Builder(requireContext())
+                        .setTitle("Remove from waitlist")
+                        .setMessage("Remove this user from the waitlist and mark them as declined?")
+                        .setPositiveButton("Remove", (dialog, which) -> {
+                            if (waitingList == null || waitingList.getWaitList() == null) {
+                                showInfoDialog("Waitlist not loaded");
+                                return;
+                            }
+                            // Find corresponding WaitlistUser
+                            WaitlistUser target = null;
+                            for (WaitlistUser u : waitingList.getWaitList()) {
+                                if (u.getUserId() == profile.getUserId()) {
+                                    target = u;
+                                    break;
+                                }
+                            }
+                            if (target == null) {
+                                showInfoDialog("User not found in waitlist");
+                                return;
+                            }
+
+                            // Update status to declined (3)
+                            target.updateStatusInDb(eventId, 3, new WaitlistUser.OnStatusUpdateListener() {
+                                @Override
+                                public void onSuccess() {
+                                    // Reload waitlist and refresh UI
+                                    db.getWaitingList(eventId, wl -> {
+                                        if (wl != null) {
+                                            waitingList = wl;
+                                            // refresh profiles list
+                                            requireActivity().runOnUiThread(() -> {
+                                                profiles.clear();
+                                                adapter.notifyDataSetChanged();
+                                                loadProfilesFromWaitingList();
+                                                showInfoDialog("User removed and marked as declined.");
+                                            });
+                                        }
+                                    }, e -> {
+                                        Log.e("WaitingListFragment", "Failed to reload waitlist after remove", e);
+                                        if (isAdded())
+                                            requireActivity().runOnUiThread(() -> showInfoDialog(
+                                                    "Removed user but failed to reload waitlist."));
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Log.e("WaitingListFragment", "Failed to update user status", e);
+                                    if (isAdded())
+                                        requireActivity().runOnUiThread(
+                                                () -> showInfoDialog("Failed to remove user: " + e.getMessage()));
+                                }
+                            });
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             }
         });
         recyclerView.setAdapter(adapter);

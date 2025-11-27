@@ -1,10 +1,13 @@
 package com.example.pixel_events.events;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -61,10 +64,7 @@ public class MyEventAdapter extends RecyclerView.Adapter<MyEventAdapter.EventVie
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
         private ImageView eventImage;
-        private TextView eventTitle;
-        private TextView eventTime;
-        private TextView host;
-        private TextView status;
+        private TextView eventTitle, eventTime, host, status;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
