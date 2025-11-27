@@ -92,6 +92,19 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/eventTagsContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"/>
+                </HorizontalScrollView>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -136,26 +149,17 @@
                         android:clickable="false"
                         android:visibility="gone"
                         android:textColor="@color/white"/>
-
                 </LinearLayout>
 
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/event_waitinglistcount"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:overScrollMode="never"
-                    android:scrollbars="none">
-
-                    <LinearLayout
-                        android:id="@+id/eventTagsContainer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"/>
-                </HorizontalScrollView>
+                    android:text="There are currently x amount of poeple in the waiting list"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"/>
 
             </LinearLayout>
-
-            <!-- Join / Leave Button -->
 
 
             <!-- Divider -->

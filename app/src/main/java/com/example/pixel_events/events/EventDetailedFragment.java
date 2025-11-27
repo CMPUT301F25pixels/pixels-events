@@ -50,6 +50,7 @@ public class EventDetailedFragment extends Fragment {
     private ShapeableImageView poster;
     private TextView title, date, description;
     private MaterialButton joinButton, leaveButton, tagButton;
+    private TextView waitingListCountView;
     private ImageButton backButton, qrButton;
     private LinearLayout tagsContainer;
 
@@ -96,6 +97,10 @@ public class EventDetailedFragment extends Fragment {
         tagButton = view.findViewById(R.id.event_tag);
         qrButton = view.findViewById(R.id.event_qrcode_button);
         tagsContainer = view.findViewById(R.id.eventTagsContainer);
+        // Waiting list count view (under the buttons)
+        waitingListCountView = view.findViewById(R.id.event_waitinglistcount);
+        if (waitingListCountView != null)
+            waitingListCountView.setVisibility(View.GONE);
 
         backButton.setOnClickListener(v -> requireActivity().getSupportFragmentManager().popBackStack());
         qrButton.setOnClickListener(v -> showQrDialog());
@@ -180,8 +185,8 @@ public class EventDetailedFragment extends Fragment {
                 toast("You must be logged in to join the waitlist");
                 return;
             }
-            joinButton.setEnabled(false);
-            leaveButton.setEnabled(false);
+            setButtonEnabled(joinButton, false);
+            setButtonEnabled(leaveButton, false);
             joinWaitlist();
         });
 
@@ -190,8 +195,8 @@ public class EventDetailedFragment extends Fragment {
                 toast("You must be logged in to leave the waitlist");
                 return;
             }
-            leaveButton.setEnabled(false);
-            joinButton.setEnabled(false);
+            setButtonEnabled(leaveButton, false);
+            setButtonEnabled(joinButton, false);
             leaveWaitlist();
         });
 
@@ -251,8 +256,10 @@ public class EventDetailedFragment extends Fragment {
         if (event == null) {
             tagButton.setVisibility(GONE);
             joinButton.setText("Loading registration…");
-            joinButton.setEnabled(false);
-            leaveButton.setEnabled(false);
+            setButtonEnabled(joinButton, false);
+            setButtonEnabled(leaveButton, false);
+            if (waitingListCountView != null)
+                waitingListCountView.setVisibility(View.GONE);
             return;
         }
 
@@ -274,7 +281,9 @@ public class EventDetailedFragment extends Fragment {
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration dates missing");
-                tagButton.setEnabled(false);
+                setButtonEnabled(tagButton, false);
+                if (waitingListCountView != null)
+                    waitingListCountView.setVisibility(View.GONE);
                 return;
             }
 
@@ -283,7 +292,9 @@ public class EventDetailedFragment extends Fragment {
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration opens " + startStr);
-                tagButton.setEnabled(false);
+                setButtonEnabled(tagButton, false);
+                if (waitingListCountView != null)
+                    waitingListCountView.setVisibility(View.GONE);
                 return;
             }
             if (today.after(end)) {
@@ -291,7 +302,9 @@ public class EventDetailedFragment extends Fragment {
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration Closed");
-                tagButton.setEnabled(false);
+                setButtonEnabled(tagButton, false);
+                if (waitingListCountView != null)
+                    waitingListCountView.setVisibility(View.GONE);
                 return;
             }
 
@@ -299,6 +312,10 @@ public class EventDetailedFragment extends Fragment {
             tagButton.setVisibility(GONE);
             joinButton.setVisibility(View.VISIBLE);
             leaveButton.setVisibility(View.VISIBLE);
+            if (waitingListCountView != null) {
+                waitingListCountView.setVisibility(View.VISIBLE);
+                waitingListCountView.setText(String.valueOf(waitingListCount) + " in waiting list");
+            }
 
             if (this.waitList != null && Objects.equals(this.waitList.getStatus(), "drawn")) {
                 int userStatus = -1;
@@ -316,19 +333,21 @@ public class EventDetailedFragment extends Fragment {
                 if (userStatus == 1) {
                     // selected -> show Accept (join) and Decline (leave)
                     joinButton.setText("Accept Invitation");
-                    joinButton.setEnabled(true);
+                    setButtonEnabled(joinButton, true);
                     joinButton.setOnClickListener(v -> {
-                        joinButton.setEnabled(false);
-                        leaveButton.setEnabled(false);
+                        setButtonEnabled(joinButton, false);
+                        setButtonEnabled(leaveButton, false);
                         updateUserStatus(2);
                     });
 
                     leaveButton.setText("Decline Invitation");
-                    leaveButton.setEnabled(true);
+                    setButtonEnabled(leaveButton, true);
                     leaveButton.setOnClickListener(v -> {
-                        leaveButton.setEnabled(false);
-                        joinButton.setEnabled(false);
+                        setButtonEnabled(leaveButton, false);
+                        setButtonEnabled(joinButton, false);
                         updateUserStatus(3);
+                        // redraw should be triggered after status update and reload; keep here for
+                        // safety
                         waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
                             @Override
                             public void onSuccess(int numberDrawn) {
@@ -350,7 +369,7 @@ public class EventDetailedFragment extends Fragment {
                     leaveButton.setVisibility(GONE);
                     tagButton.setVisibility(View.VISIBLE);
                     tagButton.setText("You accepted the invitation");
-                    tagButton.setEnabled(false);
+                    setButtonEnabled(tagButton, false);
                     return;
                 }
 
@@ -360,7 +379,7 @@ public class EventDetailedFragment extends Fragment {
                     leaveButton.setVisibility(GONE);
                     tagButton.setVisibility(View.VISIBLE);
                     tagButton.setText("You declined the invitation");
-                    tagButton.setEnabled(false);
+                    setButtonEnabled(tagButton, false);
                     return;
                 }
 
@@ -369,14 +388,14 @@ public class EventDetailedFragment extends Fragment {
                     leaveButton.setVisibility(GONE);
                     tagButton.setVisibility(View.VISIBLE);
                     tagButton.setText("Sorry, you were not selected");
-                    tagButton.setEnabled(false);
+                    setButtonEnabled(tagButton, false);
                 } else {
                     if (joined) {
                         joinButton.setText("Join");
-                        joinButton.setEnabled(false);
+                        setButtonEnabled(joinButton, false);
 
                         leaveButton.setText("Leave");
-                        leaveButton.setEnabled(true);
+                        setButtonEnabled(leaveButton, true);
                     } else {
                         boolean canJoin = waitingListMaxCount <= 0 ? true : waitingListCount < waitingListMaxCount;
                         if (!canJoin) {
@@ -384,14 +403,14 @@ public class EventDetailedFragment extends Fragment {
                             leaveButton.setVisibility(GONE);
                             tagButton.setVisibility(View.VISIBLE);
                             tagButton.setText("Waitlist full");
-                            tagButton.setEnabled(false);
+                            setButtonEnabled(tagButton, false);
                             return;
                         }
                         joinButton.setText("Join");
-                        joinButton.setEnabled(true);
+                        setButtonEnabled(joinButton, true);
 
                         leaveButton.setText("Leave");
-                        leaveButton.setEnabled(false);
+                        setButtonEnabled(leaveButton, false);
                     }
                     joinButton.setOnClickListener(v -> {
                         waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
@@ -408,15 +427,14 @@ public class EventDetailedFragment extends Fragment {
                     });
                 }
 
-
             } else {
                 // Not drawn: normal join/leave behavior
                 if (joined) {
                     joinButton.setText("Join");
-                    joinButton.setEnabled(false);
+                    setButtonEnabled(joinButton, false);
 
                     leaveButton.setText("Leave");
-                    leaveButton.setEnabled(true);
+                    setButtonEnabled(leaveButton, true);
                 } else {
                     boolean canJoin = waitingListMaxCount <= 0 ? true : waitingListCount < waitingListMaxCount;
                     if (!canJoin) {
@@ -424,14 +442,14 @@ public class EventDetailedFragment extends Fragment {
                         leaveButton.setVisibility(GONE);
                         tagButton.setVisibility(View.VISIBLE);
                         tagButton.setText("Waitlist full");
-                        tagButton.setEnabled(false);
+                        setButtonEnabled(tagButton, false);
                         return;
                     }
                     joinButton.setText("Join");
-                    joinButton.setEnabled(true);
+                    setButtonEnabled(joinButton, true);
 
                     leaveButton.setText("Leave");
-                    leaveButton.setEnabled(false);
+                    setButtonEnabled(leaveButton, false);
                 }
             }
 
@@ -441,7 +459,7 @@ public class EventDetailedFragment extends Fragment {
             joinButton.setVisibility(GONE);
             leaveButton.setVisibility(GONE);
             tagButton.setText("Registration dates invalid");
-            tagButton.setEnabled(false);
+            setButtonEnabled(tagButton, false);
         }
     }
 
@@ -462,9 +480,9 @@ public class EventDetailedFragment extends Fragment {
                     if (isAdded())
                         requireActivity().runOnUiThread(() -> {
                             toast("Error: " + e.getMessage());
-                            joinButton.setEnabled(true);
+                            setButtonEnabled(joinButton, true);
                             // leave stays disabled when not joined
-                            leaveButton.setEnabled(false);
+                            setButtonEnabled(leaveButton, false);
                         });
                 });
     }
@@ -487,10 +505,18 @@ public class EventDetailedFragment extends Fragment {
                     if (isAdded())
                         requireActivity().runOnUiThread(() -> {
                             toast("Error: " + e.getMessage());
-                            leaveButton.setEnabled(true);
-                            joinButton.setEnabled(false);
+                            setButtonEnabled(leaveButton, true);
+                            setButtonEnabled(joinButton, false);
                         });
                 });
+    }
+
+    private void setButtonEnabled(MaterialButton btn, boolean enabled) {
+        if (btn == null)
+            return;
+        btn.setEnabled(enabled);
+        // Visual cue for disabled state
+        btn.setAlpha(enabled ? 1f : 0.5f);
     }
 
     private void updateUserStatus(int newStatus) {
