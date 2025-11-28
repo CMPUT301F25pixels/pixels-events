@@ -13,10 +13,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="WaitingListJoinLeaveTest">
+      <SelectionState runConfigName="BrowseImagesTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ProvideInfoTest">
+      <SelectionState runConfigName="AdminDatabaseIntegrationTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="WaitListCapacityTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="WaitlistCapacityTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="testDeleteEvent_removesEventAndWaitList()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
