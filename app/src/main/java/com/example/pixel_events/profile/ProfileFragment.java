@@ -82,9 +82,19 @@ public class ProfileFragment extends Fragment {
     }
 
     private void replaceFragment(Fragment fragment) {
+        int containerId;
+        if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
+            containerId = R.id.nav_host_fragment_activity_dashboard;
+        } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+            containerId = R.id.nav_host_fragment_activity_admin;
+        } else {
+            // Fallback or error handling
+            containerId = android.R.id.content; // Last resort
+        }
+
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.nav_host_fragment_activity_dashboard, fragment)
+                .replace(containerId, fragment)
                 .addToBackStack(null)
                 .commit();
     }

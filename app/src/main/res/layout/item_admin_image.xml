@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    android:background="@color/dark_bg">
+
+    <ImageView
+        android:id="@+id/admin_image_poster"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Event poster"
+        android:src="@drawable/sample_image" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <ImageButton
+        android:id="@+id/admin_image_delete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="Delete event"
+        android:src="@android:drawable/ic_menu_delete"
+        app:tint="@color/red"
+        android:background="@android:color/transparent" />
+
+</LinearLayout>

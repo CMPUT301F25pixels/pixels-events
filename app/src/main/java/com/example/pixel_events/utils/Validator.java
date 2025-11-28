@@ -47,32 +47,32 @@ public class Validator {
             // Today's date at midnight
             Date today = dateFmt.parse(dateFmt.format(new Date()));
 
-            if (startDateObj != null && !startDateObj.after(today)) {
-                throw new IllegalArgumentException("Event start date must be after today");
+            if (startDateObj != null && startDateObj.before(today)) {
+                throw new IllegalArgumentException("Event start date must be today or after today");
             }
-            if (endDateObj != null && !endDateObj.after(today)) {
-                throw new IllegalArgumentException("Event end date must be after today");
+            if (endDateObj != null && endDateObj.before(today)) {
+                throw new IllegalArgumentException("Event end date must be today or after today");
             }
             if (regStartObj != null && regStartObj.before(today)) {
-                throw new IllegalArgumentException("Registration start date must be after today");
+                throw new IllegalArgumentException("Registration start date must be today or after today");
             }
             if (regEndObj != null && regEndObj.before(today)) {
-                throw new IllegalArgumentException("Registration end date must be after today");
+                throw new IllegalArgumentException("Registration end date must be today or after today");
             }
 
-            // End must be after start when both present
-            if (startDateObj != null && endDateObj != null && !endDateObj.after(startDateObj)) {
-                throw new IllegalArgumentException("Event end date must be after event start date");
+            // End must be on or after start when both present
+            if (startDateObj != null && endDateObj != null && endDateObj.before(startDateObj)) {
+                throw new IllegalArgumentException("Event end date must be on or after event start date");
             }
 
             // Registration ordering
-            if (regStartObj != null && regEndObj != null && !regEndObj.after(regStartObj)) {
-                throw new IllegalArgumentException("Registration end date must be after registration start date");
+            if (regStartObj != null && regEndObj != null && regEndObj.before(regStartObj)) {
+                throw new IllegalArgumentException("Registration end date must be on or after registration start date");
             }
 
-            // Registration must finish before event starts (if both present)
-            if  (regEndObj != null && startDateObj != null && !regEndObj.before(startDateObj))  {
-                throw new IllegalArgumentException("Registration must end before the event start date");
+            // Registration must finish before or on the event start date (if both present)
+            if  (regEndObj != null && startDateObj != null && regEndObj.after(startDateObj))  {
+                throw new IllegalArgumentException("Registration must end before or on the event start date");
             }
 
             // Time validation when both times provided

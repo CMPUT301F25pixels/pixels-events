@@ -7,6 +7,8 @@ import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -83,6 +85,19 @@ public class DatabaseHandler {
     // Optional accessors for other classes to read internal references
     public FirebaseFirestore getFirestore() {
         return db;
+    }
+
+    /**
+     * Convert a Firebase UID string to a positive integer id used by legacy DB.
+     * Ensures the returned id is > 0.
+     */
+    public static int uidToId(String uid) {
+        if (uid == null) return 1;
+        int raw = uid.hashCode();
+        if (raw == Integer.MIN_VALUE) return Integer.MAX_VALUE;
+        int v = Math.abs(raw);
+        if (v <= 0) v = 1;
+        return v;
     }
 
     public CollectionReference getAccountCollection() {
@@ -177,6 +192,70 @@ public class DatabaseHandler {
                 .delete()
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+
+        // Also try to delete from Firebase Auth if it is the current user
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && uidToId(currentUser.getUid()) == userID) {
+            currentUser.delete()
+                    .addOnSuccessListener(aVoid -> Log.d("DB", "Deleted user from Firebase Auth"))
+                    .addOnFailureListener(e -> Log.e("DB", "Failed to delete user from Firebase Auth", e));
+        }
+
+        // Delete events organized by this user
+        eventRef.whereEqualTo("organizerId", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        try {
+                            int eventId = Integer.parseInt(doc.getId());
+                            deleteEvent(eventId);
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                    }
+                });
+
+        // Remove user from all waitlists and selected lists
+        waitListRef.whereArrayContains("waitList", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().update("waitList", FieldValue.arrayRemove(userID));
+                    }
+                });
+
+        waitListRef.whereArrayContains("selected", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().update("selected", FieldValue.arrayRemove(userID));
+                    }
+                });
+    }
+
+    /**
+     * Fetch all profiles in AccountData collection.
+     * @param listener success callback with list of Profile objects (empty list if none)
+     * @param errorListener failure callback invoked on Firestore error
+     */
+    public void getAllProfile(OnSuccessListener<java.util.List<Profile>> listener,
+                              OnFailureListener errorListener) {
+        accRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Profile> profiles = new java.util.ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        try {
+                            Profile p = document.toObject(Profile.class);
+                            if (p != null) {
+                                profiles.add(p);
+                            }
+                        } catch (RuntimeException ex) {
+                            Log.e("DB", "Failed to deserialize Profile doc: " + document.getId(), ex);
+                        }
+                    }
+                    listener.onSuccess(profiles);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting all profiles", e);
+                    errorListener.onFailure(e);
+                });
     }
 
     // EVENT INFO FUNCTIONS

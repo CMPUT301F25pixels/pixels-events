@@ -41,14 +41,21 @@ dependencies {
     implementation(libs.material) // Ensure version catalog pins >= 1.12.0 for Material3 theme
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.annotation)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation(libs.firebase.firestore)
 
-    // --- Firebase (Bill of Materials) ---
+    // JUnit 4 for unit testing
+    testImplementation(libs.junit)
+    testImplementation("junit:junit:4.13.2")
+    
+    // Mockito for mocking in unit tests
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    
+    // Android testing
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    
+    // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore")
@@ -60,28 +67,8 @@ dependencies {
 
     // --- Imaging ---
     implementation("com.github.bumptech.glide:glide:5.0.5")
+    implementation(libs.legacy.support.v4)
+    implementation(libs.recyclerview)
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 
-    // --- QR / ZXing ---
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0") // keep single occurrence
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("org.osmdroid:osmdroid-android:6.1.16")
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-
-    // --- Unit Testing ---
-    // Use a single JUnit 4 dependency (version catalog or explicit). Remove duplicate.
-    testImplementation("junit:junit:4.13.2")
-    // Mockito
-    testImplementation("org.mockito:mockito-core:5.7.0")
-    testImplementation("org.mockito:mockito-inline:5.2.0")
-
-    // --- Instrumented / UI Testing (Aligned AndroidX Test & Espresso versions) ---
-    androidTestImplementation("androidx.test:core:1.5.0")
-    androidTestImplementation("androidx.test:runner:1.5.2")
-    androidTestImplementation("androidx.test:rules:1.5.0")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5") // Even if libs.ext.junit present, explicit for alignment
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    // Fragment testing (debug only) - keep
-    debugImplementation("androidx.fragment:fragment-testing:1.7.1")
 }

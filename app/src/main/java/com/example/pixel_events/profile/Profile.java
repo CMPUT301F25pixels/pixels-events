@@ -12,40 +12,31 @@ import java.util.List;
 import java.util.Map;
 
 public class Profile {
-    private int userId; // Unique userId (for backwards compatibility)
-    private String role; // { user, org, admin }
-    private String userName; // User entered name
-    private String gender; // { male, female, other }
-    private String email; // e-mail address
-    private String phoneNum; // user's phone number
-    private String postalcode; // user's postal code
-    private String province; // user's province
-    private String city; // user's city
-    private List<Integer> eventsUpcoming; // list of upcoming eventID
-    private List<Integer> eventsPart; // list of past eventID that user participated in
-    private List<Integer> eventsNPart; // list of past eventID that user did not participate in
-    private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]
-    private Double latitude;
-    private Double longitude;
-    private boolean autoUpdateDatabase = true;
+    private int id;                              // Unique userID
+    private String accType;                      // { user, org, admin }
+    private String userName;                     // User entered name
+    private Date DOB;                            // Date of birth
+    private String gender;                       // { male, female, other }
+    private String email;                        // e-mail address
+    private String city;                         // city of residence
+    private String province;                     // province of residence
+    private int phoneNum;                        // user's phone number
+    private List<Integer> eventsUpcoming;        // list of upcoming eventID
+    private List<Integer> eventsPart;            // list of past eventID that user participated in
+    private List<Integer> eventsNPart;           // list of past eventID that user did not participate in
+    private List<Boolean> notify;                // [All Notif, Win notif, Lose Notif]
 
-    public Profile() {
-    }
+    /**
+     * Empty constructor for Firebase
+     */
+    public Profile() {}
 
-    // New constructor with address fields
-    public Profile(int userid, String role, String userName, String gender,
-            String email, String phoneNum, String postalcode,
-            String province, String city, List<Boolean> notify) {
-        // Validate required fields
-        Validator.validateNotEmpty(role, "Role");
-        Validator.validateNotEmpty(userName, "User Name");
-        Validator.validateNotEmpty(gender, "Gender");
-        Validator.validateNotEmpty(email, "Email");
-
-        if (userid <= 0) {
-            throw new IllegalArgumentException("User ID must be positive");
-        }
-
+    /**
+     * Initialize
+     */
+    public Profile(int id, String accType, String userName, Date DOB, String gender,
+                   String email, String city, String province, int phoneNum,
+                   List<Boolean> notify) {
         // Assign all variables
         this.userId = userid;
         this.role = role;
@@ -219,22 +210,29 @@ public class Profile {
         this.notify = notify;
         updateDatabase("notify", notify);
     }
-    public Double getLatitude() {
-        return latitude;
+    
+    /**
+     * Helper method to update a single field in the database
+     * @param fieldName The name of the field to update
+     * @param value The new value for the field
+     */
+    private void updateDatabase(String fieldName, Object value) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(fieldName, value);
+        
+        DatabaseHandler.getInstance().modifyAcc(this.id, updates, error -> {
+            if (error != null) {
+                Log.e("Profile", "Failed to update " + fieldName + ": " + error);
+            }
+        });
     }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-        updateDatabase("latitude", latitude);
+    /**
+     * Create and save profile to database
+     * @param db DatabaseHandler reference
+     */
+    private void createProfile(DatabaseHandler db) {
+        db.addAcc(this.id, this.accType, this.userName, this.DOB, this.gender,
+                this.email, this.city, this.province, this.phoneNum, this.notify);
     }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-        updateDatabase("longitude", longitude);
-    }
-
 }

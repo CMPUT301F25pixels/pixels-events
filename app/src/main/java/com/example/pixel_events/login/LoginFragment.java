@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,10 +23,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.pixel_events.admin.AdminActivity;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.databinding.FragmentLoginBinding;
 
 import com.example.pixel_events.R;
+import com.example.pixel_events.home.DashboardActivity;
 
 public class LoginFragment extends Fragment {
 
@@ -149,7 +152,7 @@ public class LoginFragment extends Fragment {
 
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
-        DatabaseHandler.getInstance().getProfile(model.getUserId().hashCode(), profile -> {
+        DatabaseHandler.getInstance().getProfile(DatabaseHandler.uidToId(model.getUserId()), profile -> {
             AuthManager.getInstance().setCurrentUserProfile(profile);
         }, e -> {
             Log.e("Login", "Failed to load profile");
@@ -163,8 +166,11 @@ public class LoginFragment extends Fragment {
 
         // Navigate to DashboardActivity
         if (getActivity() != null) {
-            android.content.Intent intent = new android.content.Intent(getActivity(),
-                    com.example.pixel_events.home.DashboardActivity.class);
+            Intent intent;
+            getActivity().getSupportFragmentManager().popBackStack();
+            String role = AuthManager.getInstance().getCurrentUserProfile().getRole();
+            if (role.equals("admin")) intent = new Intent(getActivity(), AdminActivity.class);
+            else intent = new Intent(getActivity(), DashboardActivity.class);
             startActivity(intent);
             getActivity().finish();
         }

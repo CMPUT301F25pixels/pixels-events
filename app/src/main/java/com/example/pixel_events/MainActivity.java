@@ -4,14 +4,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.pixel_events.admin.AdminActivity;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.home.DashboardActivity;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.login.LoginFragment;
+import com.example.pixel_events.home.DashboardActivity;
+import com.example.pixel_events.login.AuthManager;
+import com.example.pixel_events.login.LoginFragment;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import androidx.core.app.ActivityCompat;
@@ -32,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             FirebaseApp app = FirebaseApp.getInstance();
             Log.d(TAG, "Firebase is initialized: " + (app != null));
+
 
             FirebaseFirestore.getInstance();
             Log.d(TAG, "Firestore instance retrieved successfully");
@@ -128,3 +135,4 @@ public class MainActivity extends AppCompatActivity {
         finish(); // Close MainActivity so the user can't go back to it
     }
 }
+

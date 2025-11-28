@@ -102,19 +102,26 @@ public class Event {
         this.eventEndTime = eventEndTime;
         this.registrationStartDate = registrationStartDate;
         this.registrationEndDate = registrationEndDate;
-        this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
-        this.waitingList = new WaitingList(eventId);
-        saveToDatabase();
+        this.waitingList = new WaitingList(String.valueOf(eventId));
     }
 
-    public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
-    
-    public void saveToDatabase()
-    {
-        if (!autoUpdateDatabase) {
-            return;
+    /**
+     * Validates that a string field is not null or empty
+     * @param value The value to validate
+     * @param fieldName The name of the field (for error messages)
+     * @throws IllegalArgumentException if value is null or empty
+     */
+    private void validateNotEmpty(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or empty");
         }
+    }
 
+    /**
+     * Save this event to the database
+     * Call this method explicitly to persist the event to Firebase
+     */
+    public void saveToDatabase() {
         try {
             DatabaseHandler db = DatabaseHandler.getInstance();
             db.addEvent(this);
@@ -163,9 +170,19 @@ public class Event {
     public String getDescription() {
         return description;
     }
+
+    public String getFullDescription(){
+        String desc = description;
+        desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + " from " + eventStartTime + " onwards to " + eventEndTime + ".";
+        desc += "\n\nThe registration date starts from " + registrationStartDate + " to " + registrationEndDate + ".";
+        desc += "\n\nThe event has a capacity of " + capacity + " people.";
+        desc += "\n\nRegister now to increase your chances of joining the event.";
+        return desc;
+    }
     public int getOrganizerId() {
         return organizerId;
     }
+
     public String getQrCode() {
         return qrCode;
     }
@@ -262,13 +279,18 @@ public class Event {
     }
 
     public void setRegistrationStartDate(String registrationStartDate) {
+        validateNotEmpty(registrationStartDate, "Registration Start Date");
+        validateDateRelations(this.eventStartDate, this.eventEndDate,
+                registrationStartDate, this.registrationEndDate,
+                this.eventStartTime, this.eventEndTime);
 
+        this.registrationStartDate = registrationStartDate;
+        updateDatabase("registrationStartDate", registrationStartDate);
     }
-
-    public void setRegistrationEndDate(String registrationEndDate)
-    {
-        Validator.validateNotEmpty(registrationEndDate, "Registration End Date");
-        Validator.validateDateRelations(this.eventStartDate, this.eventEndDate,
+    
+    public void setRegistrationEndDate(String registrationEndDate) {
+        validateNotEmpty(registrationEndDate, "Registration End Date");
+        validateDateRelations(this.eventStartDate, this.eventEndDate,
                 this.registrationStartDate, registrationEndDate,
                 this.eventStartTime, this.eventEndTime);
 
