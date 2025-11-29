@@ -12,9 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
-import com.example.pixel_events.home.DashboardAdapter;
-import com.example.pixel_events.login.AuthManager;
-import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;

@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import java.util.ArrayList;
 import java.util.List;
