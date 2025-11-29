@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
+import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -256,6 +257,73 @@ public class DatabaseHandler {
                 callback.accept(null); // Default: send all notifications
             }
         }, e -> callback.accept(null)); // On error, send notifications anyway
+    }
+
+    /**
+     * US 02.07.01 - Send notification to all entrants on waiting list
+     */
+    public void sendNotificationToAllWaitlist(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    Notification n = new Notification(
+                        "Message from Organizer",
+                        message,
+                        "ORGANIZER_MESSAGE",
+                        eventId,
+                        user.getUserId(),
+                        senderId
+                    );
+                    addNotification(user.getUserId(), n);
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
+    }
+
+    /**
+     * US 02.07.02 - Send notification to selected entrants
+     */
+    public void sendNotificationToSelected(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    if (user.getStatus() == 1) { // Selected (won lottery)
+                        Notification n = new Notification(
+                            "Message from Organizer",
+                            message,
+                            "ORGANIZER_MESSAGE",
+                            eventId,
+                            user.getUserId(),
+                            senderId
+                        );
+                        addNotification(user.getUserId(), n);
+                    }
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
+    }
+
+    /**
+     * US 02.07.03 - Send notification to cancelled entrants
+     */
+    public void sendNotificationToCancelled(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    if (user.getStatus() == 3) { // Declined/cancelled
+                        Notification n = new Notification(
+                            "Message from Organizer",
+                            message,
+                            "ORGANIZER_MESSAGE",
+                            eventId,
+                            user.getUserId(),
+                            senderId
+                        );
+                        addNotification(user.getUserId(), n);
+                    }
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
     }
 
     // ACCOUNT INFO FUNCTIONS

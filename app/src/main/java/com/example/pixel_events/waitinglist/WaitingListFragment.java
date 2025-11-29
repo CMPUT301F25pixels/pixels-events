@@ -35,7 +35,7 @@ public class WaitingListFragment extends Fragment {
     private int[] filterStatuses = null;
     // If showing selected + waiting, sort selected first
     private boolean sortSelectedFirst = false;
-    private ImageButton backButton, shareButton;
+    private ImageButton backButton, shareButton, notificationButton;
     private int eventId = -1;
     private DatabaseHandler db;
 
@@ -70,6 +70,7 @@ public class WaitingListFragment extends Fragment {
         db = DatabaseHandler.getInstance();
         backButton = view.findViewById(R.id.waitinglist_backbutton);
         shareButton = view.findViewById(R.id.waitinglist_exportButton);
+        notificationButton = view.findViewById(R.id.waitinglist_notificationButton);
 
         recyclerView = view.findViewById(R.id.waitinglist_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -214,6 +215,21 @@ public class WaitingListFragment extends Fragment {
                             requireActivity().runOnUiThread(() -> showInfoDialog(message));
                         }
                     });
+        });
+
+        notificationButton.setOnClickListener(v -> {
+            if (waitList == null) {
+                showInfoDialog("Waiting list not loaded");
+                return;
+            }
+            // Get event title
+            db.getEvent(eventId, event -> {
+                if (event != null && isAdded()) {
+                    com.example.pixel_events.notifications.OrganizerNotificationDialog dialog = 
+                        com.example.pixel_events.notifications.OrganizerNotificationDialog.newInstance(eventId, event.getTitle());
+                    dialog.show(getParentFragmentManager(), "organizer_notification");
+                }
+            }, e -> showInfoDialog("Failed to load event"));
         });
 
         return view;

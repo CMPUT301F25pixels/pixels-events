@@ -10,6 +10,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.databinding.ActivityAdminBinding;
+import com.example.pixel_events.notifications.AdminNotificationLogFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class AdminActivity extends AppCompatActivity {
@@ -67,6 +68,24 @@ public class AdminActivity extends AppCompatActivity {
                     binding.adminTitle.setText(title);
                 }
             });
+            
+            // Hook up notification logs button
+            if (binding.adminNotificationLogsBtn != null) {
+                binding.adminNotificationLogsBtn.setOnClickListener(v -> {
+                    if (binding.adminTitle != null) {
+                        binding.adminTitle.setText("Notification Logs");
+                    }
+                    if (binding.overlayFragmentContainer != null) {
+                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                    }
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .setReorderingAllowed(true)
+                            .add(R.id.overlay_fragment_container, new AdminNotificationLogFragment())
+                            .addToBackStack("overlay")
+                            .commit();
+                });
+            }
         } else {
             // If fragment not yet created, post a runnable to retry after layout pass
             binding.getRoot().post(() -> {
@@ -109,6 +128,24 @@ public class AdminActivity extends AppCompatActivity {
                             }
                         }
                     });
+                    
+                    // Hook up notification logs button
+                    if (binding.adminNotificationLogsBtn != null) {
+                        binding.adminNotificationLogsBtn.setOnClickListener(v -> {
+                            if (binding.adminTitle != null) {
+                                binding.adminTitle.setText("Notification Logs");
+                            }
+                            if (binding.overlayFragmentContainer != null) {
+                                binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                            }
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .setReorderingAllowed(true)
+                                    .add(R.id.overlay_fragment_container, new AdminNotificationLogFragment())
+                                    .addToBackStack("overlay")
+                                    .commit();
+                        });
+                    }
                 }
             });
         }

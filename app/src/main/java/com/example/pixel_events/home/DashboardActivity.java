@@ -67,11 +67,25 @@ public class DashboardActivity extends AppCompatActivity {
     private void showNotificationAlert(Notification n, int userId) {
         if (n == null) return;
         
+        // Check if it's a deletion notification
+        boolean isDeletion = "ADMIN_DELETE".equals(n.getType()) && 
+                            (n.getMessage().contains("profile has been deleted") || 
+                             n.getMessage().contains("Your profile"));
+        
         new AlertDialog.Builder(this)
                .setTitle(n.getTitle())
                .setMessage(n.getMessage())
                .setPositiveButton("OK", (dialog, id) -> {
                    DatabaseHandler.getInstance().markNotificationRead(userId, n.getNotificationId());
+                   
+                   // If profile was deleted, log out the user
+                   if (isDeletion) {
+                       AuthManager.getInstance().signOut();
+                       android.content.Intent intent = new android.content.Intent(this, com.example.pixel_events.MainActivity.class);
+                       intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                       startActivity(intent);
+                       finish();
+                   }
                    dialog.dismiss();
                })
                .setCancelable(false)
