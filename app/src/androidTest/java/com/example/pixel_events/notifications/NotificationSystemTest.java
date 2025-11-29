@@ -136,6 +136,57 @@ public class NotificationSystemTest {
         latch.await(5, TimeUnit.SECONDS);
         assertTrue("Notification should be logged globally", success.get());
     }
+
+    /**
+     * Test Organizer Notification on Event Deletion
+     */
+    @Test
+    public void testOrganizerNotifiedOnEventDeletion() throws InterruptedException {
+        // Setup: Create event
+        CountDownLatch setupLatch = new CountDownLatch(1);
+        Event event = new Event();
+        // Use reflection to set private fields if setters aren't available or for testing
+        try {
+            java.lang.reflect.Field fId = Event.class.getDeclaredField("eventId");
+            fId.setAccessible(true);
+            fId.set(event, TEST_EVENT);
+            java.lang.reflect.Field fOrg = Event.class.getDeclaredField("organizerId");
+            fOrg.setAccessible(true);
+            fOrg.set(event, TEST_ORGANIZER);
+            java.lang.reflect.Field fTitle = Event.class.getDeclaredField("title");
+            fTitle.setAccessible(true);
+            fTitle.set(event, "Deleted Event");
+        } catch (Exception e) { fail("Setup failed"); }
+        
+        event.setAutoUpdateDatabase(false); // Don't auto-save during setup
+        db.addEvent(event);
+        Thread.sleep(500);
+
+        // Action: Delete Event
+        db.deleteEvent(TEST_EVENT);
+        Thread.sleep(1000);
+
+        // Verify: Organizer got notification
+        CountDownLatch verifyLatch = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(false);
+
+        db.getFirestore()
+                .collection("AccountData")
+                .document(String.valueOf(TEST_ORGANIZER))
+                .collection("Notifications")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : snapshots.getDocuments()) {
+                        Notification n = doc.toObject(Notification.class);
+                        if (n != null && "ADMIN_DELETE".equals(n.getType()) && n.getMessage().contains("Deleted Event")) {
+                            success.set(true);
+                            break;
+                        }
+                    }
+                    verifyLatch.countDown();
+                });
+
+        verifyLatch.await(5, TimeUnit.SECONDS);
+        assertTrue("Organizer should be notified of event deletion", success.get());
+    }
 }
-
-

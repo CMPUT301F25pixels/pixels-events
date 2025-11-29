@@ -619,6 +619,21 @@ public class DatabaseHandler {
     }
 
     public void deleteEvent(int eventID) {
+        // 0. Notify Organizer
+        getEvent(eventID, event -> {
+            if (event != null) {
+                int organizerId = event.getOrganizerId();
+                Notification organizerNotice = new Notification(
+                    "Event Deleted",
+                    "Your event '" + event.getTitle() + "' has been deleted by the Admin.",
+                    "ADMIN_DELETE",
+                    eventID,
+                    organizerId
+                );
+                addNotification(organizerId, organizerNotice);
+            }
+        }, e -> Log.e("DB", "Error fetching event for organizer notification", e));
+
         // 1. Notify all entrants in waitlist and selected list
         getWaitingList(eventID, waitList -> {
             if (waitList != null) {
