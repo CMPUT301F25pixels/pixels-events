@@ -3,10 +3,11 @@ package com.example.pixel_events.entrantTests;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 import android.os.Bundle;
 
@@ -14,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.LargeTest;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
@@ -29,11 +29,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.nio.file.Watchable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /*
@@ -74,25 +71,22 @@ public class WaitingListJoinLeaveTest {
                 "Test Event",
                 "test.URL",
                 "Edmonton",
-                "100",
+                100,
                 "Test Desc",
                 "100",
                 "2026-01-01",
                 "2030-01-01",
                 "09:00",
                 "10:00",
-                today,
-                "2025-12-30",
+                today, // Registration start
+                "2025-12-10", // Registration end
                 tags);
         Tasks.await(db.getEventCollection().document(String.valueOf(eventId)).set(evn));
-        }
+    }
 
     @NonNull
     private Profile getProfile() {
         Profile user = new Profile();
-        List<Integer> eventsU = new ArrayList<>();
-        List<Integer> eventsP = new ArrayList<>();
-        List<Integer> eventsN = new ArrayList<>();
         List<Boolean> noti = new ArrayList<>();
         noti.add(true);
         noti.add(true);
@@ -107,9 +101,6 @@ public class WaitingListJoinLeaveTest {
         user.setPostalcode("T1T1T1");
         user.setProvince("Alberta");
         user.setCity("Edmonton");
-        user.setEventsUpcoming(eventsU);
-        user.setEventsNPart(eventsP);
-        user.setEventsNPart(eventsN);
         user.setNotify(noti);
         return user;
     }
@@ -134,20 +125,22 @@ public class WaitingListJoinLeaveTest {
                 );
         scenario.moveToState(Lifecycle.State.RESUMED);
 
-        // Wait for "Loading..." to turn into "Join"
-        waitForText(R.id.event_jlbutton, "Join", 5000);
+        // Wait for loading
+        waitForText(R.id.event_joinButton, "Join", 5000);
 
-        // Click Join
-        onView(withId(R.id.event_jlbutton)).perform(click());
+        // Click Join Button
+        onView(withId(R.id.event_joinButton)).perform(click());
 
-        // Wait for "Join" to turn into "Leave"
-        waitForText(R.id.event_jlbutton, "Leave", 5000);
+        // Wait and Check if join is now disabled
+        waitForEnabled(R.id.event_leaveButton, true, 5000);
+        onView(withId(R.id.event_joinButton)).check(matches(not(isEnabled())));
 
-        // Click Leave
-        onView(withId(R.id.event_jlbutton)).perform(click());
+        // Click Leave Button
+        onView(withId(R.id.event_leaveButton)).perform(click());
 
-        // Wait for "Leave" to turn into "Join"
-        waitForText(R.id.event_jlbutton, "Join", 5000);
+        // Wait and check if leave is disabled
+        waitForEnabled(R.id.event_joinButton, true, 5000);
+        onView(withId(R.id.event_leaveButton)).check(matches(not(isEnabled())));
     }
 
     // Helper method to wait for text to appear on a View
@@ -157,11 +150,9 @@ public class WaitingListJoinLeaveTest {
 
         while (System.currentTimeMillis() < endTime) {
             try {
-                // Check if the view has the expected text
                 onView(withId(viewId)).check(matches(withText(containsString(expectedText))));
                 return;
-            } catch (Throwable t) {         // Failed
-                // We sleep and try again.
+            } catch (Throwable t) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -169,8 +160,31 @@ public class WaitingListJoinLeaveTest {
                 }
             }
         }
-        // Timed out. Throw the error to fail the test.
         throw new RuntimeException("Timed out waiting for text '" + expectedText + "' on view " + viewId);
+    }
+
+    // Helper method to wait for a View to become enabled/disabled
+    public static void waitForEnabled(int viewId, boolean shouldBeEnabled, long timeoutMillis) {
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + timeoutMillis;
+
+        while (System.currentTimeMillis() < endTime) {
+            try {
+                if (shouldBeEnabled) {
+                    onView(withId(viewId)).check(matches(isEnabled()));
+                } else {
+                    onView(withId(viewId)).check(matches(not(isEnabled())));
+                }
+                return;
+            } catch (Throwable t) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        throw new RuntimeException("Timed out waiting for view " + viewId + " to be " + (shouldBeEnabled ? "enabled" : "disabled"));
     }
 
     @After
@@ -179,6 +193,4 @@ public class WaitingListJoinLeaveTest {
         db.deleteEvent(eventId);
         DatabaseHandler.resetInstance();
     }
-
 }
-

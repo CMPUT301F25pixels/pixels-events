@@ -31,7 +31,7 @@ public class OrganizerIntegrationTest {
     private static final String TEST_TITLE = "Integration Test Event";
     private String TEST_IMAGE_URL;
     private static final String TEST_LOCATION = "Test City";
-    private static final String TEST_CAPACITY = "500";
+    private static final int TEST_CAPACITY = 500;
     private static final String TEST_FEE = "Free";
     private static final String TEST_DESCRIPTION = "This is a test event";
     private static final String TEST_EVENT_START = "2026-02-01";

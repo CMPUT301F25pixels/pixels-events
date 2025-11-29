@@ -40,6 +40,7 @@ import java.util.List;
         US 01.01.04: As an entrant, I want to filter events based on my interests and availability.
 */
 
+// INCOMPLETE: NEED TO UNDERSTAND
 @RunWith(AndroidJUnit4.class)
 public class FilterEventsTest {
     DatabaseHandler db;
@@ -55,9 +56,6 @@ public class FilterEventsTest {
         db = DatabaseHandler.getInstance(true); // emulator mode
 
         // Create and add a new user
-        List<Integer> eventsU = new ArrayList<>();
-        List<Integer> eventsP = new ArrayList<>();
-        List<Integer> eventsN = new ArrayList<>();
         List<Boolean> noti = new ArrayList<>();
         noti.add(true);
         noti.add(true);
@@ -74,9 +72,6 @@ public class FilterEventsTest {
                 "Alberta",
                 "Edmonton",
                 noti);
-        user.setEventsUpcoming(eventsU);
-        user.setEventsNPart(eventsP);
-        user.setEventsNPart(eventsN);
         Tasks.await(db.getAccountCollection().document(String.valueOf(userID)).set(user));
 
         // Create Event 1 and add event to DB
@@ -92,7 +87,7 @@ public class FilterEventsTest {
                 "Event One",
                 "test.URL",
                 "Edmonton",
-                "100",
+                100,
                 "Test Desc",
                 "100",
                 "2026-01-01",
@@ -114,7 +109,7 @@ public class FilterEventsTest {
                 "Event Twe",
                 "test.URL",
                 "Edmonton",
-                "100",
+                100,
                 "Test Desc",
                 "100",
                 "2026-02-01",

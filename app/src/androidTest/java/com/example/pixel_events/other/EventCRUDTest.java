@@ -47,7 +47,7 @@ public class EventCRUDTest {
         String title = "Test Event " + testEventId;
         String imageUrl = "";
         String location = "Test Location";
-        String capacity = "100";
+        int capacity = 100;
         String description = "Test Description";
         String fee = "Free";
         String eventStartDate = "2026-01-08";
