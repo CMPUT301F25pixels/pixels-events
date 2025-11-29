@@ -80,8 +80,8 @@ public class DashboardActivity extends AppCompatActivity {
                    
                    // If profile was deleted, log out the user
                    if (isDeletion) {
-                       AuthManager.getInstance().signOut();
-                       android.content.Intent intent = new android.content.Intent(this, com.example.pixel_events.MainActivity.class);
+                       AuthManager.getInstance().signOut(DashboardActivity.this);
+                       android.content.Intent intent = new android.content.Intent(DashboardActivity.this, com.example.pixel_events.MainActivity.class);
                        intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
                        startActivity(intent);
                        finish();

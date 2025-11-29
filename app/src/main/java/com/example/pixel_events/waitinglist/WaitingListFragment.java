@@ -218,7 +218,7 @@ public class WaitingListFragment extends Fragment {
         });
 
         notificationButton.setOnClickListener(v -> {
-            if (waitList == null) {
+            if (waitingList == null) {
                 showInfoDialog("Waiting list not loaded");
                 return;
             }
