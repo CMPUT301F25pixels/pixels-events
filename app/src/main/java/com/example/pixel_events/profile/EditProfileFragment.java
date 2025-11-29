@@ -146,7 +146,7 @@ public class EditProfileFragment extends Fragment {
         }
         if (!email.isEmpty() && !email.equals(profile.getEmail())) {
             updates.put("email", email);
-            AuthManager.getInstance().setCurrentUserEmail(email);
+            AuthManager.getInstance().setCurrentEmail(email);
         }
 
         if (!newPhone.isEmpty() && !newPhone.equals(profile.getPhoneNum())) {

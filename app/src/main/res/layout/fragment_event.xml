@@ -144,7 +144,6 @@
                 android:backgroundTint="@color/card_bg"
                 android:fontFamily="@font/poppins"
                 android:text="Draw Lottery"
-                android:clickable="false"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 

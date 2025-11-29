@@ -155,7 +155,7 @@
                     android:id="@+id/event_waitinglistcount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="There are currently x amount of poeple in the waiting list"
+                    android:text="There are currently x amount of people in the waiting list"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp"/>
 

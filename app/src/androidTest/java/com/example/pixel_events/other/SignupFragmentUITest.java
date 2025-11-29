@@ -32,7 +32,6 @@ public class SignupFragmentUITest {
 
         onView(withId(R.id.signup_user_name)).check(matches(isDisplayed()));
         onView(withId(R.id.signup_user_email)).check(matches(isDisplayed()));
-        onView(withId(R.id.signup_user_password)).check(matches(isDisplayed()));
         onView(withId(R.id.signup_user_role)).check(matches(isDisplayed()));
 
         onView(withId(R.id.signup_user_save))

@@ -96,7 +96,7 @@ public class WaitingList {
         return cancelled;
     }
     public ArrayList<WaitlistUser> getWaitList() {
-        return waitList;
+        return waitList == null ? null : new ArrayList<>(waitList);
     }
     public int getMaxWaitlistSize() {
         return maxWaitlistSize;

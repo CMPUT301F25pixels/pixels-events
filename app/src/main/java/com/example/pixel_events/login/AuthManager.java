@@ -1,13 +1,15 @@
 package com.example.pixel_events.login;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
+import java.util.function.Consumer;
 
 /**
  * Singleton class to manage user authentication and session
@@ -16,62 +18,12 @@ import com.google.firebase.auth.FirebaseUser;
 public class AuthManager {
     private static final String TAG = "AuthManager";
     private static AuthManager instance;
-
-    private FirebaseAuth auth;
+    private static final String PREF_NAME = "PixelEventsPrefs";
+    private static final String KEY_USER_ID = "logged_in_user_id";
     private Profile currentUserProfile;
 
     private AuthManager() {
-        auth = FirebaseAuth.getInstance();
-        // Listen for auth state changes and load profile when a user is present
-        auth.addAuthStateListener(firebaseAuth -> {
-            FirebaseUser user = firebaseAuth.getCurrentUser();
-            if (user != null) {
-                loadProfileForUser(user);
-            } else {
-                currentUserProfile = null;
-            }
-        });
-
-        // If a user is already signed in when AuthManager is created, load their
-        // profile
-        if (auth.getCurrentUser() != null) {
-            loadProfileForUser(auth.getCurrentUser());
-        }
-    }
-
-    /**
-     * Force refresh of the current user profile from Firestore.
-     */
-    public void refreshCurrentUserProfile() {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            loadProfileForUser(user);
-        }
-    }
-
-    /**
-     * Load profile using Firebase UID mapped to integer id via hashCode.
-     * This uses DatabaseHandler.getProfile(...) so we reuse existing DB access
-     * methods.
-     */
-    private void loadProfileForUser(FirebaseUser user) {
-        if (user == null || user.getUid() == null) {
-            currentUserProfile = null;
-            return;
-        }
-
-        int id = DatabaseHandler.uidToId(user.getUid());
-
-        DatabaseHandler.getInstance().getProfile(id,
-                (OnSuccessListener<Profile>) profile -> {
-                    currentUserProfile = profile;
-                    Log.d(TAG, "Loaded profile for uid=" + user.getUid() + " id="
-                            + (profile != null ? profile.getUserId() : "null"));
-                },
-                (OnFailureListener) e -> {
-                    Log.e(TAG, "Failed to load profile for uid=" + user.getUid(), e);
-                    currentUserProfile = null;
-                });
+        // No Firebase initialization
     }
 
     public static synchronized AuthManager getInstance() {
@@ -79,14 +31,6 @@ public class AuthManager {
             instance = new AuthManager();
         }
         return instance;
-    }
-
-    public FirebaseAuth getAuth() {
-        return auth;
-    }
-
-    public FirebaseUser getCurrentFirebaseUser() {
-        return auth.getCurrentUser();
     }
 
     public Profile getCurrentUserProfile() {
@@ -97,24 +41,121 @@ public class AuthManager {
         this.currentUserProfile = profile;
     }
 
-    public void setCurrentUserEmail(String email) {
-        if (auth.getCurrentUser() != null) {
-            auth.getCurrentUser().updateEmail(email);
+    public void setCurrentEmail(String email) {
+        this.currentUserProfile.setEmail(email);
+    }
+
+    /**
+     * Sign up a new user.
+     * 
+     * @param context         App context
+     * @param profile         The profile to create
+     * @param successCallback Callback on success
+     * @param failureCallback Callback on failure
+     */
+    public void signup(Context context, Profile profile, Runnable successCallback,
+            Consumer<Exception> failureCallback) {
+        // Save to DB
+        DatabaseHandler.getInstance().addAcc(profile);
+
+        // Set as current user
+        this.currentUserProfile = profile;
+
+        // Save session
+        saveSession(context, profile.getUserId());
+
+        if (successCallback != null) {
+            successCallback.run();
         }
     }
 
     /**
-     * Sign out the current user
+     * Log in a user by email and role.
+     * 
+     * @param context         App context
+     * @param email           User email
+     * @param role            User role
+     * @param successCallback Callback on success
+     * @param failureCallback Callback on failure
      */
-    public void signOut() {
-        auth.signOut();
-        currentUserProfile = null;
+    public void login(Context context, String email, String role, Runnable successCallback,
+            Consumer<Exception> failureCallback) {
+        DatabaseHandler.getInstance().getProfileByEmail(email, profile -> {
+            if (profile != null) {
+                // Check if role matches
+                if (profile.getRole().equalsIgnoreCase(role)) {
+                    this.currentUserProfile = profile;
+                    saveSession(context, profile.getUserId());
+                    if (successCallback != null)
+                        successCallback.run();
+                } else {
+                    if (failureCallback != null)
+                        failureCallback.accept(new Exception("Role mismatch. Please login as " + profile.getRole()));
+                }
+            } else {
+                if (failureCallback != null)
+                    failureCallback.accept(new Exception("User not found"));
+            }
+        }, e -> {
+            if (failureCallback != null)
+                failureCallback.accept(e);
+        });
     }
 
     /**
-     * Check if user is logged in
+     * Auto-login using SharedPreferences.
+     * 
+     * @param context         App context
+     * @param successCallback Callback on success
+     * @param failureCallback Callback on failure
      */
-    public boolean isUserLoggedIn() {
-        return auth.getCurrentUser() != null;
+    public void autoLogin(Context context, Runnable successCallback, Runnable failureCallback) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        int userId = prefs.getInt(KEY_USER_ID, -1);
+
+        if (userId != -1) {
+            DatabaseHandler.getInstance().getProfile(userId, profile -> {
+                if (profile != null) {
+                    this.currentUserProfile = profile;
+                    if (successCallback != null)
+                        successCallback.run();
+                } else {
+                    // Invalid session
+                    clearSession(context);
+                    if (failureCallback != null)
+                        failureCallback.run();
+                }
+            }, e -> {
+                if (failureCallback != null)
+                    failureCallback.run();
+            });
+        } else {
+            if (failureCallback != null)
+                failureCallback.run();
+        }
+    }
+
+    /**
+     * Sign out the current user.
+     * 
+     * @param context App context
+     */
+    public void signOut(Context context) {
+        this.currentUserProfile = null;
+        clearSession(context);
+    }
+
+    private void saveSession(Context context, int userId) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(KEY_USER_ID, userId).apply();
+    }
+
+    private void clearSession(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        prefs.edit().remove(KEY_USER_ID).apply();
+    }
+
+    public Boolean isUserLoggedIn(){
+        return currentUserProfile != null;
     }
 }

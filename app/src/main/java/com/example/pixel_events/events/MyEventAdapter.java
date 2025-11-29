@@ -121,11 +121,7 @@ public class MyEventAdapter extends RecyclerView.Adapter<MyEventAdapter.EventVie
                     }
                 }
                 if (!found) {
-                    db.getWaitingList(eventId, waitingList -> {
-                        status.setText(waitingList.getStatus());
-                    }, e -> {
-                        status.setVisibility(GONE);
-                    });
+                    status.setText("Not participating");
                 }
             }
         }
