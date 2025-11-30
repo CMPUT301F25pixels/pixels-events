@@ -17,8 +17,6 @@ import com.example.pixel_events.events.Event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class AdminImageFragment extends Fragment {
 	private AdminImageAdapter adapter;

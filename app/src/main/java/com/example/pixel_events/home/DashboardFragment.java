@@ -60,10 +60,12 @@ public class DashboardFragment extends Fragment {
         eventsRecyclerView = view.findViewById(R.id.dashboard_eventRecyclerView);
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Initialize adapter with empty list. Use overlay container so NavHost remains intact.
+        // Initialize adapter with empty list. Use overlay container so NavHost remains
+        // intact.
         adapter = new DashboardAdapter(new ArrayList<>(), event -> {
-            if (!isAdded()) return;
-            androidx.fragment.app.Fragment detail = new EventDetailedFragment(event.getEventId());
+            if (!isAdded())
+                return;
+            Fragment detail = new EventDetailedFragment(event.getEventId());
             View overlay = requireActivity().findViewById(R.id.overlay_fragment_container);
             if (overlay != null && overlay.getVisibility() != View.VISIBLE) {
                 overlay.setVisibility(View.VISIBLE);
@@ -97,7 +99,23 @@ public class DashboardFragment extends Fragment {
                 events -> {
                     Log.d(TAG, "Loaded " + events.size() + " events from Firebase");
                     allEvents = events != null ? events : new ArrayList<>();
-                    adapter.updateEvents(allEvents);
+                    // Filter events to only current events: end date >= today
+                    Calendar today = Calendar.getInstance();
+                    today.set(Calendar.HOUR_OF_DAY, 0);
+                    today.set(Calendar.MINUTE, 0);
+                    today.set(Calendar.SECOND, 0);
+                    today.set(Calendar.MILLISECOND, 0);
+                    List<Event> filtered = new ArrayList<>();
+                    for (Event e : allEvents) {
+                        Date end = parseDateSafe(e.getEventEndDate());
+                        if (end != null && !end.before(today.getTime())) {
+                            filtered.add(e);
+                        }
+                    }
+                    adapter.updateEvents(filtered);
+                    if (filtered.size() == 0) {
+                        Toast.makeText(getContext(), "No events found", Toast.LENGTH_SHORT).show();
+                    }
                 },
                 e -> {
                     Log.e(TAG, "Error loading events", e);

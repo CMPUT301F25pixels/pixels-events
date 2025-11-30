@@ -327,7 +327,7 @@ public class EventDetailedFragment extends Fragment {
             leaveButton.setVisibility(View.VISIBLE);
             if (waitingListCountView != null) {
                 waitingListCountView.setVisibility(View.VISIBLE);
-                waitingListCountView.setText(String.valueOf(waitingListCount) + " in waiting list");
+                waitingListCountView.setText(waitingListCount + " in waiting list");
             }
 
             if (this.waitList != null && Objects.equals(this.waitList.getStatus(), "drawn")) {
@@ -396,55 +396,14 @@ public class EventDetailedFragment extends Fragment {
                     return;
                 }
 
-                if (userStatus == 0 && today.after(end)) {
+                if (userStatus == 0) {
                     joinButton.setVisibility(GONE);
                     leaveButton.setVisibility(GONE);
                     tagButton.setVisibility(View.VISIBLE);
                     tagButton.setText("Sorry, you were not selected");
                     setButtonEnabled(tagButton, false);
-                } else {
-                    if (joined) {
-                        joinButton.setText("Join");
-                        setButtonEnabled(joinButton, false);
-
-                        leaveButton.setText("Leave");
-                        setButtonEnabled(leaveButton, true);
-                    } else {
-                        boolean canJoin = waitingListMaxCount <= 0 || waitingListCount < waitingListMaxCount;
-                        if (!canJoin) {
-                            joinButton.setVisibility(GONE);
-                            leaveButton.setVisibility(GONE);
-                            tagButton.setVisibility(View.VISIBLE);
-                            tagButton.setText("Waitlist full");
-                            setButtonEnabled(tagButton, false);
-                            return;
-                        }
-                        joinButton.setText("Join");
-                        setButtonEnabled(joinButton, true);
-
-                        leaveButton.setText("Leave");
-                        setButtonEnabled(leaveButton, false);
-                    }
-                    leaveButton.setOnClickListener(v -> {
-                        waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
-                            @Override
-                            public void onSuccess(int numberDrawn) {
-                                Log.d(TAG, "Lottery drawn: " + numberDrawn);
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                Log.e(TAG, "Failed to draw lottery", e);
-                            }
-                        });
-                        joinButton.setVisibility(GONE);
-                        leaveButton.setVisibility(GONE);
-                        tagButton.setVisibility(View.VISIBLE);
-                        tagButton.setText("Invitation declined");
-                        setButtonEnabled(tagButton, false);
-                    });
+                    return;
                 }
-
             } else {
                 // Not drawn: normal join/leave behavior
                 if (joined) {

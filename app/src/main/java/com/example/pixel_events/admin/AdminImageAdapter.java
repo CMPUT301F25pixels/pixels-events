@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,8 +14,6 @@ import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
 import android.util.Log;
 
-import com.example.pixel_events.login.AuthManager;
-import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;

@@ -5,31 +5,37 @@ import java.util.UUID;
 
 /**
  * Model class for User Notifications.
- * Stored in AccountData/{userId}/Notifications
+ * Stored in AccountData/{userId}/Notifications and globally in NotificationLogs
  */
 public class Notification {
     private String notificationId;
     private String title;
     private String message;
     private Timestamp timestamp;
-    private boolean isRead;
-    private String type; // "LOTTERY_WIN", "LOTTERY_LOSS", "ADMIN_DELETE", "INVITE", "GENERAL"
+    private boolean read;
+    private String type; // "LOTTERY_WIN", "LOTTERY_LOSS", "ADMIN_DELETE", "ORGANIZER_MESSAGE", "GENERAL"
     private int relatedEventId; // -1 if not applicable
     private int recipientId;
+    private int senderId; // For organizer messages
 
     public Notification() {
         // Empty constructor for Firestore
     }
 
     public Notification(String title, String message, String type, int relatedEventId, int recipientId) {
+        this(title, message, type, relatedEventId, recipientId, -1);
+    }
+
+    public Notification(String title, String message, String type, int relatedEventId, int recipientId, int senderId) {
         this.notificationId = UUID.randomUUID().toString();
         this.title = title;
         this.message = message;
         this.timestamp = Timestamp.now();
-        this.isRead = false;
+        this.read = false;
         this.type = type;
         this.relatedEventId = relatedEventId;
         this.recipientId = recipientId;
+        this.senderId = senderId;
     }
 
     public String getNotificationId() { return notificationId; }
@@ -44,8 +50,8 @@ public class Notification {
     public Timestamp getTimestamp() { return timestamp; }
     public void setTimestamp(Timestamp timestamp) { this.timestamp = timestamp; }
 
-    public boolean isRead() { return isRead; }
-    public void setRead(boolean read) { isRead = read; }
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
@@ -55,5 +61,7 @@ public class Notification {
 
     public int getRecipientId() { return recipientId; }
     public void setRecipientId(int recipientId) { this.recipientId = recipientId; }
-}
 
+    public int getSenderId() { return senderId; }
+    public void setSenderId(int senderId) { this.senderId = senderId; }
+}

@@ -177,6 +177,9 @@ public class WaitingList {
             status = "drawn";
             updateDatabase("status", status);
             
+            // Send notifications to winners and losers (US 01.04.01, 01.04.02)
+            sendLotteryNotifications(e.getTitle(), waitingIndices, numberToDraw);
+            
             if (listener != null) listener.onSuccess(numberToDraw);
         }, e -> {
             Log.e("WaitingList", "Failed to get event", e);
@@ -210,6 +213,28 @@ public class WaitingList {
             });
         } catch (Exception e) {
             Log.e("WaitingList", "Failed to access database for update", e);
+        }
+    }
+
+    /**
+     * Send win/loss notifications after lottery draw
+     * US 01.04.01 - Notify winners
+     * US 01.04.02 - Notify losers
+     */
+    private void sendLotteryNotifications(String eventTitle, java.util.List<Integer> waitingIndices, int numberDrawn) {
+        DatabaseHandler db = DatabaseHandler.getInstance();
+        
+        for (int i = 0; i < waitingIndices.size(); i++) {
+            int idx = waitingIndices.get(i);
+            WaitlistUser user = waitList.get(idx);
+            
+            if (i < numberDrawn) {
+                // Winner
+                db.sendWinNotification(eventId, eventTitle, user.getUserId());
+            } else {
+                // Loser
+                db.sendLossNotification(eventId, eventTitle, user.getUserId());
+            }
         }
     }
 }

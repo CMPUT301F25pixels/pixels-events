@@ -27,6 +27,14 @@
             android:textColor="@color/white"
             android:textSize="30sp"
             android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/admin_notification_logs_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_notifications"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Notification Logs" />
     </LinearLayout>
 
     <androidx.fragment.app.FragmentContainerView
