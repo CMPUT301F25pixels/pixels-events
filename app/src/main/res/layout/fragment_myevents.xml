@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/dark_bg"
+    android:background="@drawable/bg_gradient"
     tools:context=".events.MyEventFragment">
 
     <com.google.android.material.button.MaterialButtonToggleGroup
