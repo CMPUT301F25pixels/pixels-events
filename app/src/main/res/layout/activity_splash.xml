@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@drawable/bg_gradient">
 
     <ImageView
         android:id="@+id/logo"
@@ -25,6 +25,6 @@
         android:layout_marginEnd="163dp"
         android:layout_marginBottom="136dp"
         android:indeterminate="true"
-        android:indeterminateTint="@color/card_bg" />  <!-- force color -->
+        android:indeterminateTint="@color/white" />  <!-- force color -->
 
 </RelativeLayout>
