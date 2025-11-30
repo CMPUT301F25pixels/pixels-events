@@ -1,6 +1,7 @@
 package com.example.pixel_events.events;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -254,10 +255,11 @@ public class EventDetailedFragment extends Fragment {
 
         // If event not yet loaded, show loading state
         if (event == null) {
-            tagButton.setVisibility(GONE);
-            joinButton.setText("Loading registration…");
-            setButtonEnabled(joinButton, false);
-            setButtonEnabled(leaveButton, false);
+            tagButton.setVisibility(VISIBLE);
+            tagButton.setText("Loading event…");
+            setButtonEnabled(tagButton, false);
+            joinButton.setVisibility(GONE);
+            leaveButton.setVisibility(GONE);
             if (waitingListCountView != null)
                 waitingListCountView.setVisibility(View.GONE);
             return;
@@ -275,9 +277,22 @@ public class EventDetailedFragment extends Fragment {
             Date today = truncateToDay(new Date());
             Date start = (startStr != null && !startStr.isEmpty()) ? truncateToDay(fmt.parse(startStr)) : null;
             Date end = (endStr != null && !endStr.isEmpty()) ? truncateToDay(fmt.parse(endStr)) : null;
+            String currUserRole = AuthManager.getInstance().getCurrentUserProfile().getRole();
+
+            if (Objects.equals(currUserRole, "org")){
+                Log.d(TAG, "User is not an organizer");
+                joinButton.setVisibility(GONE);
+                leaveButton.setVisibility(GONE);
+                tagButton.setVisibility(VISIBLE);
+                tagButton.setText("Only Entrants can join");
+                setButtonEnabled(tagButton, false);
+                if (waitingListCountView != null)
+                    waitingListCountView.setVisibility(View.GONE);
+                return;
+            }
 
             if (start == null || end == null) {
-                tagButton.setVisibility(View.VISIBLE);
+                tagButton.setVisibility(VISIBLE);
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration dates missing");
@@ -288,7 +303,7 @@ public class EventDetailedFragment extends Fragment {
             }
 
             if (today.before(start)) {
-                tagButton.setVisibility(View.VISIBLE);
+                tagButton.setVisibility(VISIBLE);
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration opens " + startStr);
@@ -298,7 +313,7 @@ public class EventDetailedFragment extends Fragment {
                 return;
             }
             if (today.after(end)) {
-                tagButton.setVisibility(View.VISIBLE);
+                tagButton.setVisibility(VISIBLE);
                 joinButton.setVisibility(GONE);
                 leaveButton.setVisibility(GONE);
                 tagButton.setText("Registration Closed");
@@ -310,10 +325,10 @@ public class EventDetailedFragment extends Fragment {
 
             // Lottery drawn? handle accept/decline/final states
             tagButton.setVisibility(GONE);
-            joinButton.setVisibility(View.VISIBLE);
-            leaveButton.setVisibility(View.VISIBLE);
+            joinButton.setVisibility(VISIBLE);
+            leaveButton.setVisibility(VISIBLE);
             if (waitingListCountView != null) {
-                waitingListCountView.setVisibility(View.VISIBLE);
+                waitingListCountView.setVisibility(VISIBLE);
                 waitingListCountView.setText(waitingListCount + " in waiting list");
             }
 
@@ -367,7 +382,7 @@ public class EventDetailedFragment extends Fragment {
                     // accepted -> final tag
                     joinButton.setVisibility(GONE);
                     leaveButton.setVisibility(GONE);
-                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setVisibility(VISIBLE);
                     tagButton.setText("Invitation Accepted");
                     setButtonEnabled(tagButton, false);
                     return;
@@ -377,7 +392,7 @@ public class EventDetailedFragment extends Fragment {
                     // declined -> final tag
                     joinButton.setVisibility(GONE);
                     leaveButton.setVisibility(GONE);
-                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setVisibility(VISIBLE);
                     tagButton.setText("Invitation declined");
                     setButtonEnabled(tagButton, false);
                     return;
@@ -386,7 +401,7 @@ public class EventDetailedFragment extends Fragment {
                 if (userStatus == 0) {
                     joinButton.setVisibility(GONE);
                     leaveButton.setVisibility(GONE);
-                    tagButton.setVisibility(View.VISIBLE);
+                    tagButton.setVisibility(VISIBLE);
                     tagButton.setText("Sorry, you were not selected");
                     setButtonEnabled(tagButton, false);
                     return;
@@ -404,7 +419,7 @@ public class EventDetailedFragment extends Fragment {
                     if (!canJoin) {
                         joinButton.setVisibility(GONE);
                         leaveButton.setVisibility(GONE);
-                        tagButton.setVisibility(View.VISIBLE);
+                        tagButton.setVisibility(VISIBLE);
                         tagButton.setText("Waitlist full");
                         setButtonEnabled(tagButton, false);
                         return;
@@ -419,7 +434,7 @@ public class EventDetailedFragment extends Fragment {
 
         } catch (ParseException e) {
             Log.e(TAG, "Failed to parse registration dates. start='" + startStr + "' end='" + endStr + "'", e);
-            tagButton.setVisibility(View.VISIBLE);
+            tagButton.setVisibility(VISIBLE);
             joinButton.setVisibility(GONE);
             leaveButton.setVisibility(GONE);
             tagButton.setText("Registration dates invalid");

@@ -13,7 +13,10 @@ import com.example.pixel_events.databinding.ActivityAdminBinding;
 import com.example.pixel_events.notifications.AdminNotificationLogFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Set;
+
 public class AdminActivity extends AppCompatActivity {
+
     private ActivityAdminBinding binding;
 
     @Override
@@ -22,137 +25,71 @@ public class AdminActivity extends AppCompatActivity {
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().hide();
 
         BottomNavigationView navView = binding.adminBottomNavView;
 
-        // Safely obtain NavController from NavHostFragment to avoid timing issues
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment_activity_admin);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager().findFragmentById(
+                        R.id.nav_host_fragment_activity_admin
+                );
 
-        if (navHostFragment != null) {
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(navView, navController);
+        if (navHostFragment == null) return;
 
-            // Hide overlay container when its back stack empties
-            getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-                if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
-                    binding.overlayFragmentContainer.setVisibility(View.GONE);
-                }
-            });
+        NavController navController = navHostFragment.getNavController();
+        NavigationUI.setupWithNavController(navView, navController);
 
-            // Bottom navigation: clear ONLY overlay fragments, then delegate to NavigationUI
-            navView.setOnItemSelectedListener(item -> {
-                // Remove overlay fragments if present (they were added via add() on overlay container)
-                while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                    getSupportFragmentManager().popBackStackImmediate();
-                }
-                if (binding.overlayFragmentContainer != null) {
-                    binding.overlayFragmentContainer.setVisibility(View.GONE);
-                }
-                return NavigationUI.onNavDestinationSelected(item, navController);
-            });
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            boolean hasOverlayFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
 
-            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                CharSequence title = null;
-                navView.getMenu();
-                if (navView.getMenu().findItem(destination.getId()) != null) {
-                    title = navView.getMenu().findItem(destination.getId()).getTitle();
-                }
-                if (title == null && destination.getLabel() != null) {
-                    title = destination.getLabel();
-                }
-                if (title != null) {
-                    binding.adminTitle.setText(title);
-                }
-            });
-            
-            // Hook up notification logs button
-            if (binding.adminNotificationLogsBtn != null) {
-                binding.adminNotificationLogsBtn.setOnClickListener(v -> {
-                    if (binding.adminTitle != null) {
-                        binding.adminTitle.setText("Notification Logs");
-                    }
-                    if (binding.overlayFragmentContainer != null) {
-                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
-                    }
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .setReorderingAllowed(true)
-                            .add(R.id.overlay_fragment_container, new AdminNotificationLogFragment())
-                            .addToBackStack("overlay")
-                            .commit();
-                });
+            if (hasOverlayFragments) {
+                // fragment → fragment of fragment
+                binding.adminLayout.setVisibility(View.GONE);
+                binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+            } else {
+                // returned to bottom nav destination
+                binding.adminLayout.setVisibility(View.VISIBLE);
+                binding.overlayFragmentContainer.setVisibility(View.GONE);
             }
-        } else {
-            // If fragment not yet created, post a runnable to retry after layout pass
-            binding.getRoot().post(() -> {
-                NavHostFragment nhf = (NavHostFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.nav_host_fragment_activity_dashboard);
-                if (nhf != null) {
-                    NavController nc = nhf.getNavController();
-                    NavigationUI.setupWithNavController(navView, nc);
+        });
 
-                    // Hide overlay when back stack empties
-                    getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-                        if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
-                            binding.overlayFragmentContainer.setVisibility(View.GONE);
-                        }
-                    });
+        navView.setOnItemSelectedListener(item -> {
 
-                    navView.setOnItemSelectedListener(item -> {
-                        while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                            getSupportFragmentManager().popBackStackImmediate();
-                        }
-                        if (binding.overlayFragmentContainer != null) {
-                            binding.overlayFragmentContainer.setVisibility(View.GONE);
-                        }
-                        return NavigationUI.onNavDestinationSelected(item, nc);
-                    });
+            // clear all overlay fragments
+            while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
 
-                    nc.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                        if (binding.adminTitle != null) {
-                            CharSequence title = null;
-                            if (navView != null && navView.getMenu() != null) {
-                                if (navView.getMenu().findItem(destination.getId()) != null) {
-                                    title = navView.getMenu().findItem(destination.getId()).getTitle();
-                                }
-                            }
-                            if (title == null && destination.getLabel() != null) {
-                                title = destination.getLabel();
-                            }
-                            if (title != null) {
-                                binding.adminTitle.setText(title);
-                            }
-                        }
-                    });
-                    
-                    // Hook up notification logs button
-                    if (binding.adminNotificationLogsBtn != null) {
-                        binding.adminNotificationLogsBtn.setOnClickListener(v -> {
-                            if (binding.adminTitle != null) {
-                                binding.adminTitle.setText("Notification Logs");
-                            }
-                            if (binding.overlayFragmentContainer != null) {
-                                binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
-                            }
-                            getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .setReorderingAllowed(true)
-                                    .add(R.id.overlay_fragment_container, new AdminNotificationLogFragment())
-                                    .addToBackStack("overlay")
-                                    .commit();
-                        });
-                    }
-                }
-            });
-        }
-    }
+            // restore main layout
+            binding.adminLayout.setVisibility(View.VISIBLE);
+            binding.overlayFragmentContainer.setVisibility(View.GONE);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+            return NavigationUI.onNavDestinationSelected(item, navController);
+        });
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            CharSequence title = null;
+            if (navView.getMenu().findItem(destination.getId()) != null) {
+                title = navView.getMenu().findItem(destination.getId()).getTitle();
+            }
+            if (title == null && destination.getLabel() != null) {
+                title = destination.getLabel();
+            }
+            if (title != null) {
+                binding.adminTitle.setText(title);
+            }
+        });
+
+        binding.adminNotificationLogsBtn.setOnClickListener(v -> {
+            binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+            binding.adminLayout.setVisibility(View.GONE);
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(R.id.overlay_fragment_container, new AdminNotificationLogFragment())
+                    .addToBackStack("overlay")
+                    .commit();
+        });
     }
 }

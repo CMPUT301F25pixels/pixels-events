@@ -8,8 +8,11 @@ import com.example.pixel_events.qrcode.QRCode;
 import com.example.pixel_events.utils.Validator;
 import com.google.firebase.firestore.Exclude;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Event {
@@ -203,10 +206,39 @@ public class Event {
     public ArrayList<String> getTags() {
         return tags;
     }
+
     @Exclude
     public String getDateString() {
-        return this.eventStartDate + " - " + this.eventEndDate + " from  " + this.eventStartTime + " to " + this.eventEndTime;
+        try {
+            // Input formats
+            SimpleDateFormat dateInput = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat timeInput = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+            // Output formats
+            SimpleDateFormat dateOutput = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
+            SimpleDateFormat timeOutput = new SimpleDateFormat("h:mm a", Locale.getDefault());
+
+            // Parse
+            Date startDateParsed = dateInput.parse(eventStartDate);
+            Date endDateParsed = dateInput.parse(eventEndDate);
+
+            Date startTimeParsed = timeInput.parse(eventStartTime);
+            Date endTimeParsed = timeInput.parse(eventEndTime);
+
+            // Convert
+            String dateStr = dateOutput.format(startDateParsed);
+            String startTimeStr = timeOutput.format(startTimeParsed);
+            String endTimeStr = timeOutput.format(endTimeParsed);
+
+            return dateStr + ", " + startTimeStr + " - " + endTimeStr;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // fallback original format
+            return eventStartDate + " " + eventStartTime + " - " + eventEndTime;
+        }
     }
+
 
     // Setters / Modify event
     public void setEventId(int eventId)
