@@ -49,7 +49,7 @@ public class EventDetailedFragment extends Fragment {
 
     // UI elements
     private ShapeableImageView poster;
-    private TextView title, date, description;
+    private TextView title, date, description, location;
     private MaterialButton joinButton, leaveButton, tagButton;
     private TextView waitingListCountView;
     private ImageButton backButton, qrButton;
@@ -91,6 +91,7 @@ public class EventDetailedFragment extends Fragment {
         poster = view.findViewById(R.id.event_poster);
         title = view.findViewById(R.id.event_title);
         date = view.findViewById(R.id.event_date);
+        location = view.findViewById(R.id.event_location);
         description = view.findViewById(R.id.event_description);
         joinButton = view.findViewById(R.id.event_joinButton);
         leaveButton = view.findViewById(R.id.event_leaveButton);
@@ -210,6 +211,7 @@ public class EventDetailedFragment extends Fragment {
 
         title.setText(event.getTitle());
         date.setText(event.getDateString());
+        location.setText(event.getLocation());
         description.setText(event.getFullDescription());
 
         // Load poster image
@@ -228,8 +230,10 @@ public class EventDetailedFragment extends Fragment {
 
         tagsContainer.removeAllViews();
         List<String> tags = event.getTags();
-        if (tags == null || tags.isEmpty())
+        if (tags == null || tags.isEmpty()){
+            tagsContainer.setVisibility(View.GONE);
             return;
+        }
 
         for (String tag : tags) {
             if (tag == null || tag.trim().isEmpty())
