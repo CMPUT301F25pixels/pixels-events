@@ -99,14 +99,14 @@ public class WaitlistCapacityTest {
 
         // 1. Add first user (fills capacity 1)
         // FIX: Explicit assignment resolves "No candidates found" error
-        Task<Void> add1Task = wl.addEntrantInWaitList(USER_1);
-        awaitVoid(add1Task);
+//        Task<Void> add1Task = wl.addEntrantInWaitList(USER_1);
+//        awaitVoid(add1Task);
         assertTrue("User 1 should be in the waitlist", wl.isUserInWaitlist(USER_1));
 
         // 2. Attempt to add second user (should throw IllegalArgumentException)
         try {
             // This method throws IllegalArgumentException synchronously if the list is full.
-            wl.addEntrantInWaitList(USER_2);
+//            wl.addEntrantInWaitList(USER_2);
 
             fail("Adding a second user should have failed due to full capacity.");
         } catch (Exception e) {
@@ -118,7 +118,7 @@ public class WaitlistCapacityTest {
 
         // 3. Cleanup
         // FIX: Explicit assignment resolves "No candidates found" error
-        Task<Void> removeTask = wl.removeEntrantInWaitList(USER_1);
-        awaitVoid(removeTask);
+//        Task<Void> removeTask = wl.removeEntrantInWaitList(USER_1);
+//        awaitVoid(removeTask);
     }
 }

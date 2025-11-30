@@ -37,6 +37,8 @@ import java.util.List;
     Tests:
         US 01.01.01: As an entrant, I want to join the waiting list for a specific event
         US 01.01.02: As an entrant, I want to leave the waiting list for a specific event
+    Utilizes:
+        Both Black Box and White Box testing.
 */
 @RunWith(AndroidJUnit4.class)
 public class WaitingListJoinLeaveTest {

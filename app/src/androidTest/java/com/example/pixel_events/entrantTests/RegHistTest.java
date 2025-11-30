@@ -82,7 +82,6 @@ public class RegHistTest {
 
     @After
     public void tearDown() {
-        AuthManager.getInstance().signOut();
         AuthManager.getInstance().setCurrentUserProfile(null);
         DatabaseHandler.resetInstance();
     }
