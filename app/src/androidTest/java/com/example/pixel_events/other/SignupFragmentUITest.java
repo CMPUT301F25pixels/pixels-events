@@ -19,6 +19,10 @@ import com.example.pixel_events.login.SignupFragment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/*
+    Utilizes:
+        Black Box Testing
+ */
 @RunWith(AndroidJUnit4.class)
 public class SignupFragmentUITest {
 

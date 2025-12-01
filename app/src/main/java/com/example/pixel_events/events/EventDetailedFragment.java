@@ -83,7 +83,6 @@ public class EventDetailedFragment extends Fragment {
         db = DatabaseHandler.getInstance();
 
         userId = -1;
-        eventId = -1;
 
         // Check for Test Arguments (Backdoor)
         if (getArguments() != null) {

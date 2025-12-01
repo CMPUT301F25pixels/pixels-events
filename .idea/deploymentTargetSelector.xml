@@ -22,10 +22,10 @@
       <SelectionState runConfigName="EventsListTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="FilterEventsTest">
+      <SelectionState runConfigName="EntrantCountNGuideTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="EntrantCountNGuideTest">
+      <SelectionState runConfigName="Tests in 'com.example.pixel_events.other'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -24,6 +24,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+/*
+    Utilizes:
+        White Box Testing
+ */
+
 @RunWith(AndroidJUnit4.class)
 public class FirebaseConnectivityTest {
     private static final String TAG = "FirebaseConnectivityTest";
