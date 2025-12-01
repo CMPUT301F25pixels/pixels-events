@@ -1,6 +1,7 @@
 package com.example.pixel_events.entrantTests;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -61,10 +62,19 @@ public class EventsListTest {
         // Launch Activity
         ActivityScenario<DashboardActivity> scenario = ActivityScenario.launch(DashboardActivity.class);
 
-        Thread.sleep(5000);
-        onView(withId(R.id.dashboard_eventRecyclerView))
-                .check(matches(isDisplayed()));
-        Thread.sleep(5000);
+        // 1. Handle "Event Deleted" Dialog bleed-over from previous tests
+        try {
+            // Wait briefly for the dialog to potentially appear
+            Thread.sleep(1000);
+            // Attempt to click the "OK" button on the alert dialog
+            onView(withText("OK")).perform(click());
+        } catch (NoMatchingViewException e) {
+            // If the dialog is not present (isolated run), ignore and continue
+        }
+
+        // 2. Proceed with actual test logic
+        // Give the list time to load (Consider replacing sleep with IdlingResource later)
+        Thread.sleep(2000);
 
         onView(withId(R.id.dashboard_eventRecyclerView))
                 .check(matches(isDisplayed()));

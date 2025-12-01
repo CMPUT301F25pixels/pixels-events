@@ -20,6 +20,7 @@ import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.events.EventDetailedFragment;
+import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.gms.tasks.Tasks;
@@ -58,24 +59,14 @@ public class EntrantCountNGuideTest {
         db = DatabaseHandler.getInstance(true); // emulator mode
 
         // Add a user
-        Profile user = new Profile();
         List<Boolean> noti = new ArrayList<>();
         noti.add(true);
         noti.add(true);
         noti.add(true);
-
-        user.setUserId(userID);
-        user.setRole("user");
-        user.setUserName("Dummy");
-        user.setGender("Male");
-        user.setEmail("example@gmail.com");
-        user.setPhoneNum("1112223333");
-        user.setPostalcode("T1T1T1");
-        user.setProvince("Alberta");
-        user.setCity("Edmonton");
-        user.setNotify(noti);
-
+        Profile user = new Profile(userID, "user", "Dummy", "Male", "example@gmail.com",
+                "1112223333", "T1T1T1", "Alberta", "Edmonton", noti);
         Tasks.await(db.getAccountCollection().document(String.valueOf(userID)).set(user));
+        AuthManager.getInstance().setCurrentUserProfile(user);
 
         // Create Event and add event to DB
         Calendar cal = Calendar.getInstance();
@@ -176,6 +167,10 @@ public class EntrantCountNGuideTest {
 
     @After
     public void cleanup() {
+        // 1. Clear the persistent User Profile so the next test doesn't think it's logged in
+        AuthManager.getInstance().setCurrentUserProfile(null);
+
+        // 2. Existing cleanup
         db.deleteAcc(userID);
         db.deleteEvent(eventID);
         DatabaseHandler.resetInstance();
