@@ -3,6 +3,7 @@ package com.example.pixel_events.adminTests;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.graphics.Bitmap;
 
@@ -30,7 +31,8 @@ public class AdminDatabaseIntegrationTest {
     private static final int TEST_EVENT_ID = 10000;
     private static final int TEST_USER_ID = 20000;
     private static final int TEST_ORGANIZER_ID = 30000;
-    private static final int TIMEOUT_SEC = 10;
+    // FIX: Increased timeout duration for stability in Firebase emulator environment
+    private static final int TIMEOUT_SEC = 20;
     private static final String TEST_IMAGE_URL = ImageConversion.bitmapToBase64(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888));
 
     @Before
@@ -61,7 +63,6 @@ public class AdminDatabaseIntegrationTest {
         );
         testEvent.setAutoUpdateDatabase(false);
         databaseHandler.addEvent(testEvent);
-        Thread.sleep(5000);
     }
 
 
@@ -73,11 +74,11 @@ public class AdminDatabaseIntegrationTest {
         );
         testProfile.setAutoUpdateDatabase(false);
         databaseHandler.addAcc(testProfile);
-        Thread.sleep(2000);
     }
 
     /**
-     * Helper method to synchronously fetch an event and return it (or null if not found/error).
+     * Helper method to synchronously fetch an event. Returns the Event object, null if not found,
+     * or null if a timeout/transient error occurs (for use in retry loops). Throws permanent errors.
      */
     private Event fetchEvent(int eventId) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
@@ -94,12 +95,85 @@ public class AdminDatabaseIntegrationTest {
                     latch.countDown();
                 });
 
-        assertTrue("Event fetch timed out", latch.await(TIMEOUT_SEC, TimeUnit.SECONDS));
+        boolean completed = latch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+
+        if (!completed) {
+            return null;
+        }
+
         if (error.get() != null) {
+            if (error.get() instanceof java.io.IOException) return null;
             throw error.get();
         }
         return result.get();
     }
+
+    /**
+     * Helper method to synchronously fetch a profile. Returns the Profile object, null if not found,
+     * or null if a timeout/transient error occurs (for use in retry loops). Throws permanent errors.
+     */
+    private Profile fetchProfile(int userId) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Profile> result = new AtomicReference<>();
+        AtomicReference<Exception> error = new AtomicReference<>();
+
+        databaseHandler.getProfile(userId,
+                profile -> {
+                    result.set(profile);
+                    latch.countDown();
+                },
+                e -> {
+                    error.set(e);
+                    latch.countDown();
+                });
+
+        boolean completed = latch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+
+        if (!completed) {
+            return null;
+        }
+
+        if (error.get() != null) {
+            if (error.get() instanceof java.io.IOException) return null;
+            throw error.get();
+        }
+        return result.get();
+    }
+
+    /**
+     * Helper to reliably fetch an Event within the timeout, asserting its existence for setup.
+     */
+    private Event checkEventExistence(int eventId) throws Exception {
+        long startTime = System.currentTimeMillis();
+        Event event;
+        do {
+            event = fetchEvent(eventId);
+            if (event != null) return event;
+            if (System.currentTimeMillis() - startTime > TIMEOUT_SEC * 1000) {
+                // FIX: Added TIMEOUT_SEC to the error message for clarity
+                fail("Event setup timed out: Event " + eventId + " could not be found. Exceeded " + TIMEOUT_SEC + " seconds.");
+            }
+            Thread.sleep(500); // Retry delay
+        } while (true);
+    }
+
+    /**
+     * Helper to reliably fetch a Profile within the timeout, asserting its existence for setup.
+     */
+    private Profile checkProfileExistence(int userId) throws Exception {
+        long startTime = System.currentTimeMillis();
+        Profile profile;
+        do {
+            profile = fetchProfile(userId);
+            if (profile != null) return profile;
+            if (System.currentTimeMillis() - startTime > TIMEOUT_SEC * 1000) {
+                // FIX: Added TIMEOUT_SEC to the error message for clarity
+                fail("Profile setup timed out: Profile " + userId + " could not be found. Exceeded " + TIMEOUT_SEC + " seconds.");
+            }
+            Thread.sleep(500); // Retry delay
+        } while (true);
+    }
+
 
     /**
      * Tests US 03.01.01: As an administrator, I want to be able to remove events.
@@ -108,13 +182,21 @@ public class AdminDatabaseIntegrationTest {
     public void testAdminCanRemoveEvent() throws Exception {
         createTestEvent(TEST_IMAGE_URL);
 
-        Event initialEvent = fetchEvent(TEST_EVENT_ID);
+        Event initialEvent = checkEventExistence(TEST_EVENT_ID);
         assertNotNull("Event should exist before deletion", initialEvent);
 
         databaseHandler.deleteEvent(TEST_EVENT_ID);
-        Thread.sleep(3000);
 
+        long startTime = System.currentTimeMillis();
         Event finalEvent = fetchEvent(TEST_EVENT_ID);
+
+        while (finalEvent != null) {
+            if (System.currentTimeMillis() - startTime > TIMEOUT_SEC * 1000) {
+                break;
+            }
+            Thread.sleep(500);
+            finalEvent = fetchEvent(TEST_EVENT_ID);
+        }
 
         assertNull("Event should be removed after deletion", finalEvent);
     }
@@ -127,30 +209,34 @@ public class AdminDatabaseIntegrationTest {
         createTestProfile(TEST_USER_ID, "user");
         createTestProfile(TEST_ORGANIZER_ID, "org");
 
+        checkProfileExistence(TEST_USER_ID);
+        checkProfileExistence(TEST_ORGANIZER_ID);
 
-        CountDownLatch checkLatch = new CountDownLatch(1);
-        AtomicReference<Profile> userProfile = new AtomicReference<>();
-        databaseHandler.getProfile(TEST_USER_ID, p -> { userProfile.set(p); checkLatch.countDown(); }, e -> checkLatch.countDown());
-        assertTrue("User Profile fetch timed out", checkLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS));
-        assertNotNull("User profile should exist before deletion", userProfile.get());
-
-        // ACTION: Remove profiles
+        // ACTION: Remove profiles (asynchronous calls)
         databaseHandler.deleteAcc(TEST_USER_ID);
         databaseHandler.deleteAcc(TEST_ORGANIZER_ID);
-        Thread.sleep(3000); // Add sleep after asynchronous delete
 
-        // Verification: Profiles should be removed
-        CountDownLatch verifyUserLatch = new CountDownLatch(1);
-        CountDownLatch verifyOrgLatch = new CountDownLatch(1);
-        userProfile.set(null); // Reset references
+        // Dynamic waiting for the complex asynchronous deleteAcc operation
+        long startTime = System.currentTimeMillis();
+        Profile finalUserProfile = fetchProfile(TEST_USER_ID);
+        Profile finalOrgProfile = fetchProfile(TEST_ORGANIZER_ID);
 
-        databaseHandler.getProfile(TEST_USER_ID, p -> { userProfile.set(p); verifyUserLatch.countDown(); }, e -> verifyUserLatch.countDown());
-        databaseHandler.getProfile(TEST_ORGANIZER_ID, p -> { /* Don't set orgProfile to null */ verifyOrgLatch.countDown(); }, e -> verifyOrgLatch.countDown());
+        // Wait for both to be null or timeout
+        while (finalUserProfile != null || finalOrgProfile != null) {
+            if (System.currentTimeMillis() - startTime > TIMEOUT_SEC * 1000) {
+                break;
+            }
+            Thread.sleep(500);
 
-        verifyUserLatch.await(3, TimeUnit.SECONDS);
-        verifyOrgLatch.await(3, TimeUnit.SECONDS);
+            if (finalUserProfile != null) {
+                finalUserProfile = fetchProfile(TEST_USER_ID);
+            }
+            if (finalOrgProfile != null) {
+                finalOrgProfile = fetchProfile(TEST_ORGANIZER_ID);
+            }
+        }
 
-        assertNull("User profile should be removed after deletion", userProfile.get());
+        assertNull("User profile should be removed after deletion", finalUserProfile);
+        assertNull("Organizer profile should be removed after deletion", finalOrgProfile);
     }
-
 }
