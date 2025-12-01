@@ -73,11 +73,7 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-<<<<<<< HEAD
             Bundle savedInstanceState) {
-=======
-                             Bundle savedInstanceState) {
->>>>>>> origin/tests
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_notification, container, false);
     }
@@ -144,12 +140,6 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
         }
 
         DatabaseHandler.getInstance().getAllEvents(events -> {
-<<<<<<< HEAD
-            // Use a local list and set to deduplicate while building results to avoid race
-            // conditions
-=======
-            // Use a local list and set to deduplicate while building results to avoid race conditions
->>>>>>> origin/tests
             List<EventInvitation> newInvitations = new ArrayList<>();
             java.util.Set<Integer> seenEventIds = new java.util.HashSet<>();
 
@@ -197,12 +187,8 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
      * Load system notifications (my feature - admin alerts, lottery results, etc.)
      */
     private void loadSystemNotifications() {
-<<<<<<< HEAD
         if (currentUser == null)
             return;
-=======
-        if (currentUser == null) return;
->>>>>>> origin/tests
 
         DatabaseHandler.getInstance().listenToNotifications(currentUser.getUserId(), (snapshots, error) -> {
             if (error != null) {
@@ -213,18 +199,8 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                 systemNotifications.clear();
                 for (com.google.firebase.firestore.DocumentSnapshot doc : snapshots.getDocuments()) {
                     Notification n = doc.toObject(Notification.class);
-<<<<<<< HEAD
                     if (n != null)
                         systemNotifications.add(n);
-                }
-
-=======
-                    if (n != null) systemNotifications.add(n);
-                }
-                
->>>>>>> origin/tests
-                if (notificationAdapter != null) {
-                    notificationAdapter.setNotifications(systemNotifications);
                 }
             }
         });
@@ -260,7 +236,6 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
     }
 
     private void updateInvitationStatus(EventInvitation invitation, int newStatus) {
-<<<<<<< HEAD
         invitation.getWaitlistUser().updateStatusInDb(invitation.getEvent().getEventId(), newStatus,
                 new WaitlistUser.OnStatusUpdateListener() {
                     @Override
@@ -283,21 +258,5 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                         Toast.makeText(getContext(), "Failed to update invitation.", Toast.LENGTH_SHORT).show();
                     }
                 });
-=======
-        invitation.getWaitlistUser().updateStatusInDb(invitation.getEvent().getEventId(), newStatus, new WaitlistUser.OnStatusUpdateListener() {
-            @Override
-            public void onSuccess() {
-                currentInvitations.remove(invitation);
-                invitationAdapter.updateInvitations(new ArrayList<>(currentInvitations));
-                Toast.makeText(getContext(), "Invitation updated.", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, "Failed to update status", e);
-                Toast.makeText(getContext(), "Failed to update invitation.", Toast.LENGTH_SHORT).show();
-            }
-        });
->>>>>>> origin/tests
     }
 }

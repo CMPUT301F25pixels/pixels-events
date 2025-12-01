@@ -88,7 +88,7 @@ public class EntrantCountNGuideTest {
                 "10:00",
                 today, // Registration start
                 "2025-12-10", // Registration end
-                tag,
+                tags,
                 Boolean.FALSE);
         Tasks.await(db.getEventCollection().document(String.valueOf(eventID)).set(evn));
 

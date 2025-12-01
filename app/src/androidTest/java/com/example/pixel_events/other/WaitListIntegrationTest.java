@@ -21,6 +21,10 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/*
+    Utilizes:
+        White Box Testing
+ */
 @RunWith(AndroidJUnit4.class)
 public class WaitListIntegrationTest {
 

@@ -1,25 +1,17 @@
 package com.example.pixel_events.loading;
 
 import android.content.Intent;
-<<<<<<< HEAD
 import android.content.pm.PackageManager;
-=======
->>>>>>> origin/tests
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
-<<<<<<< HEAD
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-=======
->>>>>>> origin/tests
 
 import com.example.pixel_events.MainActivity;
 import com.example.pixel_events.R;
-
-<<<<<<< HEAD
 /**
  * SplashActivity
  *
@@ -32,17 +24,12 @@ import com.example.pixel_events.R;
 public class SplashActivity extends AppCompatActivity {
     private static final String TAG = "SplashActivity";
     private static final int REQ_LOCATION_PERMISSION = 1001;
-=======
-public class SplashActivity extends AppCompatActivity {
-    private static final String TAG = "SplashActivity";
->>>>>>> origin/tests
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-<<<<<<< HEAD
         // Ensure permissions are requested before transitioning to MainActivity
         requestLocationPermissionThenProceed();
     }
@@ -88,14 +75,3 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 }
-=======
-        // Simulate short loading (e.g., 1.5 sec splash)
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish(); // prevent going back to splash
-        }, 1500);
-    }
-}
-
->>>>>>> origin/tests

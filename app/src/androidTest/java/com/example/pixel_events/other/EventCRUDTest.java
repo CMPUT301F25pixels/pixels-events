@@ -19,8 +19,9 @@ import java.util.concurrent.TimeUnit;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.*;
 
-/**
- * Instrumented test to verify Event CRUD operations with Firebase
+/*
+    Utilizes:
+        White Box Testing
  */
 @RunWith(AndroidJUnit4.class)
 public class EventCRUDTest {
@@ -141,4 +142,3 @@ public class EventCRUDTest {
         Log.d(TAG, "✅ Test passed! Retrieved " + eventCount[0] + " events");
     }
 }
-
