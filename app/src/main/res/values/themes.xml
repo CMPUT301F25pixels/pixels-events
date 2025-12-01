@@ -11,4 +11,7 @@
     <style name="ThemeOverlay.Pixelevents.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">true</item>
     </style>
+    <style name="Theme.Pixelevents.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
 </resources>

@@ -20,9 +20,18 @@ import com.example.pixel_events.notifications.Notification;
 import com.google.firebase.firestore.DocumentChange;
 import androidx.appcompat.app.AlertDialog;
 
+import java.util.Set;
+
 public class DashboardActivity extends AppCompatActivity {
     private ActivityDashboardBinding binding;
     private com.google.firebase.firestore.ListenerRegistration notificationListener;
+
+    private final Set<Integer> bottomNavDestinations = Set.of(
+            R.id.navigation_dashboard,
+            R.id.navigation_myevents,
+            R.id.navigation_scanner,
+            R.id.navigation_profile
+    );
 
     @Override
     protected void onResume() {
@@ -104,24 +113,55 @@ public class DashboardActivity extends AppCompatActivity {
 
         BottomNavigationView navView = binding.dashboardBottomNavView;
 
-        // Safely obtain NavController from NavHostFragment to avoid timing issues
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment_activity_dashboard);
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_dashboard);
 
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(navView, navController);
 
-            // Hide overlay container when its back stack empties
-            getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-                if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
-                    binding.overlayFragmentContainer.setVisibility(View.GONE);
+            // Hide/show dashboard_layout based on destination
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                int destId = destination.getId();
+                boolean isRoot = bottomNavDestinations.contains(destId);
+
+                if (isRoot) {
+                    binding.dashboardLayout.setVisibility(View.VISIBLE);
+                } else {
+                    binding.dashboardLayout.setVisibility(View.GONE);
                 }
+
+                getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+                    boolean hasOverlay = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
+                    if (hasOverlay) {
+                        // We are on a fragment-of-fragment → hide dashboard
+                        binding.dashboardLayout.setVisibility(View.GONE);
+                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
+                    } else {
+                        // Back to root → show dashboard
+                        binding.dashboardLayout.setVisibility(View.VISIBLE);
+                        binding.overlayFragmentContainer.setVisibility(View.GONE);
+                    }
+                });
+
+                // Update title
+                if (binding.dashboardTitle != null) {
+                    CharSequence title = null;
+                    if (navView.getMenu().findItem(destId) != null) {
+                        title = navView.getMenu().findItem(destId).getTitle();
+                    }
+                    if (title == null && destination.getLabel() != null) {
+                        title = destination.getLabel();
+                    }
+                    binding.dashboardTitle.setText(title);
+                }
+
+                updateButtonVisibility();
             });
 
-            // Bottom navigation: clear ONLY overlay fragments, then delegate to NavigationUI
             navView.setOnItemSelectedListener(item -> {
-                // Remove overlay fragments if present (they were added via add() on overlay container)
+                // Remove overlay fragments if present
                 while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                     getSupportFragmentManager().popBackStackImmediate();
                 }
@@ -131,118 +171,35 @@ public class DashboardActivity extends AppCompatActivity {
                 return NavigationUI.onNavDestinationSelected(item, navController);
             });
 
-            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                if (binding.dashboardTitle != null) {
-                    CharSequence title = null;
-                    if (navView != null && navView.getMenu() != null) {
-                        if (navView.getMenu().findItem(destination.getId()) != null) {
-                            title = navView.getMenu().findItem(destination.getId()).getTitle();
-                        }
-                    }
-                    if (title == null && destination.getLabel() != null) {
-                        title = destination.getLabel();
-                    }
-                    if (title != null) {
-                        binding.dashboardTitle.setText(title);
-                    }
-                }
+            // Add Event Button
+            binding.dashboardAddevent.setOnClickListener(v -> {
+                binding.dashboardLayout.setVisibility(View.GONE);
 
-                // Update the add button visibility for current user role
-                updateButtonVisibility();
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .setReorderingAllowed(true)
+                        .add(R.id.overlay_fragment_container, new CreateEventFragment())
+                        .addToBackStack("overlay")
+                        .commit();
             });
 
-            // Hook up add button click once
-            if (binding.dashboardAddevent != null) {
-                binding.dashboardAddevent.setOnClickListener(v -> {
-                    if (binding.dashboardTitle != null) {
-                        binding.dashboardTitle.setText("Create Event");
-                    }
-                    if (binding.overlayFragmentContainer != null) {
-                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
-                    }
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .setReorderingAllowed(true)
-                            .add(R.id.overlay_fragment_container, new CreateEventFragment())
-                            .addToBackStack("overlay")
-                            .commit();
-                });
-            }
-            if (binding.dashboardShowNotifications != null){
-                binding.dashboardShowNotifications.setOnClickListener(v -> {
-                    if (binding.dashboardTitle != null) {
-                        binding.dashboardTitle.setText("Notifications");
-                    }
-                    if (binding.overlayFragmentContainer != null) {
-                        binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
-                    }
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .setReorderingAllowed(true)
-                            .add(R.id.overlay_fragment_container, new NotificationFragment())
-                            .addToBackStack("overlay")
-                            .commit();
-                });
-            }
-        } else {
-            // If fragment not yet created, post a runnable to retry after layout pass
-            binding.getRoot().post(() -> {
-                NavHostFragment nhf = (NavHostFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.nav_host_fragment_activity_dashboard);
-                if (nhf != null) {
-                    NavController nc = nhf.getNavController();
-                    NavigationUI.setupWithNavController(navView, nc);
+            // Notification Button
+            binding.dashboardShowNotifications.setOnClickListener(v -> {
+                binding.dashboardLayout.setVisibility(View.GONE);
 
-                    // Hide overlay when back stack empties
-                    getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-                        if (getSupportFragmentManager().getBackStackEntryCount() == 0 && binding.overlayFragmentContainer != null) {
-                            binding.overlayFragmentContainer.setVisibility(View.GONE);
-                        }
-                    });
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .setReorderingAllowed(true)
+                        .add(R.id.overlay_fragment_container, new NotificationFragment())
+                        .addToBackStack("overlay")
+                        .commit();
+            });
 
-                    navView.setOnItemSelectedListener(item -> {
-                        while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                            getSupportFragmentManager().popBackStackImmediate();
-                        }
-                        if (binding.overlayFragmentContainer != null) {
-                            binding.overlayFragmentContainer.setVisibility(View.GONE);
-                        }
-                        return NavigationUI.onNavDestinationSelected(item, nc);
-                    });
-
-                    nc.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                        if (binding.dashboardTitle != null) {
-                            CharSequence title = null;
-                            if (navView != null && navView.getMenu() != null) {
-                                if (navView.getMenu().findItem(destination.getId()) != null) {
-                                    title = navView.getMenu().findItem(destination.getId()).getTitle();
-                                }
-                            }
-                            if (title == null && destination.getLabel() != null) {
-                                title = destination.getLabel();
-                            }
-                            if (title != null) {
-                                binding.dashboardTitle.setText(title);
-                            }
-                        }
-                    });
-                    updateButtonVisibility();
-                    if (binding.dashboardAddevent != null) {
-                        binding.dashboardAddevent.setOnClickListener(v -> {
-                            if (binding.dashboardTitle != null) {
-                                binding.dashboardTitle.setText("Create Event");
-                            }
-                            if (binding.overlayFragmentContainer != null) {
-                                binding.overlayFragmentContainer.setVisibility(View.VISIBLE);
-                            }
-                            getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .setReorderingAllowed(true)
-                                    .add(R.id.overlay_fragment_container, new CreateEventFragment())
-                                    .addToBackStack("overlay")
-                                    .commit();
-                        });
-                    }
+            // Overlay restore on back press
+            getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+                if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    binding.overlayFragmentContainer.setVisibility(View.GONE);
+                    binding.dashboardLayout.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -255,10 +212,9 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void updateButtonVisibility() {
-        if (binding == null || binding.dashboardAddevent == null)
-            return;
         Profile profile = AuthManager.getInstance().getCurrentUserProfile();
         boolean isOrganizer = profile != null && "org".equalsIgnoreCase(profile.getRole());
+
         binding.dashboardAddevent.setVisibility(isOrganizer ? View.VISIBLE : View.GONE);
         binding.dashboardShowNotifications.setVisibility(isOrganizer ? View.GONE : View.VISIBLE);
     }

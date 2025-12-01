@@ -4,9 +4,8 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/dark_bg"
-    android:paddingLeft="32dp"
-    android:paddingRight="32dp">
+    android:background="@drawable/bg_gradient"
+    android:padding="32dp">
 
     <LinearLayout
         android:id="@+id/waitinglist_toplayout"
