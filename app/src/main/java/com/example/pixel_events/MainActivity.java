@@ -1,83 +1,45 @@
 package com.example.pixel_events;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
+import android.content.pm.PackageManager;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.home.DashboardActivity;
-import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.login.LoginFragment;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * MainActivity
+ *
+ * Entry point activity for the application.
+ * Initializes Firebase and routes users based on authentication state.
+ * Hosts the login/signup flow before navigating to role-specific activities.
+ *
+ * Collaborators:
+ * - LoginFragment: Authentication UI
+ * - AuthManager: Session check
+ * - DatabaseHandler: Firebase initialization
+ * - DashboardActivity, AdminActivity: Post-login routing
+ */
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private DatabaseHandler db;
+    private static final int REQ_LOCATION_PERMISSION = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try {
-            FirebaseApp app = FirebaseApp.getInstance();
-            Log.d(TAG, "Firebase is initialized: " + (app != null));
-
-            FirebaseFirestore.getInstance();
-            Log.d(TAG, "Firestore instance retrieved successfully");
-        } catch (Exception e) {
-            Log.e(TAG, "Firebase initialization error", e);
-        }
-
         db = DatabaseHandler.getInstance();
         Log.d(TAG, "DatabaseHandler initialized");
 
-        try {
-            AuthManager.getInstance().getAuth().getFirebaseAuthSettings()
-                    .setAppVerificationDisabledForTesting(true);
-            Log.d(TAG, "App verification disabled for testing");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to disable app verification", e);
-        }
-
-        // ✅ Firebase Auth check - Auto login
-        checkAuthState();
-    }
-
-    private void checkAuthState() {
-        AuthManager authManager = AuthManager.getInstance();
-        FirebaseUser user = authManager.getCurrentFirebaseUser();
-        if (user == null) {
-            Log.d(TAG, "No user logged in — navigating to LoginFragment");
-            showLoginFragment();
-        } else {
-            Log.d(TAG, "User already logged in: " + user.getEmail() + " — loading profile");
-
-            // Load user profile from database
-            db.getProfile(
-                    user.getUid().hashCode(),
-                    profile -> {
-                        if (profile != null) {
-                            Log.d(TAG, "Profile loaded successfully for: " + profile.getUserId());
-                            showDashboardActivity();
-                        }
-                    },
-                    e -> {
-                        Log.e(TAG, "Failed to load profile: " + e);
-                        Toast.makeText(MainActivity.this,
-                                "Failed to load profile. Please login again.",
-                                Toast.LENGTH_LONG).show();
-
-                        // Sign out and show login
-                        authManager.signOut();
-                        showLoginFragment();
-                    });
-        }
+        // Request location permission before showing login flow
+        requestLocationPermissionThenShowLogin();
     }
 
     private void showLoginFragment() {
@@ -86,9 +48,36 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void showDashboardActivity() {
-        Intent intent = new Intent(this, DashboardActivity.class);
-        startActivity(intent);
-        finish(); // Close MainActivity so the user can't go back to it
+    private void requestLocationPermissionThenShowLogin() {
+        boolean fineGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+        boolean coarseGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+
+        if (fineGranted || coarseGranted) {
+            showLoginFragment();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                    REQ_LOCATION_PERMISSION);
+            // Proceed to show login; fragment can re-check after permission result
+            showLoginFragment();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_LOCATION_PERMISSION) {
+            boolean granted = false;
+            for (int res : grantResults) {
+                if (res == PackageManager.PERMISSION_GRANTED) {
+                    granted = true;
+                    break;
+                }
+            }
+            Log.d(TAG, "Location permission " + (granted ? "granted" : "denied"));
+            // No further action needed here; LoginFragment will read location if granted
+        }
     }
 }

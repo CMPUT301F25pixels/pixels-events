@@ -5,19 +5,47 @@ import android.util.Log;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
+import com.example.pixel_events.waitinglist.WaitlistUser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.example.pixel_events.notifications.Notification;
 import java.util.Map;
 import java.util.function.Consumer;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 
+/**
+ * DatabaseHandler
+ *
+ * Singleton repository class managing all Firebase Firestore operations for the
+ * app.
+ * Centralizes data access for Events, Profiles, WaitingLists, and
+ * Notifications.
+ * Provides CRUD operations, real-time listeners, and atomic updates.
+ * Handles data type coercion and validation for Firebase document mapping.
+ *
+ * Implements:
+ * - US 01.01.01, 01.01.02 (Join/leave waiting list persistence)
+ * - US 01.02.01, 01.02.02, 01.02.04 (Profile CRUD operations)
+ * - US 01.04.01, 01.04.02 (Send lottery notifications)
+ * - US 02.01.01 (Store event and QR code)
+ * - US 02.07.01, 02.07.02, 02.07.03 (Organizer notifications)
+ * - US 03.01.01, 03.02.01, 03.03.01 (Admin deletions)
+ * - US 03.04.01, 03.05.01, 03.06.01 (Admin browse data)
+ * - US 03.08.01 (Notification logging)
+ *
+ * Collaborators:
+ * - FirebaseFirestore: Cloud database connection
+ * - Event, Profile, WaitingList, Notification: Data models
+ * - All fragments: Data access layer
+ */
 public class DatabaseHandler {
     private static DatabaseHandler instance;
     private final FirebaseFirestore db;
@@ -85,6 +113,22 @@ public class DatabaseHandler {
         return db;
     }
 
+    /**
+     * Convert a Firebase UID string to a positive integer id used by legacy DB.
+     * Ensures the returned id is > 0.
+     */
+    public static int uidToId(String uid) {
+        if (uid == null)
+            return 1;
+        int raw = uid.hashCode();
+        if (raw == Integer.MIN_VALUE)
+            return Integer.MAX_VALUE;
+        int v = Math.abs(raw);
+        if (v <= 0)
+            v = 1;
+        return v;
+    }
+
     public CollectionReference getAccountCollection() {
         return accRef;
     }
@@ -143,6 +187,168 @@ public class DatabaseHandler {
                 });
     }
 
+    // NOTIFICATION FUNCTIONS
+    // -----------------------------------------------------------------------
+
+    /**
+     * Adds a notification to a specific user's notification collection.
+     */
+    public void addNotification(int userId, Notification notification) {
+        // Ensure recipientId is set
+        if (notification.getRecipientId() == 0) {
+            notification.setRecipientId(userId);
+        }
+
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notification.getNotificationId())
+                .set(notification)
+                .addOnFailureListener(e -> Log.e("DB", "Failed to send notification to user " + userId, e));
+
+        // Log globally
+        db.collection("NotificationLogs")
+                .document(notification.getNotificationId())
+                .set(notification);
+    }
+
+    /**
+     * Listens for real-time notifications for a specific user.
+     */
+    public void listenToNotifications(int userId, EventListener<QuerySnapshot> listener) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener(listener);
+    }
+
+    /**
+     * Mark a notification as read/deleted (or just delete it from DB).
+     */
+    public void deleteNotification(int userId, String notificationId) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notificationId)
+                .delete();
+    }
+
+    public void markNotificationRead(int userId, String notificationId) {
+        accRef.document(String.valueOf(userId))
+                .collection("Notifications")
+                .document(notificationId)
+                .update("read", true);
+    }
+
+    // NOTIFICATION HELPERS
+    // -----------------------------------------------------------------------
+
+    public void sendInviteNotification(int eventId, String eventTitle, int userId) {
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 1 || prefs.get(0)) {
+                Notification n = new Notification("Event Invitation",
+                        "You have been invited to sign up for " + eventTitle,
+                        "INVITE", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
+    }
+
+    public void sendWinNotification(int eventId, String eventTitle, int userId) {
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 2 || prefs.get(1)) {
+                Notification n = new Notification("Lottery Won!",
+                        "You have been selected for " + eventTitle + ". Please sign up!",
+                        "LOTTERY_WIN", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
+    }
+
+    public void sendLossNotification(int eventId, String eventTitle, int userId) {
+        checkNotificationPreferences(userId, prefs -> {
+            if (prefs == null || prefs.isEmpty() || prefs.size() < 3 || prefs.get(2)) {
+                Notification n = new Notification("Lottery Result",
+                        "Unfortunately you were not selected for " + eventTitle + ".",
+                        "LOTTERY_LOSS", eventId, userId);
+                addNotification(userId, n);
+            }
+        });
+    }
+
+    private void checkNotificationPreferences(int userId,
+            java.util.function.Consumer<java.util.List<Boolean>> callback) {
+        getProfile(userId, profile -> {
+            if (profile != null && profile.getNotify() != null) {
+                callback.accept(profile.getNotify());
+            } else {
+                callback.accept(null); // Default: send all notifications
+            }
+        }, e -> callback.accept(null)); // On error, send notifications anyway
+    }
+
+    /**
+     * US 02.07.01 - Send notification to all entrants on waiting list
+     */
+    public void sendNotificationToAllWaitlist(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    Notification n = new Notification(
+                            "Message from Organizer",
+                            message,
+                            "ORGANIZER_MESSAGE",
+                            eventId,
+                            user.getUserId(),
+                            senderId);
+                    addNotification(user.getUserId(), n);
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
+    }
+
+    /**
+     * US 02.07.02 - Send notification to selected entrants
+     */
+    public void sendNotificationToSelected(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    if (user.getStatus() == 1) { // Selected (won lottery)
+                        Notification n = new Notification(
+                                "Message from Organizer",
+                                message,
+                                "ORGANIZER_MESSAGE",
+                                eventId,
+                                user.getUserId(),
+                                senderId);
+                        addNotification(user.getUserId(), n);
+                    }
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
+    }
+
+    /**
+     * US 02.07.03 - Send notification to cancelled entrants
+     */
+    public void sendNotificationToCancelled(int eventId, String eventTitle, String message, int senderId) {
+        getWaitingList(eventId, waitList -> {
+            if (waitList != null && waitList.getWaitList() != null) {
+                for (WaitlistUser user : waitList.getWaitList()) {
+                    if (user.getStatus() == 3) { // Declined/cancelled
+                        Notification n = new Notification(
+                                "Message from Organizer",
+                                message,
+                                "ORGANIZER_MESSAGE",
+                                eventId,
+                                user.getUserId(),
+                                senderId);
+                        addNotification(user.getUserId(), n);
+                    }
+                }
+            }
+        }, e -> Log.e("DB", "Failed to get waitlist for sending notifications", e));
+    }
+
     // ACCOUNT INFO FUNCTIONS
     // ---------------------------------------------------------------------
 
@@ -172,11 +378,202 @@ public class DatabaseHandler {
                 });
     }
 
+    /**
+     * Fetch a profile by email address.
+     *
+     * @param email         The email to search for
+     * @param listener      Success callback with the Profile object (or null if not
+     *                      found)
+     * @param errorListener Failure callback
+     */
+    public void getProfileByEmail(String email,
+            OnSuccessListener<Profile> listener,
+            OnFailureListener errorListener) {
+        accRef.whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                        try {
+                            // Manually map fields to avoid strict type issues if any
+                            int id = 0;
+                            Object idObj = document.get("userId"); // Try "userId" first
+                            if (idObj == null)
+                                idObj = document.get("id"); // Fallback to "id"
+
+                            if (idObj instanceof Number) {
+                                id = ((Number) idObj).intValue();
+                            } else if (idObj instanceof String) {
+                                try {
+                                    id = Integer.parseInt((String) idObj);
+                                } catch (NumberFormatException e) {
+                                    id = 0;
+                                }
+                            }
+
+                            if (id == 0) {
+                                // Try to parse from document ID if it's an int
+                                try {
+                                    id = Integer.parseInt(document.getId());
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+
+                            Profile profile = document.toObject(Profile.class);
+                            // Ensure ID is set if toObject didn't catch it (e.g. if field name mismatch)
+                            if (profile != null && profile.getUserId() == 0) {
+                                profile.setUserId(id);
+                            }
+                            listener.onSuccess(profile);
+                        } catch (Exception e) {
+                            Log.e("DB", "Error parsing profile", e);
+                            errorListener.onFailure(e);
+                        }
+                    } else {
+                        listener.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error finding profile by email", e);
+                    errorListener.onFailure(e);
+                });
+    }
+
     public void deleteAcc(int userID) {
+        // 1. Notify User
+        Notification notice = new Notification(
+                "Profile Deleted",
+                "Your profile has been deleted by the Admin.",
+                "ADMIN_DELETE",
+                -1,
+                userID);
+        addNotification(userID, notice);
+
         accRef.document(String.valueOf(userID))
                 .delete()
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+
+        // Proceed to clean up related data
+        eventRef.whereEqualTo("organizerId", userID).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        try {
+                            int eventId = Integer.parseInt(doc.getId());
+                            deleteEvent(eventId);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                });
+
+        // 2) Remove user from waitlists and redraw if they had accepted
+        waitListRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<com.google.android.gms.tasks.Task<Void>> removals = new java.util.ArrayList<>();
+                    java.util.List<Integer> redrawEvents = new java.util.ArrayList<>();
+
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        int eventId;
+                        try {
+                            eventId = Integer.parseInt(doc.getId());
+                        } catch (NumberFormatException ex) {
+                            continue;
+                        }
+
+                        // Coerce to WaitingList for simple inspection
+                        WaitingList wl = safeMapWaitingList(doc);
+                        if (wl == null || wl.getWaitList() == null)
+                            continue;
+
+                        boolean containsUser = false;
+                        boolean accepted = false;
+                        for (com.example.pixel_events.waitinglist.WaitlistUser u : wl.getWaitList()) {
+                            if (u.getUserId() == userID) {
+                                containsUser = true;
+                                if (u.getStatus() == 2)
+                                    accepted = true;
+                                break;
+                            }
+                        }
+
+                        if (containsUser) {
+                            removals.add(leaveWaitingList(eventId, userID));
+                            if (accepted)
+                                redrawEvents.add(eventId);
+                        }
+                    }
+
+                    Tasks.whenAll(removals).addOnSuccessListener(unused -> {
+                        // Trigger redraws for freed accepted slots
+                        for (Integer eid : redrawEvents) {
+                            getWaitingList(eid, wl -> {
+                                if (wl != null) {
+                                    wl.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                                        @Override
+                                        public void onSuccess(int n) {
+                                            Log.d("DB", "Redrew lottery for " + eid + "; selected=" + n);
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Log.e("DB", "Redraw failed for " + eid, e);
+                                        }
+                                    });
+                                }
+                            }, e -> Log.e("DB", "Failed to load waitlist for redraw: " + eid, e));
+                        }
+
+                        // 3) Delete account document
+                        accRef.document(String.valueOf(userID)).delete()
+                                .addOnSuccessListener(unused2 -> Log.d("DB", "Deleted user: " + userID))
+                                .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
+
+                    }).addOnFailureListener(e -> {
+                        Log.e("DB", "Failed to remove user from waitlists", e);
+                        accRef.document(String.valueOf(userID)).delete()
+                                .addOnSuccessListener(
+                                        unused2 -> Log.d("DB", "Deleted user (partial cleanup): " + userID))
+                                .addOnFailureListener(err -> Log.e("DB", "Error deleting user " + userID, err));
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Failed to scan waitlists for deletion: " + userID, e);
+                    accRef.document(String.valueOf(userID)).delete()
+                            .addOnSuccessListener(unused -> Log.d("DB", "Deleted user (fallback): " + userID))
+                            .addOnFailureListener(err -> Log.e("DB", "Error deleting user " + userID, err));
+                });
+    }
+
+    /**
+     * Fetch all profiles in AccountData collection.
+     * 
+     * @param listener      success callback with list of Profile objects (empty
+     *                      list if none)
+     * @param errorListener failure callback invoked on Firestore error
+     */
+    public void getAllProfile(OnSuccessListener<java.util.List<Profile>> listener,
+            OnFailureListener errorListener) {
+        accRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    java.util.List<Profile> profiles = new java.util.ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        try {
+                            Profile p = document.toObject(Profile.class);
+                            if (p != null) {
+                                profiles.add(p);
+                            }
+                        } catch (RuntimeException ex) {
+                            Log.e("DB", "Failed to deserialize Profile doc: " + document.getId(), ex);
+                        }
+                    }
+                    listener.onSuccess(profiles);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting all profiles", e);
+                    errorListener.onFailure(e);
+                });
     }
 
     // EVENT INFO FUNCTIONS
@@ -243,14 +640,60 @@ public class DatabaseHandler {
     }
 
     public void deleteEvent(int eventID) {
-        eventRef.document(String.valueOf(eventID))
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("DB", "Deleted event: " + eventID))
-                .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
-        waitListRef.document(String.valueOf(eventID))
-                .delete()
-                .addOnSuccessListener(unused -> Log.d("DB", "Deleted Waitlist for event: " + eventID))
-                .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+        // 0. Notify Organizer
+        getEvent(eventID, event -> {
+            if (event != null) {
+                int organizerId = event.getOrganizerId();
+                Notification organizerNotice = new Notification(
+                        "Event Deleted",
+                        "Your event '" + event.getTitle() + "' has been deleted by the Admin.",
+                        "ADMIN_DELETE",
+                        eventID,
+                        organizerId);
+                addNotification(organizerId, organizerNotice);
+            }
+        }, e -> Log.e("DB", "Error fetching event for organizer notification", e));
+
+        // 1. Notify all entrants in waitlist and selected list
+        getWaitingList(eventID, waitList -> {
+            if (waitList != null) {
+                // Notify waitlist
+                if (waitList.getWaitList() != null) {
+                    for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getWaitList()) {
+                        Notification notice = new Notification(
+                                "Event Cancelled",
+                                "The event you interacted with has been cancelled by the Admin.",
+                                "ADMIN_DELETE",
+                                eventID,
+                                user.getUserId());
+                        addNotification(user.getUserId(), notice);
+                    }
+                }
+                // Notify selected
+                if (waitList.getSelected() != null) {
+                    for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getSelected()) {
+                        Notification notice = new Notification(
+                                "Event Cancelled",
+                                "The event you interacted with has been cancelled by the Admin.",
+                                "ADMIN_DELETE",
+                                eventID,
+                                user.getUserId());
+                        addNotification(user.getUserId(), notice);
+                    }
+                }
+            }
+
+            // 2. Delete event and waitlist after notifying
+            eventRef.document(String.valueOf(eventID))
+                    .delete()
+                    .addOnSuccessListener(unused -> Log.d("DB", "Deleted event: " + eventID))
+                    .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+            waitListRef.document(String.valueOf(eventID))
+                    .delete()
+                    .addOnSuccessListener(unused -> Log.d("DB", "Deleted Waitlist for event: " + eventID))
+                    .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
+
+        }, e -> Log.e("DB", "Error fetching waitlist for delete notification", e));
     }
 
     // WAITING LIST PUBLIC OPERATIONS (Task-based)
@@ -286,18 +729,186 @@ public class DatabaseHandler {
     public Task<Void> joinWaitingList(int eventId, int userId) {
         String docId = String.valueOf(eventId);
         return ensureWaitListExists(eventId)
-                .continueWithTask(t -> waitListRef.document(docId)
-                        .update("waitList", com.google.firebase.firestore.FieldValue.arrayUnion(userId)));
+                .continueWithTask(t -> waitListRef.document(docId).get())
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        return Tasks.forException(task.getException() != null ? task.getException()
+                                : new RuntimeException("Failed to read waitlist"));
+                    }
+
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot == null || !snapshot.exists()) {
+                        return Tasks.forException(new RuntimeException("Waitlist not found"));
+                    }
+
+                    // Get current waitList
+                    java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
+                    if (waitList == null) {
+                        waitList = new java.util.ArrayList<>();
+                    }
+
+                    // Check if user already exists
+                    boolean userExists = false;
+                    for (Object obj : waitList) {
+                        if (obj instanceof java.util.Map) {
+                            java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                            Object uid = userMap.get("userId");
+                            int existingUserId = 0;
+                            if (uid instanceof Number) {
+                                existingUserId = ((Number) uid).intValue();
+                            } else if (uid instanceof String) {
+                                try {
+                                    existingUserId = Integer.parseInt((String) uid);
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+                            if (existingUserId == userId) {
+                                userExists = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If user doesn't exist, add them
+                    if (!userExists) {
+                        java.util.Map<String, Object> newUser = new java.util.HashMap<>();
+                        newUser.put("userId", userId);
+                        newUser.put("status", 0); // 0 = waiting/undecided
+                        return waitListRef.document(docId)
+                                .update("waitList", com.google.firebase.firestore.FieldValue.arrayUnion(newUser));
+                    } else {
+                        // User already exists, do nothing
+                        return Tasks.forResult(null);
+                    }
+                });
     }
 
     /**
-     * Removes the user id from the event waitlist (no-op if absent).
+     * Removes the user from the event waitlist by finding and removing their
+     * WaitlistUser object.
      */
     public Task<Void> leaveWaitingList(int eventId, int userId) {
         String docId = String.valueOf(eventId);
         return ensureWaitListExists(eventId)
-                .continueWithTask(t -> waitListRef.document(docId)
-                        .update("waitList", com.google.firebase.firestore.FieldValue.arrayRemove(userId)));
+                .continueWithTask(t -> waitListRef.document(docId).get())
+                .continueWithTask(task -> {
+                    if (!task.isSuccessful()) {
+                        return Tasks.forException(task.getException() != null ? task.getException()
+                                : new RuntimeException("Failed to read waitlist"));
+                    }
+
+                    DocumentSnapshot snapshot = task.getResult();
+                    if (snapshot == null || !snapshot.exists()) {
+                        return Tasks.forException(new RuntimeException("Waitlist not found"));
+                    }
+
+                    // Get current waitList
+                    java.util.List<Object> waitList = (java.util.List<Object>) snapshot.get("waitList");
+                    if (waitList == null || waitList.isEmpty()) {
+                        return Tasks.forResult(null); // Nothing to remove
+                    }
+
+                    // Find and remove the user's entry
+                    java.util.List<Object> updatedWaitList = new java.util.ArrayList<>();
+                    for (Object obj : waitList) {
+                        if (obj instanceof java.util.Map) {
+                            java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                            Object uid = userMap.get("userId");
+                            int existingUserId = 0;
+                            if (uid instanceof Number) {
+                                existingUserId = ((Number) uid).intValue();
+                            } else if (uid instanceof String) {
+                                try {
+                                    existingUserId = Integer.parseInt((String) uid);
+                                } catch (NumberFormatException e) {
+                                    // ignore
+                                }
+                            }
+                            // Keep all users except the one leaving
+                            if (existingUserId != userId) {
+                                updatedWaitList.add(obj);
+                            }
+                        }
+                    }
+
+                    // Update the waitlist with the filtered list
+                    return waitListRef.document(docId).update("waitList", updatedWaitList);
+                });
+    }
+
+    /**
+     * Get all events that a user is part of (in any waitlist).
+     * 
+     * @param userId        The user ID to search for
+     * @param listener      Success callback with list of Events
+     * @param errorListener Failure callback
+     */
+    public void getEventsForUser(int userId,
+            OnSuccessListener<java.util.List<Event>> listener,
+            OnFailureListener errorListener) {
+        // First get all waitlists
+        waitListRef.get()
+                .addOnSuccessListener(waitlistSnapshot -> {
+                    // Collect event IDs where user is in the waitlist
+                    java.util.List<Integer> eventIds = new java.util.ArrayList<>();
+
+                    for (QueryDocumentSnapshot doc : waitlistSnapshot) {
+                        try {
+                            java.util.List<Object> waitList = (java.util.List<Object>) doc.get("waitList");
+                            if (waitList != null) {
+                                for (Object obj : waitList) {
+                                    if (obj instanceof java.util.Map) {
+                                        java.util.Map<String, Object> userMap = (java.util.Map<String, Object>) obj;
+                                        Object uid = userMap.get("userId");
+                                        int existingUserId = 0;
+                                        if (uid instanceof Number) {
+                                            existingUserId = ((Number) uid).intValue();
+                                        } else if (uid instanceof String) {
+                                            try {
+                                                existingUserId = Integer.parseInt((String) uid);
+                                            } catch (NumberFormatException e) {
+                                                // ignore
+                                            }
+                                        }
+                                        if (existingUserId == userId) {
+                                            // Get event ID from document ID
+                                            try {
+                                                int eventId = Integer.parseInt(doc.getId());
+                                                eventIds.add(eventId);
+                                            } catch (NumberFormatException e) {
+                                                // ignore
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("DB", "Error parsing waitlist document: " + doc.getId(), e);
+                        }
+                    }
+
+                    // Now fetch all the events
+                    if (eventIds.isEmpty()) {
+                        listener.onSuccess(new java.util.ArrayList<>());
+                        return;
+                    }
+
+                    getAllEvents(allEvents -> {
+                        java.util.List<Event> userEvents = new java.util.ArrayList<>();
+                        for (Event event : allEvents) {
+                            if (eventIds.contains(event.getEventId())) {
+                                userEvents.add(event);
+                            }
+                        }
+                        listener.onSuccess(userEvents);
+                    }, errorListener);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DB", "Error getting waitlists for user", e);
+                    errorListener.onFailure(e);
+                });
     }
 
     // Map a Firestore snapshot to Event while coercing types (e.g., String -> int)
@@ -347,6 +958,7 @@ public class DatabaseHandler {
             setIfPresent(ev, data, "eventEndTime");
             setIfPresent(ev, data, "fee");
             setIfPresent(ev, data, "tags");
+            setIfPresent(ev, data, "geoLocation");
             // waitingList is optional and has its own collection; skip here
 
             return ev;
@@ -443,44 +1055,56 @@ public class DatabaseHandler {
                 }
             }
 
-            // Coerce arrays to ArrayList<Integer>
+            // Coerce arrays to ArrayList<WaitlistUser>
             Object wl = data.get("waitList");
             if (wl instanceof java.util.List) {
-                java.util.ArrayList<Integer> coerced = new java.util.ArrayList<>();
+                java.util.ArrayList<com.example.pixel_events.waitinglist.WaitlistUser> coerced = new java.util.ArrayList<>();
                 for (Object o : (java.util.List<?>) wl) {
-                    if (o instanceof Number)
-                        coerced.add(((Number) o).intValue());
-                    else if (o instanceof String) {
+                    if (o instanceof java.util.Map) {
                         try {
-                            coerced.add(Integer.parseInt((String) o));
+                            java.util.Map<String, Object> map = (java.util.Map<String, Object>) o;
+                            int userId = 0;
+                            int status = 0;
+                            if (map.containsKey("userId")) {
+                                Object uid = map.get("userId");
+                                if (uid instanceof Number)
+                                    userId = ((Number) uid).intValue();
+                                else if (uid instanceof String)
+                                    userId = Integer.parseInt((String) uid);
+                            }
+                            if (map.containsKey("status")) {
+                                Object st = map.get("status");
+                                if (st instanceof Number)
+                                    status = ((Number) st).intValue();
+                                else if (st instanceof String)
+                                    status = Integer.parseInt((String) st);
+                            }
+                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(userId, status));
+                        } catch (Exception e) {
+                            Log.e("DB", "Failed to parse WaitlistUser map", e);
+                        }
+                    } else if (o instanceof Number) {
+                        // Handle legacy data where waitList was just a list of user IDs
+                        coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(((Number) o).intValue(), 0));
+                    } else if (o instanceof String) {
+                        try {
+                            coerced.add(new com.example.pixel_events.waitinglist.WaitlistUser(
+                                    Integer.parseInt((String) o), 0));
                         } catch (NumberFormatException ignored) {
                         }
                     }
                 }
                 data.put("waitList", coerced);
             }
-            Object sel = data.get("selected");
-            if (sel instanceof java.util.List) {
-                java.util.ArrayList<Integer> coerced = new java.util.ArrayList<>();
-                for (Object o : (java.util.List<?>) sel) {
-                    if (o instanceof Number)
-                        coerced.add(((Number) o).intValue());
-                    else if (o instanceof String) {
-                        try {
-                            coerced.add(Integer.parseInt((String) o));
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                }
-                data.put("selected", coerced);
-            }
+
+            // Remove selected field handling as it's deprecated
+            data.remove("selected");
 
             WaitingList wlObj = new WaitingList();
             wlObj.setAutoUpdateDatabase(false);
             setIfPresent(wlObj, data, "eventId");
             setIfPresent(wlObj, data, "status");
             setIfPresent(wlObj, data, "waitList");
-            setIfPresent(wlObj, data, "selected");
             setIfPresent(wlObj, data, "maxWaitlistSize");
             return wlObj;
         }

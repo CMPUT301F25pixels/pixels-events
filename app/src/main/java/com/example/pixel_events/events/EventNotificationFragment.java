@@ -23,6 +23,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * EventNotificationFragment
+ *
+ * Fragment for organizers to manage notification preferences for a specific event.
+ * Allows enabling/disabling notification types for event participants.
+ * Currently used for event-specific notification settings.
+ *
+ * Implements:
+ * - Event-level notification management
+ *
+ * Collaborators:
+ * - Profile: User notification preferences
+ * - DatabaseHandler: Preference persistence
+ */
 public class EventNotificationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

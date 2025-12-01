@@ -25,6 +25,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * NotificationPreferencesFragment
+ *
+ * Fragment for users to manage notification opt-in/opt-out preferences.
+ * Allows toggling notifications for: all messages, lottery wins, lottery losses.
+ * Preferences are checked before sending notifications.
+ *
+ * Implements:
+ * - US 01.04.03 (Opt out of receiving notifications)
+ *
+ * Collaborators:
+ * - Profile: Stores notification preferences
+ * - DatabaseHandler: Preference persistence
+ * - Notification: Respects preferences when sending
+ */
 public class NotificationPreferencesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

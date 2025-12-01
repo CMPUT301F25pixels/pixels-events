@@ -4,9 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/dark_bg"
-    android:paddingLeft="32dp"
-    android:paddingRight="32dp">
+    android:background="@drawable/bg_gradient"
+    android:padding="32dp">
 
     <ScrollView
         android:layout_width="0dp"
@@ -57,7 +56,6 @@
                 android:id="@+id/profileUsernameText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
                 android:fontFamily="@font/poppins_bold"
                 android:text="Username"
                 android:textAlignment="center"
@@ -67,9 +65,9 @@
             <Button
                 android:id="@+id/profileEditButton"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="25dp"
                 android:layout_gravity="end"
-                android:layout_marginBottom="16dp"
+                android:padding="0dp"
                 android:backgroundTint="@android:color/transparent"
                 android:fontFamily="@font/poppins_bold"
                 android:text="Edit"
@@ -82,100 +80,174 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/profileGenderText"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="Gender"
                     android:hint="Gender"
-                    android:textColor="@color/white" />
+                    android:padding="0dp"
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
 
-                <TextView
-                    android:id="@+id/profileEmailText"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileGenderText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="Email"
+                    android:layout_marginTop="16dp"
+                    android:padding="0dp"
                     android:hint="Email"
-                    android:textColor="@color/white" />
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
 
-                <TextView
-                    android:id="@+id/profilePhoneText"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileEmailText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="Phone Number"
+                    android:layout_marginTop="16dp"
+                    android:padding="0dp"
                     android:hint="Phone Number"
-                    android:textColor="@color/white" />
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
 
-                <TextView
-                    android:id="@+id/profilePostalText"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profilePhoneText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="Postal Code"
+                    android:layout_marginTop="16dp"
+                    android:padding="0dp"
                     android:hint="Postal Code"
-                    android:textColor="@color/white" />
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
 
-                <TextView
-                    android:id="@+id/profileProvinceText"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profilePostalText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="Province"
+                    android:layout_marginTop="16dp"
+                    android:padding="0dp"
                     android:hint="Province"
-                    android:textColor="@color/white" />
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
 
-                <TextView
-                    android:id="@+id/profileCityText"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileProvinceText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="24dp"
-                    android:background="@drawable/view_rounded_text"
-                    android:fontFamily="@font/poppins"
-                    android:gravity="center_vertical"
-                    android:padding="16dp"
-                    android:text="City"
+                    android:layout_marginTop="16dp"
+                    android:padding="0dp"
                     android:hint="City"
-                    android:textColor="@color/white" />
+                    android:textColorHint="#FFEE58"
+                    app:boxBackgroundColor="#3F3679F7"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
+                    app:hintEnabled="true"
+                    app:hintTextColor="@color/text_secondary"
+                    app:placeholderTextColor="@color/text_secondary">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileCityText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
             </LinearLayout>
-
-
-
         </LinearLayout>
 
     </ScrollView>

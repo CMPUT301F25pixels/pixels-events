@@ -4,7 +4,7 @@
     android:id="@+id/fragment_signup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_bg"
+    android:background="@drawable/bg_gradient"
     android:padding="32dp">
 
     <ScrollView
@@ -58,19 +58,6 @@
                 android:textColor="@color/white"
                 android:textColorHint="@color/text_secondary" />
 
-            <EditText
-                android:id="@+id/signup_user_password"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/view_rounded_text"
-                android:fontFamily="@font/poppins"
-                android:hint="Password *"
-                android:inputType="textPassword"
-                android:padding="16dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary" />
-
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/signup_user_role"
                 android:layout_width="match_parent"
@@ -98,6 +85,18 @@
                     android:layout_weight="1"
                     android:fontFamily="@font/poppins_bold"
                     android:text="Organizer"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/toggle_button_bg_tint_blue" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signup_user_admin"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Admin"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold"

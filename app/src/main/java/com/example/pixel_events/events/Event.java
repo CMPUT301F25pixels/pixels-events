@@ -6,17 +6,42 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.qrcode.QRCode;
 import com.example.pixel_events.utils.Validator;
+import com.google.firebase.firestore.Exclude;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Event
+ *
+ * Model class representing a community event in the lottery-based registration system.
+ * Stores all event details including dates, capacity, registration periods, and organizer information.
+ * Automatically generates QR codes for promotional use and integrates with the waiting list system.
+ *
+ * Implements:
+ * - US 02.01.01 (Create event and generate QR code)
+ * - US 02.01.04 (Set registration period)
+ * - US 02.04.01 (Upload event poster)
+ * - US 02.04.02 (Update event poster)
+ * - US 01.06.01 (View event details via QR scan)
+ * - US 01.06.02 (Sign up from event details)
+ *
+ * Collaborators:
+ * - WaitingList: Manages entrants and lottery draws
+ * - QRCode: Generates promotional codes
+ * - DatabaseHandler: Persists event data
+ * - Organizer (via fragments): Creates and manages events
+ */
 public class Event {
     private int eventId;
     private String title;
     private String imageUrl;
     private String location;
-    private String capacity;
+    private int capacity;
     private String description;
     private int organizerId;
     private String qrCode;
@@ -28,6 +53,7 @@ public class Event {
     private String eventEndTime;
     private String fee;
     private WaitingList waitingList;
+    private Boolean geoLocation;
     private ArrayList<String> tags;
     private boolean autoUpdateDatabase = true;
 
@@ -39,7 +65,7 @@ public class Event {
         String title,
         String imageUrl,
         String location,
-        String capacity,
+        Integer capacity,
         String description,
         String fee,
         String eventStartDate,
@@ -48,13 +74,13 @@ public class Event {
         String eventEndTime,
         String registrationStartDate,
         String registrationEndDate,
-        ArrayList<String> tags
+        ArrayList<String> tags,
+        Boolean geoLocation
     )
     {
         // Validate required fields
         Validator.validateNotEmpty(title, "Title");
         Validator.validateNotEmpty(location, "Location");
-        Validator.validateNotEmpty(capacity, "Capacity");
         Validator.validateNotEmpty(description, "Description");
         Validator.validateNotEmpty(eventStartDate, "Event Start Date");
         Validator.validateNotEmpty(eventEndDate, "Event End Date");
@@ -70,6 +96,9 @@ public class Event {
         if (organizerId <= 0) {
             throw new IllegalArgumentException("Organizer ID must be positive");
         }
+        if (capacity <= 0){
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
 
         this.eventId = eventId;
         this.organizerId = organizerId;
@@ -79,6 +108,7 @@ public class Event {
         this.capacity = capacity;
         this.description = description;
         this.tags = tags;
+        this.geoLocation = geoLocation;
 
         // Validate dates and times
         Validator.validateDateRelations(eventStartDate, eventEndDate,
@@ -104,7 +134,6 @@ public class Event {
         this.registrationEndDate = registrationEndDate;
         this.qrCode = QRCode.generateQRCodeBase64("Event-" + this.eventId + "-" + this.organizerId);
         this.waitingList = new WaitingList(eventId);
-        saveToDatabase();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) { this.autoUpdateDatabase = autoUpdate; }
@@ -157,11 +186,19 @@ public class Event {
     public String getLocation() {
         return location;
     }
-    public String getCapacity() {
-        return capacity;
-    }
+    public int getCapacity() { return capacity; }
     public String getDescription() {
         return description;
+    }
+
+    @Exclude
+    public String getFullDescription(){
+        String desc = description;
+        desc += "\n\nThe event starts on " + eventStartDate + " and ends on " + eventEndDate + " from " + eventStartTime + " onwards to " + eventEndTime + ".";
+        desc += "\n\nThe registration date starts from " + registrationStartDate + " to " + registrationEndDate + ".";
+        desc += "\n\nThe event has a capacity of " + capacity + " people.";
+        desc += "\n\nRegister now to increase your chances of joining the event.";
+        return desc;
     }
     public int getOrganizerId() {
         return organizerId;
@@ -194,6 +231,43 @@ public class Event {
         return tags;
     }
 
+    public Boolean getGeoLocation() {
+        return geoLocation;
+    }
+
+    @Exclude
+    public String getDateString() {
+        try {
+            // Input formats
+            SimpleDateFormat dateInput = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat timeInput = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+            // Output formats
+            SimpleDateFormat dateOutput = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
+            SimpleDateFormat timeOutput = new SimpleDateFormat("h:mm a", Locale.getDefault());
+
+            // Parse
+            Date startDateParsed = dateInput.parse(eventStartDate);
+            Date endDateParsed = dateInput.parse(eventEndDate);
+
+            Date startTimeParsed = timeInput.parse(eventStartTime);
+            Date endTimeParsed = timeInput.parse(eventEndTime);
+
+            // Convert
+            String dateStr = dateOutput.format(startDateParsed);
+            String startTimeStr = timeOutput.format(startTimeParsed);
+            String endTimeStr = timeOutput.format(endTimeParsed);
+
+            return dateStr + ", " + startTimeStr + " - " + endTimeStr;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // fallback original format
+            return eventStartDate + " " + eventStartTime + " - " + eventEndTime;
+        }
+    }
+
+
     // Setters / Modify event
     public void setEventId(int eventId)
     {
@@ -224,9 +298,11 @@ public class Event {
         updateDatabase("location", location);
     }
 
-    public void setCapacity(String capacity)
+    public void setCapacity(Integer capacity)
     {
-        Validator.validateNotEmpty(capacity, "Capacity");
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive");
+        }
         this.capacity = capacity;
         updateDatabase("capacity", capacity);
     }
@@ -262,7 +338,13 @@ public class Event {
     }
 
     public void setRegistrationStartDate(String registrationStartDate) {
+        Validator.validateNotEmpty(registrationStartDate, "Registration Start Date");
+        Validator.validateDateRelations(this.eventStartDate, this.eventEndDate,
+            registrationStartDate, this.registrationEndDate,
+            this.eventStartTime, this.eventEndTime);
 
+        this.registrationStartDate = registrationStartDate;
+        updateDatabase("registrationStartDate", registrationStartDate);
     }
 
     public void setRegistrationEndDate(String registrationEndDate)
@@ -275,8 +357,9 @@ public class Event {
         this.registrationEndDate = registrationEndDate;
         updateDatabase("registrationEndDate", registrationEndDate);
     }
-
-    public String getDateString() {
-        return this.eventStartDate + " - " + this.eventEndDate + " from  " + this.eventStartTime + " to " + this.eventEndTime;
+    public Boolean setGeoLocation(Boolean geoLocation) {
+        this.geoLocation = geoLocation;
+        updateDatabase("geoLocation", geoLocation);
+        return geoLocation;
     }
 }

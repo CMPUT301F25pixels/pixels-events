@@ -81,8 +81,8 @@ public class FirebaseConnectivityTest {
 
         Log.d(TAG, "Creating test event with ID: " + testEventId);
         Event testEvent = new Event(testEventId, 1, testTitle, "", "Test Location",
-                "100", "Test Description", "Free", "2026-01-08", "2026-01-10",
-                "10:00", "18:00", "2026-01-01", "2026-01-06", tags);
+                100, "Test Description", "Free", "2026-01-08", "2026-01-10",
+                "10:00", "18:00", "2026-01-01", "2026-01-06", tags, Boolean.FALSE);
 
         // Create event
         db.addEvent(testEvent);

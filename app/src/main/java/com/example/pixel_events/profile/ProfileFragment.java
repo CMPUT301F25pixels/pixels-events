@@ -18,6 +18,25 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.MainActivity;
 
+/**
+ * ProfileFragment
+ *
+ * Main profile screen for users showing profile summary and navigation options.
+ * Provides access to profile editing, registration history, notification preferences, and account deletion.
+ * Displays username and role information.
+ *
+ * Implements:
+ * - US 01.02.02 (Access profile update)
+ * - US 01.02.03 (Access registration history)
+ * - US 01.02.04 (Delete profile)
+ * - US 01.04.03 (Access notification preferences)
+ *
+ * Collaborators:
+ * - Profile: Current user data
+ * - EditProfileFragment: Profile editing
+ * - RegistrationHistoryFragment: Event history
+ * - NotificationPreferencesFragment: Opt-out settings
+ */
 public class ProfileFragment extends Fragment {
     private Profile profile;
     private Button viewProfileButton, registrationHistoryButton, notificationPreferencesButton, logoutButton,
@@ -62,7 +81,7 @@ public class ProfileFragment extends Fragment {
         });
 
         logoutButton.setOnClickListener(v -> {
-            AuthManager.getInstance().signOut();
+            AuthManager.getInstance().signOut(requireContext());
             AuthManager.getInstance().setCurrentUserProfile(null);
             Intent intent = new Intent(requireContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -72,19 +91,30 @@ public class ProfileFragment extends Fragment {
 
         deleteAccountButton.setOnClickListener(v -> {
             DatabaseHandler.getInstance().deleteAcc(profile.getUserId());
-            AuthManager.getInstance().signOut();
+            AuthManager.getInstance().signOut(requireContext());
             AuthManager.getInstance().setCurrentUserProfile(null);
             Intent intent = new Intent(requireContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             requireActivity().finishAffinity();
         });
+
     }
 
     private void replaceFragment(Fragment fragment) {
+        int containerId;
+        if (requireActivity().findViewById(R.id.nav_host_fragment_activity_dashboard) != null) {
+            containerId = R.id.nav_host_fragment_activity_dashboard;
+        } else if (requireActivity().findViewById(R.id.nav_host_fragment_activity_admin) != null) {
+            containerId = R.id.nav_host_fragment_activity_admin;
+        } else {
+            // Fallback or error handling
+            containerId = android.R.id.content; // Last resort
+        }
+
         requireActivity().getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.nav_host_fragment_activity_dashboard, fragment)
+                .replace(containerId, fragment)
                 .addToBackStack(null)
                 .commit();
     }

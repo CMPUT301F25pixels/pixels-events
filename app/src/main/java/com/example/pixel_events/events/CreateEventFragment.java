@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -34,12 +35,34 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+/**
+ * CreateEventFragment
+ *
+ * Fragment for creating and editing events (organizer functionality).
+ * Provides forms for event details, dates, registration periods, and poster
+ * upload.
+ * Automatically generates QR codes upon event creation.
+ * Supports both create and edit modes.
+ *
+ * Implements:
+ * - US 02.01.01 (Create event and generate QR code)
+ * - US 02.01.04 (Set registration period)
+ * - US 02.04.01 (Upload event poster)
+ * - US 02.04.02 (Update event poster)
+ *
+ * Collaborators:
+ * - Event: Data model for event creation
+ * - DatabaseHandler: Persists event data
+ * - ImageConversion: Handles poster image encoding
+ * - QRCode: Generates promotional codes
+ */
 public class CreateEventFragment extends Fragment {
     private TextInputEditText startDate, endDate, startTime, endTime, regStartDate, regEndDate;
     private EditText titleField, locationField, capacityField, descriptionField, feeField;
     private Button doneButton, cancelButton, uploadButton;
     private ImageView imageView;
     private ChipGroup tagGroup;
+    private CompoundButton geoSwitch;
     private Uri filePath;
     private Bitmap bitmap;
     private ArrayList<String> selectedTags = new ArrayList<>();
@@ -85,6 +108,7 @@ public class CreateEventFragment extends Fragment {
         uploadButton = view.findViewById(R.id.eventFormUploadImage);
         imageView = view.findViewById(R.id.eventFormPosterImage);
         tagGroup = view.findViewById(R.id.eventFormTagGroup);
+        geoSwitch = view.findViewById(R.id.eventFormGeoLocation);
 
         // Register image picker
         imagePickerLauncher = registerForActivityResult(
@@ -175,7 +199,7 @@ public class CreateEventFragment extends Fragment {
     private void populateFormFields(Event event) {
         titleField.setText(event.getTitle());
         locationField.setText(event.getLocation());
-        capacityField.setText(event.getCapacity());
+        capacityField.setText(Integer.toString(event.getCapacity()));
         descriptionField.setText(event.getDescription());
         feeField.setText(event.getFee());
         startDate.setText(event.getEventStartDate());
@@ -206,6 +230,12 @@ public class CreateEventFragment extends Fragment {
                 }
             }
         }
+
+        // Set geo-location toggle state if present
+        if (geoSwitch != null) {
+            Boolean geo = event.getGeoLocation();
+            geoSwitch.setChecked(Boolean.TRUE.equals(geo));
+        }
     }
 
     private void saveEvent() {
@@ -232,7 +262,7 @@ public class CreateEventFragment extends Fragment {
 
         String imageURL = "";
         if (bitmap != null) {
-            imageURL = ImageConversion.bitmapToBase64(bitmap);
+            imageURL = ImageConversion.bitmapToCompressedBase64(bitmap);
         } else if (isEditMode && existingEvent != null && existingEvent.getImageUrl() != null) {
             imageURL = existingEvent.getImageUrl();
         }
@@ -249,13 +279,15 @@ public class CreateEventFragment extends Fragment {
                 organizerId = profile != null ? profile.getUserId() : 1;
             }
 
+            boolean geoEnabled = geoSwitch != null && geoSwitch.isChecked();
             Event event = new Event(eventId, organizerId, title, imageURL, location,
-                    capacity, description, fee, sDate, eDate, sTime, eTime, rStart, rEnd, selectedTags);
+                    Integer.parseInt(capacity), description, fee, sDate, eDate, sTime, eTime, rStart, rEnd,
+                    selectedTags, geoEnabled);
+
+            event.saveToDatabase();
 
             android.util.Log.d("CreateEventFrag",
                     (isEditMode ? "Updated" : "Created") + " event: ID=" + eventId + " Title=" + title);
-
-            event.saveToDatabase();
 
             android.util.Log.d("CreateEventFrag", "Event saved to database successfully");
 
@@ -263,12 +295,14 @@ public class CreateEventFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
 
             requireActivity().runOnUiThread(() -> {
-                androidx.fragment.app.FragmentManager fm = requireActivity().getSupportFragmentManager();
-                try {
-                    fm.popBackStackImmediate();
-                } catch (IllegalStateException ignored) {
-                }
+                if (!isAdded())
+                    return;
+                androidx.fragment.app.FragmentManager fm = getParentFragmentManager();
 
+                // Pop the CreateEventFragment to go back to the previous screen
+                fm.popBackStack();
+
+                // Then navigate to the details fragment
                 androidx.fragment.app.Fragment detail = new EventDetailedFragment(eventId);
                 fm.beginTransaction()
                         .replace(R.id.nav_host_fragment_activity_dashboard, detail)

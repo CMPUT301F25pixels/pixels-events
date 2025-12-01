@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_bg"
+    android:background="@drawable/bg_gradient"
     android:padding="32dp">
 
     <TextView
@@ -38,20 +37,84 @@
         android:layout_marginTop="16dp" />
 
     <EditText
-        android:id="@+id/login_user_password"
+        android:id="@+id/login_user_code"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:hint="Password"
+        android:hint="Secret Code (Optional)"
         android:textColorHint="@color/text_secondary"
         android:textColor="@color/white"
         android:background="@drawable/view_rounded_text"
         android:padding="16dp"
-        android:inputType="textPassword"
+        android:inputType="text"
         android:fontFamily="@font/poppins"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/login_user_email"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/text_login_role"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Role"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:fontFamily="@font/poppins"
+        app:layout_constraintTop_toBottomOf="@id/login_user_code"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/login_user_role"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:checkedButton="@id/login_role_entrant"
+        app:layout_constraintTop_toBottomOf="@id/text_login_role"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/login_role_entrant"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:padding="1dp"
+            app:backgroundTint="@color/chip_background_color"
+            android:text="Entrant"
+            android:hint="user"
+            android:textColor="@color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/login_role_organizer"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:padding="1dp"
+            android:layout_weight="1"
+            app:backgroundTint="@color/chip_background_color"
+            android:text="Organizer"
+            android:hint="user"
+            android:textColor="@color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/login_role_admin"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:padding="1dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            app:backgroundTint="@color/chip_background_color"
+            android:text="Admin"
+            android:hint="user"
+            android:textColor="@color/white"/>
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
 
     <Button
         android:id="@+id/login_user_save"
@@ -63,7 +126,7 @@
         android:textStyle="bold"
         android:backgroundTint="@color/accent_blue"
         android:fontFamily="@font/poppins_bold"
-        app:layout_constraintTop_toBottomOf="@id/login_user_password"
+        app:layout_constraintTop_toBottomOf="@id/login_user_role"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp" />

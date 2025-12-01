@@ -23,6 +23,22 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * EditProfileFragment
+ *
+ * Fragment for editing user profile information.
+ * Allows updates to name, email, phone, gender, and geolocation data.
+ * Validates input and persists changes to Firestore.
+ *
+ * Implements:
+ * - US 01.02.02 (Update profile information)
+ * - US 02.02.02 (Store geolocation data)
+ *
+ * Collaborators:
+ * - Profile: User data model
+ * - DatabaseHandler: Profile updates
+ * - Validator: Input validation
+ */
 public class EditProfileFragment extends Fragment {
     private ImageButton backButton;
     private EditText nameInput, phoneInput, emailInput;
@@ -146,7 +162,7 @@ public class EditProfileFragment extends Fragment {
         }
         if (!email.isEmpty() && !email.equals(profile.getEmail())) {
             updates.put("email", email);
-            AuthManager.getInstance().setCurrentUserEmail(email);
+            AuthManager.getInstance().setCurrentEmail(email);
         }
 
         if (!newPhone.isEmpty() && !newPhone.equals(profile.getPhoneNum())) {

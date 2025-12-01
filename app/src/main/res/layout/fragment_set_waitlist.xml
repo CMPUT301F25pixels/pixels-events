@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_gradient"
+    tools:context=".events.SetWaitlistFragment">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="12dp"
+        android:labelFor="@+id/inputWaitlistSize">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputWaitlistSize"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/view_rounded_text"
+            android:fontFamily="@font/poppins"
+            android:hint="Set Waitlist Size (Default: 1000000)"
+            android:inputType="number"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_secondary" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/inputWaitlistButtonDone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/accent_blue"
+        android:fontFamily="@font/poppins_bold" />
+
+</LinearLayout>

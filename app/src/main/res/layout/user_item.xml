@@ -9,9 +9,8 @@
     android:layout_marginBottom="12dp"
     android:elevation="3dp">
 
-
     <ImageView
-        android:id="@+id/eventImage"
+        android:id="@+id/item_profile_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginStart="8dp"
@@ -27,7 +26,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/eventTitle"
+            android:id="@+id/item_profile_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="John Doe"
@@ -36,7 +35,7 @@
             android:textSize="24sp"/>
 
             <TextView
-                android:id="@+id/eventTime"
+                android:id="@+id/item_profile_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Email Address"
@@ -44,4 +43,28 @@
                 android:textSize="14sp" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/item_profile_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paid"
+        android:layout_gravity="center"
+        android:layout_marginEnd="8dp"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:textStyle="bold"/>
+
+    <ImageButton
+        android:id="@+id/item_profile_delete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:background="@android:color/transparent"
+        android:contentDescription="Delete profile"
+        android:src="@android:drawable/ic_menu_delete"
+        android:visibility="visible"
+        app:tint="@color/red" />
+
 </LinearLayout>

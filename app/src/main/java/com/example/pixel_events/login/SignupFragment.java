@@ -21,20 +21,31 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.databinding.FragmentSignupBinding;
 import com.example.pixel_events.profile.Profile;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
- * Fragment for user signup
+ * SignupFragment
+ *
+ * Fragment for new user registration.
+ * Collects user information and creates profile with device-based authentication.
+ * Allows role selection (entrant/organizer) and validates input data.
+ *
+ * Implements:
+ * - US 01.02.01 (Provide personal information)
+ * - US 01.07.01 (Device-based identification)
+ *
+ * Collaborators:
+ * - Profile: Creates new user profile
+ * - AuthManager: Firebase user creation
+ * - DatabaseHandler: Profile persistence
+ * - Validator: Input validation
  */
 public class SignupFragment extends Fragment {
     private static final String TAG = "SignupFragment";
     private FragmentSignupBinding binding;
-    private FirebaseAuth auth;
 
     public SignupFragment() {
         // Required empty public constructor
@@ -43,7 +54,6 @@ public class SignupFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        auth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -59,7 +69,6 @@ public class SignupFragment extends Fragment {
 
         final EditText nameEditText = binding.signupUserName;
         final EditText emailEditText = binding.signupUserEmail;
-        final EditText passwordEditText = binding.signupUserPassword;
         final MaterialButtonToggleGroup roleToggle = binding.signupUserRole;
         final MaterialButtonToggleGroup genderToggle = binding.signupUserGender;
         final EditText phoneEditText = binding.signupUserPhone;
@@ -75,7 +84,6 @@ public class SignupFragment extends Fragment {
         signupButton.setOnClickListener(v -> {
             String name = nameEditText.getText().toString().trim();
             String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
 
             int selectedRoleId = roleToggle.getCheckedButtonId();
             int selectedGenderId = genderToggle.getCheckedButtonId();
@@ -92,34 +100,43 @@ public class SignupFragment extends Fragment {
                 return;
             }
 
-            if (TextUtils.isEmpty(password) || password.length() < 6) {
-                passwordEditText.setError("Password must be at least 6 characters");
-                return;
-            }
-
             if (selectedRoleId == View.NO_ID) {
                 Toast.makeText(getContext(), "Please select a role", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            String role;
+            if (selectedRoleId == R.id.signup_user_organizer) {
+                role = "org";
+            } else if (selectedRoleId == R.id.signup_user_admin) {
+                role = "admin";
+            } else {
+                role = "user";
+            }
 
             if (postalCodeEditText.getText().toString().trim().isEmpty()) {
                 postalCodeEditText.setError("Postal code is required");
                 return;
             }
 
-            String role = selectedRoleId == R.id.signup_user_entrant ? "user" : "org";
             String gender = getSelectedGender(selectedGenderId);
             String postalcode = postalCodeEditText.getText().toString().trim();
             String province = provinceEditText.getText().toString().trim();
             String city = cityEditText.getText().toString().trim();
 
-            // Create user account
-            createAccount(name, email, password, role, gender, phoneNumber, postalcode, province, city);
-
-            if (getActivity() != null) {
-                getActivity().getSupportFragmentManager().popBackStack();
-            }
+            // Check if the email already exists in the database
+            DatabaseHandler.getInstance().getProfileByEmail(email, profile -> {
+                if (profile == null) {
+                    Log.d(TAG, "Email doesn't exist, creating account.");
+                    createAccount(name, email, role, gender, phoneNumber, postalcode, province, city);
+                } else {
+                    Log.d(TAG, "Email already exists.");
+                    emailEditText.setError("Email already exists");
+                }
+            }, e -> {
+                Log.e(TAG, "Error checking email existence", e);
+                Toast.makeText(getContext(), "Error checking email: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
         });
 
         // Navigate to login
@@ -148,74 +165,35 @@ public class SignupFragment extends Fragment {
         return "other";
     }
 
-    private void createAccount(String name, String email, String password, String role, String gender, String phone
-    , String postalcode, String province, String city) {
+    private void createAccount(String name, String email, String role, String gender, String phone, String postalcode,
+            String province, String city) {
         // Show loading state
-        binding.signupUserSave.setEnabled(false);
+        if (binding != null)
+            binding.signupUserSave.setEnabled(false);
 
-        // Create Firebase Authentication account
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = auth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            String uid = firebaseUser.getUid();
+        // Generate a userId from a UUID-derived positive value, ensure > 100000
+        long uuidBits = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+        int userId = (int) (uuidBits % (Integer.MAX_VALUE - 100000)) + 100001;
 
-                            // Create Profile and save to database
-                            createUserProfile(uid, name, email, role, gender, phone, postalcode, province, city);
-                        }
-                    } else {
-                        binding.signupUserSave.setEnabled(true);
-                        Log.e(TAG, "Signup failed", task.getException());
-                        Toast.makeText(getContext(),
-                                "Signup failed: " + task.getException().getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
-
-    private void createUserProfile(String uid, String name, String email, String role, String gender, String phone,
-            String postalcode, String province, String city) {
-        // Create notification preferences (all enabled by default)
         List<Boolean> notify = new ArrayList<>();
-        notify.add(true); // All notifications
-        notify.add(true); // Win notifications
-        notify.add(true); // Lose notifications
+        notify.add(true);
+        notify.add(true);
+        notify.add(true);
 
-        try {
-            int userId = uid.hashCode();
+        Profile newProfile = new Profile(userId, role, name, gender, email, phone, postalcode, province, city, notify);
 
-            Profile profile = new Profile(
-                    userId,
-                    role,
-                    name,
-                    gender,
-                    email,
-                    phone,
-                    postalcode != null ? postalcode : "",
-                    province != null ? province : "",
-                    city != null ? city : "",
-                    notify);
-
-            profile.saveToDatabase();
-
-        } catch (Exception e) {
-            binding.signupUserSave.setEnabled(true);
-            Log.e(TAG, "Error creating profile", e);
-            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-
-            // Delete the auth user if profile creation fails
-            FirebaseUser user = auth.getCurrentUser();
-            if (user != null) {
-                user.delete().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "Auth user deleted successfully after profile creation failure.");
-                    } else {
-                        Log.e(TAG, "Failed to delete auth user after profile creation failure.", task.getException());
-                    }
-                });
+        AuthManager.getInstance().signup(requireContext(), newProfile, () -> {
+            Log.d(TAG, "Signup successful");
+            Toast.makeText(getContext(), "Account created successfully", Toast.LENGTH_SHORT).show();
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
             }
-        }
+        }, e -> {
+            Log.e(TAG, "Signup failed", e);
+            Toast.makeText(getContext(), "Signup failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (binding != null)
+                binding.signupUserSave.setEnabled(true);
+        });
     }
 
     @Override

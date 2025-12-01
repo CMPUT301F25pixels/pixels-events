@@ -3,9 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_bg"
-    android:paddingLeft="32dp"
-    android:paddingRight="32dp"
+    android:background="@drawable/bg_gradient"
+    android:padding="32dp"
     android:fillViewport="true">
 
     <LinearLayout
@@ -13,6 +12,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Create Event"
+            android:textColor="@color/white"
+            android:layout_gravity="left"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
 
         <!-- Event Image -->
         <com.google.android.material.imageview.ShapeableImageView
@@ -44,7 +54,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/view_rounded_text"
             android:fontFamily="@font/poppins"
-            android:hint="Event Title"
+            android:hint="Event Title*"
             android:inputType="text"
             android:paddingLeft="16dp"
             android:textColor="@color/white"
@@ -58,7 +68,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/view_rounded_text"
             android:fontFamily="@font/poppins"
-            android:hint="Location"
+            android:hint="Location*"
             android:inputType="text"
             android:paddingLeft="16dp"
             android:textColor="@color/white"
@@ -78,7 +88,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Reg. Start Date"
+                android:hint="Reg. Start Date*"
                 android:inputType="none"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"
@@ -95,7 +105,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Reg. End Date"
+                android:hint="Reg. End Date*"
                 android:inputType="none"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"
@@ -129,9 +139,9 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event Start Date"
+                android:hint="Event Start Date*"
                 android:inputType="none"
-                android:paddingLeft="16dp"
+                android:paddingLeft="10dp"
                 android:textColor="@color/white"
                 android:textColorHint="@color/text_secondary" />
 
@@ -146,7 +156,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event End Date"
+                android:hint="Event End Date*"
                 android:inputType="none"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"
@@ -168,9 +178,9 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event Start Time"
+                android:hint="Event Start Time*"
                 android:inputType="none"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:textColor="@color/white"
                 android:textColorHint="@color/text_secondary" />
 
@@ -185,7 +195,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event End Time"
+                android:hint="Event End Time*"
                 android:inputType="none"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"
@@ -201,7 +211,7 @@
             android:layout_marginTop="12dp"
             android:background="@drawable/view_rounded_text"
             android:fontFamily="@font/poppins"
-            android:hint="Event Description"
+            android:hint="Event Description*"
             android:inputType="textMultiLine"
             android:minLines="3"
             android:paddingLeft="16dp"
@@ -223,7 +233,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event Fee"
+                android:hint="Event Fee (FREE)"
                 android:inputType="numberDecimal"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"
@@ -240,7 +250,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/view_rounded_text"
                 android:fontFamily="@font/poppins"
-                android:hint="Event Capacity"
+                android:hint="Event Capacity*"
                 android:inputType="number"
                 android:paddingLeft="16dp"
                 android:textColor="@color/white"

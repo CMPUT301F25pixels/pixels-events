@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="32dp"
-    android:paddingRight="32dp"
-    android:background="@color/dark_bg">
+    android:padding="32dp"
+    android:background="@drawable/bg_gradient">
 
     <ScrollView
         android:layout_width="0dp"
@@ -50,7 +49,7 @@
                 android:id="@+id/event_fragment_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="48dp"
+                android:layout_marginBottom="24dp"
                 android:fontFamily="@font/poppins_bold"
                 android:text="Title"
                 android:textColor="@color/white"
@@ -68,13 +67,35 @@
                 android:textSize="16sp" />
 
             <Button
-                android:id="@+id/event_fragment_notificationspreferences"
+                android:id="@+id/event_fragment_edit_page"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="@color/card_bg"
                 android:fontFamily="@font/poppins"
-                android:text="Notification Preferences"
+                android:text="Edit Event page"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/event_fragment_set_registration"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Set Registration Period"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/event_fragment_SetWaitlistSize"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Set Max Waitlist Size"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 
@@ -86,6 +107,53 @@
                 android:backgroundTint="@color/card_bg"
                 android:fontFamily="@font/poppins"
                 android:text="View waitlist"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/event_fragment_final_participants"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Final Participants"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/event_fragment_cancelled_participants"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Cancelled Participants"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                android:textSize="16sp" />
+
+
+            <Button
+                android:id="@+id/event_fragment_draw_lottery"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Draw Lottery"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/event_fragment_notificationspreferences"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/card_bg"
+                android:fontFamily="@font/poppins"
+                android:text="Notification Preferences"
                 android:textColor="@color/white"
                 android:textSize="16sp" />
 

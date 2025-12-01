@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dashboard"
-    android:background="@color/dark_bg"
+    android:background="@drawable/bg_gradient"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
@@ -50,7 +50,7 @@
                     android:text="Adventure"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_cultural"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -59,7 +59,7 @@
                     android:text="Cultural"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_religious"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -68,7 +68,7 @@
                     android:text="Religious"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_educational"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -77,7 +77,7 @@
                     android:text="Educational"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_workshop"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -86,7 +86,7 @@
                     android:text="Workshop"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_networking"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
@@ -95,7 +95,7 @@
                     android:text="Networking"
                     app:checkedIconVisible="false"
                     android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/chip_background_color"/>
+                    app:chipBackgroundColor="@color/toggle_button_bg_tint_blue"/>
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
