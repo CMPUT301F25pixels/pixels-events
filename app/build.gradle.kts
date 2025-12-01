@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.google.android.material:material:1.12.0")
 
     // --- Firebase (Bill of Materials) ---
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
@@ -60,6 +61,9 @@ dependencies {
 
     // --- Imaging ---
     implementation("com.github.bumptech.glide:glide:5.0.5")
+    implementation(libs.legacy.support.v4)
+    implementation(libs.recyclerview)
+    implementation(libs.espresso.intents)
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 
     // --- QR / ZXing ---
@@ -81,6 +85,7 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5") // Even if libs.ext.junit present, explicit for alignment
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
 
     // Fragment testing (debug only) - keep
     debugImplementation("androidx.fragment:fragment-testing:1.7.1")

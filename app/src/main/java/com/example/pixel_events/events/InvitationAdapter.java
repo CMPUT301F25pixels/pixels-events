@@ -90,18 +90,8 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.In
             holder.eventImage.setImageResource(R.drawable.sample_image); // A default placeholder
         }
 
-        holder.acceptButton.setOnClickListener(v -> {
-            // Optimistically update UI: show toast and remove item
-            android.widget.Toast.makeText(v.getContext(), "Invitation accepted", android.widget.Toast.LENGTH_SHORT).show();
-            removeInvitationAt(holder.getAdapterPosition());
-            // Delegate DB update to listener
-            listener.onAccept(invitation);
-        });
-        holder.declineButton.setOnClickListener(v -> {
-            android.widget.Toast.makeText(v.getContext(), "Invitation declined", android.widget.Toast.LENGTH_SHORT).show();
-            removeInvitationAt(holder.getAdapterPosition());
-            listener.onDecline(invitation);
-        });
+        holder.acceptButton.setOnClickListener(v -> listener.onAccept(invitation));
+        holder.declineButton.setOnClickListener(v -> listener.onDecline(invitation));
     }
 
     @Override

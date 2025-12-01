@@ -245,8 +245,8 @@ public class DatabaseHandler {
         checkNotificationPreferences(userId, prefs -> {
             if (prefs == null || prefs.isEmpty() || prefs.size() < 1 || prefs.get(0)) {
                 Notification n = new Notification("Event Invitation",
-                        "You have been invited to sign up for " + eventTitle,
-                        "INVITE", eventId, userId);
+                    "You have been invited to sign up for " + eventTitle,
+                    "INVITE", eventId, userId);
                 addNotification(userId, n);
             }
         });
@@ -267,8 +267,8 @@ public class DatabaseHandler {
         checkNotificationPreferences(userId, prefs -> {
             if (prefs == null || prefs.isEmpty() || prefs.size() < 3 || prefs.get(2)) {
                 Notification n = new Notification("Lottery Result",
-                        "Unfortunately you were not selected for " + eventTitle + ".",
-                        "LOTTERY_LOSS", eventId, userId);
+                    "Unfortunately you were not selected for " + eventTitle + ".",
+                    "LOTTERY_LOSS", eventId, userId);
                 addNotification(userId, n);
             }
         });
@@ -293,12 +293,12 @@ public class DatabaseHandler {
             if (waitList != null && waitList.getWaitList() != null) {
                 for (WaitlistUser user : waitList.getWaitList()) {
                     Notification n = new Notification(
-                            "Message from Organizer",
-                            message,
-                            "ORGANIZER_MESSAGE",
-                            eventId,
-                            user.getUserId(),
-                            senderId);
+                        "Message from Organizer",
+                        message,
+                        "ORGANIZER_MESSAGE",
+                        eventId,
+                        user.getUserId(),
+                        senderId);
                     addNotification(user.getUserId(), n);
                 }
             }
@@ -314,12 +314,13 @@ public class DatabaseHandler {
                 for (WaitlistUser user : waitList.getWaitList()) {
                     if (user.getStatus() == 1) { // Selected (won lottery)
                         Notification n = new Notification(
-                                "Message from Organizer",
-                                message,
-                                "ORGANIZER_MESSAGE",
-                                eventId,
-                                user.getUserId(),
-                                senderId);
+                            "Message from Organizer",
+                            message,
+                            "ORGANIZER_MESSAGE",
+                            eventId,
+                            user.getUserId(),
+                            senderId
+                        );
                         addNotification(user.getUserId(), n);
                     }
                 }
@@ -336,12 +337,13 @@ public class DatabaseHandler {
                 for (WaitlistUser user : waitList.getWaitList()) {
                     if (user.getStatus() == 3) { // Declined/cancelled
                         Notification n = new Notification(
-                                "Message from Organizer",
-                                message,
-                                "ORGANIZER_MESSAGE",
-                                eventId,
-                                user.getUserId(),
-                                senderId);
+                            "Message from Organizer",
+                            message,
+                            "ORGANIZER_MESSAGE",
+                            eventId,
+                            user.getUserId(),
+                            senderId
+                        );
                         addNotification(user.getUserId(), n);
                     }
                 }
@@ -444,11 +446,12 @@ public class DatabaseHandler {
     public void deleteAcc(int userID) {
         // 1. Notify User
         Notification notice = new Notification(
-                "Profile Deleted",
-                "Your profile has been deleted by the Admin.",
-                "ADMIN_DELETE",
-                -1,
-                userID);
+            "Profile Deleted",
+            "Your profile has been deleted by the Admin.",
+            "ADMIN_DELETE",
+            -1,
+            userID
+        );
         addNotification(userID, notice);
 
         accRef.document(String.valueOf(userID))
@@ -456,6 +459,7 @@ public class DatabaseHandler {
                 .addOnSuccessListener(unused -> Log.d("DB", "Deleted user: " + userID))
                 .addOnFailureListener(e -> Log.e("DB", "Error deleting user " + userID, e));
 
+        
         // Proceed to clean up related data
         eventRef.whereEqualTo("organizerId", userID).get()
                 .addOnSuccessListener(querySnapshot -> {
@@ -645,11 +649,12 @@ public class DatabaseHandler {
             if (event != null) {
                 int organizerId = event.getOrganizerId();
                 Notification organizerNotice = new Notification(
-                        "Event Deleted",
-                        "Your event '" + event.getTitle() + "' has been deleted by the Admin.",
-                        "ADMIN_DELETE",
-                        eventID,
-                        organizerId);
+                    "Event Deleted",
+                    "Your event '" + event.getTitle() + "' has been deleted by the Admin.",
+                    "ADMIN_DELETE",
+                    eventID,
+                    organizerId
+                );
                 addNotification(organizerId, organizerNotice);
             }
         }, e -> Log.e("DB", "Error fetching event for organizer notification", e));
@@ -661,11 +666,12 @@ public class DatabaseHandler {
                 if (waitList.getWaitList() != null) {
                     for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getWaitList()) {
                         Notification notice = new Notification(
-                                "Event Cancelled",
-                                "The event you interacted with has been cancelled by the Admin.",
-                                "ADMIN_DELETE",
-                                eventID,
-                                user.getUserId());
+                            "Event Cancelled",
+                            "The event you interacted with has been cancelled by the Admin.",
+                            "ADMIN_DELETE",
+                            eventID,
+                            user.getUserId()
+                        );
                         addNotification(user.getUserId(), notice);
                     }
                 }
@@ -673,16 +679,17 @@ public class DatabaseHandler {
                 if (waitList.getSelected() != null) {
                     for (com.example.pixel_events.waitinglist.WaitlistUser user : waitList.getSelected()) {
                         Notification notice = new Notification(
-                                "Event Cancelled",
-                                "The event you interacted with has been cancelled by the Admin.",
-                                "ADMIN_DELETE",
-                                eventID,
-                                user.getUserId());
+                            "Event Cancelled",
+                            "The event you interacted with has been cancelled by the Admin.",
+                            "ADMIN_DELETE",
+                            eventID,
+                            user.getUserId()
+                        );
                         addNotification(user.getUserId(), notice);
                     }
                 }
             }
-
+            
             // 2. Delete event and waitlist after notifying
             eventRef.document(String.valueOf(eventID))
                     .delete()
@@ -692,7 +699,7 @@ public class DatabaseHandler {
                     .delete()
                     .addOnSuccessListener(unused -> Log.d("DB", "Deleted Waitlist for event: " + eventID))
                     .addOnFailureListener(e -> Log.e("DB", "Error deleting event " + eventID, e));
-
+            
         }, e -> Log.e("DB", "Error fetching waitlist for delete notification", e));
     }
 
