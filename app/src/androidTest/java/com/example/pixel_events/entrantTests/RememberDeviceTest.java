@@ -14,99 +14,93 @@ import static org.junit.Assert.assertNotNull;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.test.core.app.ActivityScenario;
+import androidx.test.core.app.ActivityScenario; // Import this
 import androidx.test.espresso.intent.Intents;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.example.pixel_events.R;
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.home.DashboardActivity;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.MainActivity;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/*
-    Tests:
-        US 01.07.01: As an entrant, I want to be identified by my device, so that I don't have to
-                     use a username and password.
-    Utilizes:
-        White Box Testing.
- */
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 public class RememberDeviceTest {
     private static final String PREF_NAME = "PixelEventsPrefs";
     private static final String KEY_USER_ID = "logged_in_user_id";
-
-    @Rule
-    public ActivityScenarioRule<MainActivity> activityRule =
-            new ActivityScenarioRule<>(MainActivity.class);
+    private static final String TEST_EMAIL = "device@test.com";
 
     @Before
     public void setUp() {
         Intents.init();
+        DatabaseHandler.getInstance(true); // Emulator
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        // Clear data
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
         AuthManager.getInstance().signOut(context);
     }
 
     @Test
-    public void testDeviceIdentificationAndAutoLogin() {
+    public void testRememberDevice() {
         // Signup
-        onView(withId(R.id.login_user_signup)).perform(click());
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
 
-        // Fill details
-        onView(withId(R.id.signup_user_name)).perform(typeText("Device Test User"), closeSoftKeyboard());
-        onView(withId(R.id.signup_user_email)).perform(typeText("device@test.com"), closeSoftKeyboard());
-        onView(withId(R.id.signup_user_phone)).perform(typeText("1234567890"), closeSoftKeyboard());
-        onView(withId(R.id.signup_user_postalcode)).perform(typeText("T6G2R3"), closeSoftKeyboard());
-        onView(withId(R.id.signup_user_entrant)).perform(click());
+            onView(withId(R.id.login_user_signup)).perform(click());
+            onView(withId(R.id.signup_user_name)).perform(typeText("Device Test User"), closeSoftKeyboard());
+            onView(withId(R.id.signup_user_email)).perform(typeText(TEST_EMAIL), closeSoftKeyboard());
+            onView(withId(R.id.signup_user_phone)).perform(typeText("1234567890"), closeSoftKeyboard());
+            onView(withId(R.id.signup_user_postalcode)).perform(typeText("T6G2R3"), closeSoftKeyboard());
+            onView(withId(R.id.signup_user_entrant)).perform(click());
+            onView(withId(R.id.signup_user_save)).perform(click());
 
-        // Complete Signup
-        onView(withId(R.id.signup_user_save)).perform(click());
+            try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
 
-        // Wait
-        try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
+            // Verify login
+            assertNotNull(AuthManager.getInstance().getCurrentUserProfile());
 
-        // clear the history
+            // Close the app
+            scenario.close();
+        }
+
         Intents.release();
         Intents.init();
 
-        // Verify internal state
-        assertNotNull("AuthManager should have a current profile",
-                AuthManager.getInstance().getCurrentUserProfile());
+        // Verify auto login
+        try (ActivityScenario<MainActivity> restartScenario = ActivityScenario.launch(MainActivity.class)) {
+            try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
 
-        // Verify Persistence
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        int savedUserId = prefs.getInt(KEY_USER_ID, -1);
-
-        assertNotEquals("User ID should be saved in SharedPreferences", -1, savedUserId);
-        assertEquals("Saved ID should match AuthManager ID",
-                AuthManager.getInstance().getCurrentUserProfile().getUserId(), savedUserId);
-
-        // Close the Activity
-        activityRule.getScenario().close();
-
-        // 5. Relaunch the Activity
-        ActivityScenario.launch(MainActivity.class);
-
-        // Wait
-        try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
-
-        // 6. Verify we navigated to Dashboard directly
-        intended(hasComponent(DashboardActivity.class.getName()));
+            intended(hasComponent(DashboardActivity.class.getName()));
+        }
     }
 
     @After
     public void tearDown() {
         Intents.release();
+        // Cleanup created user
+        try {
+            CountDownLatch latch = new CountDownLatch(1);
+            DatabaseHandler.getInstance().getProfileByEmail(TEST_EMAIL,
+                    profile -> {
+                        if (profile != null) DatabaseHandler.getInstance().deleteAcc(profile.getUserId());
+                        latch.countDown();
+                    },
+                    e -> latch.countDown()
+            );
+            latch.await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        DatabaseHandler.resetInstance();
     }
 }

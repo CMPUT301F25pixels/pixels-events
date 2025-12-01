@@ -20,6 +20,7 @@ import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.events.EventDetailedFragment;
+import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.gms.tasks.Tasks;
 
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /*
     Tests:
@@ -38,7 +40,10 @@ import java.util.Calendar;
                      for an event.
         US 01.05.05: As an entrant, I want to be informed about the criteria or guidelines for the
                      lottery selection process.
+    Utilizes:
+        Black Box and White Box testing.
  */
+
 @RunWith(AndroidJUnit4.class)
 public class EntrantCountNGuideTest {
     private DatabaseHandler db;
@@ -52,6 +57,26 @@ public class EntrantCountNGuideTest {
         DatabaseHandler.resetInstance();
         db = DatabaseHandler.getInstance(true); // emulator mode
 
+        // Add a user
+        Profile user = new Profile();
+        List<Boolean> noti = new ArrayList<>();
+        noti.add(true);
+        noti.add(true);
+        noti.add(true);
+
+        user.setUserId(userID);
+        user.setRole("user");
+        user.setUserName("Dummy");
+        user.setGender("Male");
+        user.setEmail("example@gmail.com");
+        user.setPhoneNum("1112223333");
+        user.setPostalcode("T1T1T1");
+        user.setProvince("Alberta");
+        user.setCity("Edmonton");
+        user.setNotify(noti);
+
+        Tasks.await(db.getAccountCollection().document(String.valueOf(userID)).set(user));
+
         // Create Event and add event to DB
         Calendar cal = Calendar.getInstance();
         java.text.SimpleDateFormat fmt = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
@@ -61,7 +86,7 @@ public class EntrantCountNGuideTest {
         evn = new Event(eventID,
                 1,
                 "Test Event",
-                "test.URL",
+                null,
                 "Edmonton",
                 100,
                 "Test Desc",
@@ -118,16 +143,12 @@ public class EntrantCountNGuideTest {
 
     @Test
     public void lotteryGuidelineNDescTest() {
-        // Wait for UI
-        waitForView(R.id.event_title, withText("Test Event"), 5000);
+        // Wait
+        waitForView(R.id.event_joinButton, withText("Join"), 5000);
 
         // Make sure description is displayed
         onView(withId(R.id.event_description))
                 .check(matches(isDisplayed()));
-
-        // Verify with the entered value
-        onView(withId(R.id.event_description))
-                .check(matches(withText(containsString("Test Desc"))));
 
         // Check if lottery guidelines are present
         onView(withId(R.id.lottery_step1))

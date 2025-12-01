@@ -107,13 +107,8 @@ public class WaitingListJoinLeaveTest {
         return user;
     }
 
-    /*
-    Tests:
-        US 01.01.01 As an entrant, I want to join the waiting list for a specific event
-        US 01.01.02 As an entrant, I want to leave the waiting list for a specific event
-     */
     @Test
-    public void joinLeaveWaitingList() throws Exception {
+    public void testJoinLeaveWaitingList() throws Exception {
         // Pass the userId and eventId explicitly
         Bundle args = new Bundle();
         args.putInt("eventId", eventId);

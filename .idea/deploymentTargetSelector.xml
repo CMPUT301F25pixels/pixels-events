@@ -13,19 +13,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="WaitingListJoinLeaveTest">
+      <SelectionState runConfigName="AcceptDeclineParticipationTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ProvideInfoTest">
+      <SelectionState runConfigName="Tests in 'com.example.pixel_events.entrantTests'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="RememberDeviceTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ListOfEventsTest">
+      <SelectionState runConfigName="EventsListTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="EventsListTest">
+      <SelectionState runConfigName="FilterEventsTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

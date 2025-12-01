@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
     Utilized:
         Both Black Box and White Box Testing.
  */
+
 @RunWith(AndroidJUnit4.class)
 public class ProvideInfoTest {
 
@@ -54,7 +55,7 @@ public class ProvideInfoTest {
     }
 
     @Test
-    public void testSignupFlowAndReturn() throws InterruptedException {
+    public void testSignup() throws InterruptedException {
         // Launch Activity
         ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class);
 
@@ -77,7 +78,7 @@ public class ProvideInfoTest {
         // Wait
         Thread.sleep(3000);
 
-        // 4. Verify
+        // Verify
         onView(withId(R.id.dashboard_bottom_nav_view))
                 .check(matches(isDisplayed()));
         verifyUserInDatabase();
@@ -111,6 +112,7 @@ public class ProvideInfoTest {
 
     @After
     public void cleanup() {
+        FirebaseAuth.getInstance().signOut();
         DatabaseHandler.resetInstance();
     }
 }
