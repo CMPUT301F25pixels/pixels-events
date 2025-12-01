@@ -1,2 +1,7 @@
+<<<<<<< Updated upstream
 19:58:17.692 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
 19:58:17.779 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+=======
+23:25:27.620 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+23:25:27.892 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+>>>>>>> Stashed changes

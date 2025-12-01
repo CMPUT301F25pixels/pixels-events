@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList; // ADDED: Import ArrayList
 import static org.junit.Assert.*;
 
 public class SavingDataTest {
@@ -14,10 +15,8 @@ public class SavingDataTest {
 
     @Before
     public void setUp() throws Exception {
-        // Initialize SavingData
-        savingData = new SavingData(null);
 
-        // Use reflection to access the private csvField(Object val) method for WB testing
+        savingData = new SavingData(new ArrayList<>());
         csvFieldMethod = SavingData.class.getDeclaredMethod("csvField", Object.class);
         csvFieldMethod.setAccessible(true);
     }

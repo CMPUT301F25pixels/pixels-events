@@ -13,12 +13,20 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
+<<<<<<< Updated upstream
       <SelectionState runConfigName="Tests in 'com.example.pixel_events.entrantTests'">
+=======
+      <SelectionState runConfigName="AdminDatabaseIntegrationTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="RememberDeviceTest">
+      <SelectionState runConfigName="QRCodeTest">
+>>>>>>> Stashed changes
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="DashboardFragmentUITest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+<<<<<<< Updated upstream
       <SelectionState runConfigName="EventsListTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -26,6 +34,12 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="Tests in 'com.example.pixel_events.other'">
+=======
+      <SelectionState runConfigName="OrganizerEventUITest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="WaitlistCapacityTest">
+>>>>>>> Stashed changes
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

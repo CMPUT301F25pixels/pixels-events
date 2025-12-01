@@ -123,12 +123,20 @@ public class SavingData {
         if (val == null) return "null";
         String s = String.valueOf(val).trim();
         if (s.isEmpty()) return "null";
-        if (s.contains("\"") || s.contains(",") || s.contains("\n")) {
+
+        // FIX: Replaced the incorrect conditional logic with a single check for wrapping,
+        // ensuring values containing quotes are always escaped AND wrapped in outer quotes.
+
+        // Determine if wrapping is necessary (contains comma, newline, or a quote)
+        boolean needsWrapping = s.contains(",") || s.contains("\n") || s.contains("\"");
+
+        if (needsWrapping) {
+            // Escape inner quotes by doubling them
             s = s.replace("\"", "\"\"");
-        }
-        if (s.contains(",") || s.contains("\n")) {
+            // Wrap the entire result in quotes
             return "\"" + s + "\"";
         }
+
         return s;
     }
 }

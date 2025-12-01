@@ -47,22 +47,17 @@ public class OrganizerIntegrationTest {
     public void setUp() {
         DatabaseHandler.resetInstance();
 
-        // Initialize DatabaseHandler in offline mode (uses Firebase emulator)
         databaseHandler = DatabaseHandler.getInstance(true);
 
-        // Create a bitmap to upload for testing
         TEST_BITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
-        // Clean up any existing test data
         cleanUpTestData();
     }
 
     @After
     public void tearDown() {
-        // Clean up test data after each test
         cleanUpTestData();
 
-        // Reset singleton for next test
         DatabaseHandler.resetInstance();
     }
 
@@ -94,7 +89,6 @@ public class OrganizerIntegrationTest {
 
     /**
      * This test both US 02.04.01 and US 02.04.02
-     * @throws InterruptedException
      */
     @Test
     public void testImageUploadAndModify() throws InterruptedException {

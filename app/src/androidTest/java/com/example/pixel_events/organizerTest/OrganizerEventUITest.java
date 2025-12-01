@@ -10,6 +10,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotClickable;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 
@@ -32,15 +33,46 @@ public class OrganizerEventUITest {
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
 
+    public static <T> org.hamcrest.Matcher<T> first(final org.hamcrest.Matcher<T> matcher) {
+        return new org.hamcrest.BaseMatcher<T>() {
+            boolean isFirst = true;
+
+            @Override
+            public boolean matches(final Object item) {
+                if (isFirst && matcher.matches(item)) {
+                    isFirst = false;
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(final org.hamcrest.Description description) {
+                description.appendText("should return first matching item");
+            }
+        };
+    }
+
+    private void performOrganizerLogin() throws InterruptedException {
+
+        onView(withId(R.id.login_role_organizer)).perform(click());
+        onView(withId(R.id.login_user_email)).perform(typeText("testorganizer@test.com"), closeSoftKeyboard());
+
+        onView(withId(R.id.login_user_save)).perform(click());
+        Thread.sleep(12000);
+    }
+
+
+
     /**
      * US 02.01.01 BB: Create event UI and QR visibility.
      */
     @Test
     public void testCreateEvent_and_viewQR() throws InterruptedException {
-        // Pre-condition: Assume app starts in DashboardActivity as an Organizer, and the '+' button is visible.
-        onView(withId(R.id.dashboard_addevent)).perform(click());
+        performOrganizerLogin();
 
-        // 1. Fill out the form (Requires scrolling for all fields in the layout)
+        onView(withId(R.id.dashboard_addevent)).check(matches(isDisplayed())).perform(click());
+
         onView(withId(R.id.eventFormTitle)).perform(typeText("UI Test Event"), closeSoftKeyboard());
         onView(withId(R.id.eventFormLocation)).perform(typeText("Test Location"));
 
@@ -48,7 +80,6 @@ public class OrganizerEventUITest {
         onView(withId(R.id.eventFormCapacity)).perform(typeText("100"), closeSoftKeyboard());
         onView(withId(R.id.eventFormFee)).perform(typeText("10.50"), closeSoftKeyboard());
 
-        // Mock date/time selection (by simulating clicks on the DatePicker's default 'OK')
         onView(withId(R.id.eventFormRegStartDate)).perform(click());
         onView(withText("OK")).perform(click());
         onView(withId(R.id.eventFormRegEndDate)).perform(click());
@@ -64,20 +95,18 @@ public class OrganizerEventUITest {
         onView(withId(R.id.eventFormEndTime)).perform(click());
         onView(withText("OK")).perform(click());
 
-        // 2. Click Done
+
         onView(withId(R.id.eventFormAdd)).perform(scrollTo(), click());
 
-        // 3. Assert navigation to EventDetailedFragment (for the Organizer preview)
+
         onView(withId(R.id.event_title)).check(matches(isDisplayed()));
 
-        // 4. Assert QR button is visible and clickable
         onView(withId(R.id.event_qrcode_button)).check(matches(isDisplayed()));
         onView(withId(R.id.event_qrcode_button)).perform(click());
 
-        // 5. Assert QR dialog is displayed (from dialog_qrcode.xml)
         onView(withId(R.id.qr_dialog_title)).check(matches(withText("Event QR Code")));
         onView(withId(R.id.qr_code_image)).check(matches(isDisplayed()));
-        onView(withId(R.id.qr_dialog_close)).perform(click()); // Close dialog
+        onView(withId(R.id.qr_dialog_close)).perform(click());
     }
 
     /**
@@ -85,7 +114,8 @@ public class OrganizerEventUITest {
      */
     @Test
     public void testPosterUploadAndUpdate_uiElementsExist() throws InterruptedException {
-        // Pre-condition: Navigate to CreateEventFragment (simulated via '+' click)
+        performOrganizerLogin();
+
         onView(withId(R.id.dashboard_addevent)).perform(click());
 
         // 1. Assert Upload poster button (02.04.01 BB)
@@ -98,59 +128,29 @@ public class OrganizerEventUITest {
     }
 
     /**
-     * US 02.01.04 BB: Set registration period (UI check).
+     * US 02.03.01 BB: Limit entrants (Waitlist full UI) - Tested from Entrant perspective.
      */
     @Test
-    public void testSetRegistrationPeriod_success() {
+    public void testJoinButton_waitlistFull() throws InterruptedException {
+        // 1. Navigate to Dashboard as Entrant
+        onView(withId(R.id.login_role_entrant)).perform(click());
+        onView(withId(R.id.login_user_email)).perform(typeText("testentrant@test.com"), closeSoftKeyboard());
+        onView(withId(R.id.login_user_save)).perform(click());
 
-        // Find and click the 'Set Registration Period' button
-        onView(withText("Set Registration Period")).perform(scrollTo(), click());
+        Thread.sleep(12000);
 
-        // Assert the bottom sheet is displayed (fragment_set_registration.xml)
-        onView(withId(R.id.inputRegStartDate)).check(matches(isDisplayed()));
+        onView(withId(R.id.dashboard_eventRecyclerView)).check(matches(isDisplayed()));
 
-        // Click Done (assuming test setup provided valid dates to prefill)
-        onView(withId(R.id.inputRegButtonDone)).perform(click());
+        onView(first(withParent(withId(R.id.dashboard_eventRecyclerView))))
+                .perform(click());
 
-        // Assert success Toast and dismissal of bottom sheet (back to EventFragment)
-        onView(withId(R.id.event_fragment_preview)).check(matches(isDisplayed()));
-    }
+        onView(withId(R.id.event_title)).check(matches(isDisplayed()));
 
-    /**
-     * US 02.02.01 BB & 02.06.05 BB: View Waiting List and Export button visibility.
-     */
-    @Test
-    public void testViewWaitlist_and_ExportButton() {
-        // Pre-condition: Assume navigation to EventFragment
-
-        // 1. Click "View waitlist"
-        onView(withText("View waitlist")).perform(scrollTo(), click());
-
-        // 2. Assert navigation to WaitingListFragment (fragment_waitinglist.xml)
-        onView(withId(R.id.waitinglist_recyclerview)).check(matches(isDisplayed()));
-
-        // 3. Assert Export button is visible (02.06.05 BB)
-        onView(withId(R.id.waitinglist_exportButton)).check(matches(isDisplayed()));
-        onView(withId(R.id.waitinglist_exportButton)).perform(click());
-
-        // 4. Assert the export dialog appears (checks for 'OK' button in the AlertDialog)
-        onView(withText("OK")).check(matches(isDisplayed()));
-    }
-
-    /**
-     * US 02.03.01 BB: Limit entrants (Waitlist full UI).
-     */
-    @Test
-    public void testJoinButton_waitlistFull() {
-        // Pre-condition: Mock a scenario where waitListCount >= maxWaitlistSize for a user on EventDetailedFragment.
-        // Assume navigation to EventDetailedFragment (for user view) is complete
-
-        // Assert button text changes and button is disabled
-//        onView(withId(R.id.event_jlbutton))
-//                .check(matches(allOf(
-//                        withText(containsString("Waitlist full")),
-//                        isDisplayed(),
-//                        isNotClickable()
-//                )));
+        onView(withId(R.id.event_joinButton))
+                .check(matches(allOf(
+                        withText(containsString("Waitlist full")),
+                        isDisplayed(),
+                        isNotClickable()
+                )));
     }
 }

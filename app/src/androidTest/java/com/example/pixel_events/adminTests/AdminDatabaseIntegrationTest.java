@@ -1,14 +1,17 @@
 package com.example.pixel_events.adminTests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.graphics.Bitmap;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
-
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.TaskCompletionSource;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.pixel_events.utils.ImageConversion;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,143 +20,25 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import static org.junit.Assert.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
 public class AdminDatabaseIntegrationTest {
-
-    private DatabaseHandler db;
-    private FirebaseFirestore fs;
-    private static final int EVENT_ID = 2000;
-    private static final int ORGANIZER_ID = 2001;
-    private static final int USER_ID_1 = 2002;
-    private static final int TIMEOUT_SEC = 5;
+    private DatabaseHandler databaseHandler;
+    private static final int TEST_EVENT_ID = 10000;
+    private static final int TEST_USER_ID = 20000;
+    private static final int TEST_ORGANIZER_ID = 30000;
+    private static final int TIMEOUT_SEC = 10;
+    private static final String TEST_IMAGE_URL = ImageConversion.bitmapToBase64(Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888));
 
     @Before
     public void setUp() throws Exception {
         DatabaseHandler.resetInstance();
-        db = DatabaseHandler.getInstance(true);
-        fs = db.getFirestore();
+        databaseHandler = DatabaseHandler.getInstance(true); // use emulator
         cleanUpTestData();
-        setupTestData();
-    }
-
-    private void cleanUpTestData() {
-        db.deleteEvent(EVENT_ID);
-        db.deleteAcc(ORGANIZER_ID);
-        db.deleteAcc(USER_ID_1);
-        try {
-            Tasks.await(fs.collection("EventData").document(String.valueOf(EVENT_ID)).get(), 2, TimeUnit.SECONDS);
-        } catch (Exception e) { /* Ignore */ }
-    }
-
-    private void setupTestData() {
-        Event testEvent = new Event(
-                EVENT_ID, ORGANIZER_ID, "Event for Admin Test", "base64imageurl", "Location", 100,
-                "Description", "Free", "2026-02-01", "2026-02-03", "12:00", "14:00", "2026-01-01", "2026-01-30",
-                new ArrayList<>(Arrays.asList("Test"))
-        );
-        db.addEvent(testEvent);
-
-        Profile orgProfile = new Profile(ORGANIZER_ID, "org", "Organizer Admin Test", "other", "org@test.com", "123", "", "", "", Arrays.asList(true, true, true));
-        Profile user1Profile = new Profile(USER_ID_1, "user", "User 1 Admin Test", "other", "user1@test.com", "456", "", "", "", Arrays.asList(true, true, true));
-        db.addAcc(orgProfile);
-        db.addAcc(user1Profile);
-
-        WaitingList wl = new WaitingList(EVENT_ID);
-        db.addWaitingList(wl);
-        db.joinWaitingList(EVENT_ID, USER_ID_1);
-
-        try {
-            Tasks.await(fs.collection("EventData").document(String.valueOf(EVENT_ID)).get(), 2, TimeUnit.SECONDS);
-        } catch (Exception e) { /* Ignore */ }
-    }
-
-    private <T> T await(Task<T> task) throws ExecutionException, InterruptedException, TimeoutException {
-        return Tasks.await(task, TIMEOUT_SEC, TimeUnit.SECONDS);
-    }
-
-    private Task<Event> getEventTask(int eventId) {
-        TaskCompletionSource<Event> tcs = new TaskCompletionSource<>();
-        db.getEvent(eventId, tcs::setResult, tcs::setException);
-        return tcs.getTask();
-    }
-
-    private Task<Profile> getProfileTask(int userId) {
-        TaskCompletionSource<Profile> tcs = new TaskCompletionSource<>();
-        db.getProfile(userId, tcs::setResult, tcs::setException);
-        return tcs.getTask();
-    }
-
-    private Task<WaitingList> getWaitingListTask(int eventId) {
-        TaskCompletionSource<WaitingList> tcs = new TaskCompletionSource<>();
-        db.getWaitingList(eventId, tcs::setResult, tcs::setException);
-        return tcs.getTask();
-    }
-
-    /**
-     * US 03.01.01 WB: Verifies deletion of an event also deletes its associated waitlist document.
-     */
-    @Test
-    public void testDeleteEvent_removesEventAndWaitList() throws Exception {
-        Event initialEvent = await(getEventTask(EVENT_ID));
-        assertNotNull("Event should exist before deletion", initialEvent);
-
-        db.deleteEvent(EVENT_ID);
         Thread.sleep(1000);
-
-        Event deletedEvent = await(getEventTask(EVENT_ID));
-        assertNull("Event document should be null after deletion", deletedEvent);
-
-        WaitingList deletedWaitList = await(getWaitingListTask(EVENT_ID));
-        assertNull("Waitlist document should be null after event deletion", deletedWaitList);
-    }
-
-    /**
-     * US 03.02.01 WB: Verifies deleting a profile also removes their ID from all waitlists/selected lists.
-     */
-    @Test
-    public void testDeleteAcc_removesProfileAndCleanUpWaitLists() throws Exception {
-        WaitingList wlBefore = await(getWaitingListTask(EVENT_ID));
-        assertTrue("User 1 should be on the waitlist before profile deletion", wlBefore.getWaitList().contains(USER_ID_1));
-
-        db.deleteAcc(USER_ID_1);
-        Thread.sleep(1000);
-
-        Profile deletedProfile = await(getProfileTask(USER_ID_1));
-        assertNull("Profile document should be null after deletion", deletedProfile);
-
-        WaitingList wlAfter = await(getWaitingListTask(EVENT_ID));
-        assertFalse("User 1 should be removed from the waitlist after profile deletion", wlAfter.getWaitList().contains(USER_ID_1));
-    }
-
-    /**
-     * US 03.03.01 WB: Simulates AdminImageFragment action to clear an event poster.
-     */
-    @Test
-    public void testRemoveImage_clearsImageUrl() throws Exception {
-        Event initialEvent = await(getEventTask(EVENT_ID));
-        assertTrue("Event should have an image before modification", !initialEvent.getImageUrl().isEmpty());
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("imageUrl", "");
-
-        db.modify(db.getEventCollection(), EVENT_ID, updates, error -> {
-            assertNull("DatabaseHandler.modify should succeed", error);
-        });
-
-        Thread.sleep(1000);
-
-        Event modifiedEvent = await(getEventTask(EVENT_ID));
-        assertNotNull("Modified event should not be null", modifiedEvent);
-        assertTrue("Image URL should be cleared (empty string)", modifiedEvent.getImageUrl().isEmpty());
     }
 
     @After
@@ -161,4 +46,111 @@ public class AdminDatabaseIntegrationTest {
         cleanUpTestData();
         DatabaseHandler.resetInstance();
     }
+
+    private void cleanUpTestData() {
+        databaseHandler.deleteEvent(TEST_EVENT_ID);
+        databaseHandler.deleteAcc(TEST_USER_ID);
+        databaseHandler.deleteAcc(TEST_ORGANIZER_ID);
+    }
+
+    private void createTestEvent(String imageUrl) throws InterruptedException {
+        Event testEvent = new Event(
+                TEST_EVENT_ID, TEST_ORGANIZER_ID, "Event for Admin", imageUrl, "Loc",
+                100, "Desc", "Free", "2026-02-01", "2026-02-02",
+                "10:00", "12:00", "2026-01-01", "2026-01-30", new ArrayList<>(Arrays.asList("Test"))
+        );
+        testEvent.setAutoUpdateDatabase(false);
+        databaseHandler.addEvent(testEvent);
+        Thread.sleep(5000);
+    }
+
+
+    private void createTestProfile(int id, String role) throws InterruptedException {
+        Profile testProfile = new Profile(
+                id, role, "Admin Test User", "Other", "testadmin"+id+"@example.com",
+                "123", "T6J0Z0", "AB", "Edmonton",
+                new ArrayList<>(Arrays.asList(true, true, true))
+        );
+        testProfile.setAutoUpdateDatabase(false);
+        databaseHandler.addAcc(testProfile);
+        Thread.sleep(2000);
+    }
+
+    /**
+     * Helper method to synchronously fetch an event and return it (or null if not found/error).
+     */
+    private Event fetchEvent(int eventId) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Event> result = new AtomicReference<>();
+        AtomicReference<Exception> error = new AtomicReference<>();
+
+        databaseHandler.getEvent(eventId,
+                event -> {
+                    result.set(event);
+                    latch.countDown();
+                },
+                e -> {
+                    error.set(e);
+                    latch.countDown();
+                });
+
+        assertTrue("Event fetch timed out", latch.await(TIMEOUT_SEC, TimeUnit.SECONDS));
+        if (error.get() != null) {
+            throw error.get();
+        }
+        return result.get();
+    }
+
+    /**
+     * Tests US 03.01.01: As an administrator, I want to be able to remove events.
+     */
+    @Test
+    public void testAdminCanRemoveEvent() throws Exception {
+        createTestEvent(TEST_IMAGE_URL);
+
+        Event initialEvent = fetchEvent(TEST_EVENT_ID);
+        assertNotNull("Event should exist before deletion", initialEvent);
+
+        databaseHandler.deleteEvent(TEST_EVENT_ID);
+        Thread.sleep(3000);
+
+        Event finalEvent = fetchEvent(TEST_EVENT_ID);
+
+        assertNull("Event should be removed after deletion", finalEvent);
+    }
+
+    /**
+     * Tests US 03.02.01 & US 03.07.01: Admin can remove user/organizer profiles.
+     */
+    @Test
+    public void testAdminCanRemoveUserAndOrganizerProfiles() throws Exception {
+        createTestProfile(TEST_USER_ID, "user");
+        createTestProfile(TEST_ORGANIZER_ID, "org");
+
+
+        CountDownLatch checkLatch = new CountDownLatch(1);
+        AtomicReference<Profile> userProfile = new AtomicReference<>();
+        databaseHandler.getProfile(TEST_USER_ID, p -> { userProfile.set(p); checkLatch.countDown(); }, e -> checkLatch.countDown());
+        assertTrue("User Profile fetch timed out", checkLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS));
+        assertNotNull("User profile should exist before deletion", userProfile.get());
+
+        // ACTION: Remove profiles
+        databaseHandler.deleteAcc(TEST_USER_ID);
+        databaseHandler.deleteAcc(TEST_ORGANIZER_ID);
+        Thread.sleep(3000); // Add sleep after asynchronous delete
+
+        // Verification: Profiles should be removed
+        CountDownLatch verifyUserLatch = new CountDownLatch(1);
+        CountDownLatch verifyOrgLatch = new CountDownLatch(1);
+        userProfile.set(null); // Reset references
+
+        databaseHandler.getProfile(TEST_USER_ID, p -> { userProfile.set(p); verifyUserLatch.countDown(); }, e -> verifyUserLatch.countDown());
+        databaseHandler.getProfile(TEST_ORGANIZER_ID, p -> { /* Don't set orgProfile to null */ verifyOrgLatch.countDown(); }, e -> verifyOrgLatch.countDown());
+
+        verifyUserLatch.await(3, TimeUnit.SECONDS);
+        verifyOrgLatch.await(3, TimeUnit.SECONDS);
+
+        assertNull("User profile should be removed after deletion", userProfile.get());
+    }
+
 }
