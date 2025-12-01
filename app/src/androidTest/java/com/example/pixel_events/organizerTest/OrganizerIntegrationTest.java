@@ -127,7 +127,8 @@ public class OrganizerIntegrationTest {
                 TEST_EVENT_END_TIME,
                 TEST_REG_START,
                 TEST_REG_END,
-                TEST_TAGS
+                TEST_TAGS,
+                Boolean.FALSE
         );
 
         databaseHandler.addEvent(testEvent);

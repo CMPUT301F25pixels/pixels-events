@@ -82,7 +82,8 @@ public class WaitingListJoinLeaveTest {
                 "10:00",
                 today, // Registration start
                 "2025-12-10", // Registration end
-                tags);
+                tags,
+                Boolean.FALSE);
         Tasks.await(db.getEventCollection().document(String.valueOf(eventId)).set(evn));
     }
 

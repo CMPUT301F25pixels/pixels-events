@@ -79,7 +79,7 @@ public class FilterEventsTest {
         tags1.add("Esport");
 
         evn = new Event(eventID1, 1, "Event One", "test.URL", "Edmonton", 100, "Test Desc",
-                "100", "2026-01-01", "2036-02-01", "09:00", "10:00", today, "2025-12-30", tags1);
+                "100", "2026-01-01", "2036-02-01", "09:00", "10:00", today, "2025-12-30", tags1, Boolean.FALSE);
         Tasks.await(db.getEventCollection().document(String.valueOf(eventID1)).set(evn));
 
         // Create Event 2
@@ -88,7 +88,7 @@ public class FilterEventsTest {
         tags2.add("Relaxing");
 
         evn = new Event(eventID2, 1, "Event Two", "test.URL", "Edmonton", 100, "Test Desc",
-                "100", "2026-02-01", "2036-03-01", "09:00", "10:00", today, "2025-12-30", tags2);
+                "100", "2026-02-01", "2036-03-01", "09:00", "10:00", today, "2025-12-30", tags2, Boolean.FALSE);
         Tasks.await(db.getEventCollection().document(String.valueOf(eventID2)).set(evn));
     }
 

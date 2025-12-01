@@ -58,7 +58,7 @@ public class AdminDatabaseIntegrationTest {
         Event testEvent = new Event(
                 EVENT_ID, ORGANIZER_ID, "Event for Admin Test", "base64imageurl", "Location", 100,
                 "Description", "Free", "2026-02-01", "2026-02-03", "12:00", "14:00", "2026-01-01", "2026-01-30",
-                new ArrayList<>(Arrays.asList("Test"))
+                new ArrayList<>(Arrays.asList("Test")), Boolean.FALSE
         );
         db.addEvent(testEvent);
 

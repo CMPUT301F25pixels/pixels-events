@@ -63,7 +63,7 @@ public class EventCRUDTest {
         Log.d(TAG, "Creating event with ID: " + testEventId);
         Event testEvent = new Event(testEventId, organizerId, title, imageUrl, location,
                 capacity, description, fee, eventStartDate, eventEndDate, eventStartTime,
-                eventEndTime, registrationStartDate, registrationEndDate, tags);
+                eventEndTime, registrationStartDate, registrationEndDate, tags, Boolean.FALSE);
 
         testEvent.saveToDatabase();
         Log.d(TAG, "Event saved to database");

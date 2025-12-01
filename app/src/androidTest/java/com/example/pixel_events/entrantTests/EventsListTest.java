@@ -48,7 +48,7 @@ public class EventsListTest {
         // Ensure at least one event
         DatabaseHandler db = DatabaseHandler.getInstance(true);
         Event evn = new Event(SEED_EVENT_ID, 1, "Seed Event", "url", "Loc", 100, "Desc",
-                "100", "2030-01-01", "2030-01-02", "09:00", "10:00", "2027-01-01", "2027-01-02", new ArrayList<>());
+                "100", "2030-01-01", "2030-01-02", "09:00", "10:00", "2027-01-01", "2027-01-02", new ArrayList<>(), Boolean.FALSE);
 
         try {
             Tasks.await(db.getEventCollection().document(String.valueOf(SEED_EVENT_ID)).set(evn));

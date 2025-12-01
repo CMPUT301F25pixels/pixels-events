@@ -72,7 +72,8 @@ public class AcceptDeclineParticipationTest {
                 "10:00",
                 today, // Registration start
                 "2025-12-10", // Registration end
-                tags);
+                tags,
+                Boolean.FALSE);
 
         db.addEvent(evn);
 
@@ -141,7 +142,8 @@ public class AcceptDeclineParticipationTest {
                 "10:00",
                 today, // Registration start
                 "2025-12-10", // Registration end
-                tags);
+                tags,
+                Boolean.FALSE);
 
         db.addEvent(evn);
 
