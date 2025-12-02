@@ -1,4 +1,4 @@
-package com.example.pixel_events.waitlist;
+package com.example.pixel_events.other;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,12 +14,17 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/*
+    Utilizes:
+        White Box Testing
+ */
 @RunWith(AndroidJUnit4.class)
 public class WaitListIntegrationTest {
 
@@ -43,7 +48,7 @@ public class WaitListIntegrationTest {
         await(db.leaveWaitingList(EVENT_ID, USER_2));
     }
 
-    // --- 🔹 Test 1: Correct user added and count increments ---
+    // Test 1: Correct user added and count increments
     @Test
     public void join_addsCorrectUser_andIncrementsCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -55,7 +60,7 @@ public class WaitListIntegrationTest {
         assertEquals("List size should be 1", 1, waitList.size());
     }
 
-    // --- 🔹 Test 2: Second user also added, count updates correctly ---
+    // Test 2: Second user also added, count updates correctly
     @Test
     public void join_multipleUsers_incrementsCorrectly() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -69,7 +74,7 @@ public class WaitListIntegrationTest {
         assertEquals("Count should equal 2", 2, waitList.size());
     }
 
-    // --- 🔹 Test 3: Leaving removes correct user and decrements count ---
+    // Test 3: Leaving removes correct user and decrements count
     @Test
     public void leave_removesCorrectUser_andDecrementsCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -84,7 +89,7 @@ public class WaitListIntegrationTest {
         assertEquals("Count should be 1", 1, waitList.size());
     }
 
-    // --- 🔹 Test 4: Duplicate joins should not increase count ---
+    // Test 4: Duplicate joins should not increase count
     @Test
     public void join_duplicateUser_doesNotIncrementCount() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -96,7 +101,7 @@ public class WaitListIntegrationTest {
         assertEquals("Duplicate join should not increase list size", 1, waitList.size());
     }
 
-    // --- 🔹 Test 5: Leaving non-existent user does not change anything ---
+    // Test 5: Leaving non-existent user does not change anything
     @Test
     public void leave_nonexistentUser_doesNothing() throws Exception {
         await(db.joinWaitingList(EVENT_ID, USER_1));
@@ -124,11 +129,38 @@ public class WaitListIntegrationTest {
                 if (o instanceof Number) {
                     ints.add(((Number) o).intValue());
                 } else if (o instanceof String) {
-                    try { ints.add(Integer.parseInt((String) o)); } catch (NumberFormatException ignored) {}
+                    try {
+                        ints.add(Integer.parseInt((String) o));
+                    } catch (NumberFormatException ignored) {
+                    }
+                } else if (o instanceof java.util.Map) {
+                    // WaitlistUser object stored as a map { userId: ..., status: ... }
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, Object> map = (java.util.Map<String, Object>) o;
+                    Object idObj = map.get("userId");
+                    if (idObj == null) {
+                        idObj = map.get("id"); // fallback if different field name used
+                    }
+                    if (idObj instanceof Number) {
+                        ints.add(((Number) idObj).intValue());
+                    } else if (idObj instanceof String) {
+                        try {
+                            ints.add(Integer.parseInt((String) idObj));
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
                 }
             }
         }
         return ints;
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        // Clean up the waitlist document created for the test
+        if (fs != null) {
+            await(fs.collection("WaitListData").document(String.valueOf(EVENT_ID)).delete());
+        }
     }
 
 }

@@ -16,6 +16,20 @@ import com.example.pixel_events.waitinglist.WaitingList;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.textfield.TextInputEditText;
 
+/**
+ * SetWaitlistFragment
+ *
+ * Bottom sheet dialog for organizers to set maximum waiting list capacity.
+ * Allows optional capacity limiting for event waiting lists.
+ * Updates waitlist size in database.
+ *
+ * Implements:
+ * - US 02.03.01 (Optionally limit waitlist size)
+ *
+ * Collaborators:
+ * - WaitingList: Capacity setting
+ * - DatabaseHandler: Persistence
+ */
 public class SetWaitlistFragment extends BottomSheetDialogFragment {
     private static final String ARG_EVENT_ID = "eventId";
     private TextInputEditText setWaitlistSizeField;

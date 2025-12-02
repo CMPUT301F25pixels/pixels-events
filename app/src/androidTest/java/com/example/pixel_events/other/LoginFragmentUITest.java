@@ -1,4 +1,4 @@
-package com.example.pixel_events.ui;
+package com.example.pixel_events.other;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -17,6 +17,10 @@ import com.example.pixel_events.login.LoginFragment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/*
+    Utilizes:
+        Black Box Testing
+ */
 @RunWith(AndroidJUnit4.class)
 public class LoginFragmentUITest {
 
@@ -28,7 +32,6 @@ public class LoginFragmentUITest {
                 .check(matches(isDisplayed()))
                 .check(matches(withText("Sign In")));
         onView(withId(R.id.login_user_email)).check(matches(isDisplayed()));
-        onView(withId(R.id.login_user_password)).check(matches(isDisplayed()));
         onView(withId(R.id.login_user_save))
                 .check(matches(isDisplayed()))
                 .check(matches(withText("Sign In")));

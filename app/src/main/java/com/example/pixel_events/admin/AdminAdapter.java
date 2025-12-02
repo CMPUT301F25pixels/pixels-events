@@ -12,15 +12,28 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
-import com.example.pixel_events.home.DashboardAdapter;
-import com.example.pixel_events.login.AuthManager;
-import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * AdminAdapter
+ *
+ * RecyclerView adapter for administrators to browse and manage events.
+ * Shows event cards with delete functionality.
+ * Triggers admin deletion notifications.
+ *
+ * Implements:
+ * - US 03.01.01 (Delete events)
+ * - US 03.04.01 (Browse events)
+ *
+ * Collaborators:
+ * - Event: Displayed event data
+ * - AdminEventFragment: Parent fragment
+ * - DatabaseHandler: Deletion operations
+ */
 public class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.EventViewHolder> {
     private List<Event> events;
     private final OnEventClickListener listener;

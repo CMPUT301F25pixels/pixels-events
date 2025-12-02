@@ -23,6 +23,21 @@ import com.example.pixel_events.utils.Validator;
 
 import java.util.Calendar;
 
+/**
+ * SetRegistrationFragment
+ *
+ * Bottom sheet dialog for organizers to set or update event registration periods.
+ * Allows selecting registration start and end dates with date pickers.
+ * Validates dates and updates event in database.
+ *
+ * Implements:
+ * - US 02.01.04 (Set registration period)
+ *
+ * Collaborators:
+ * - Event: Registration period updates
+ * - DatabaseHandler: Persistence
+ * - Validator: Date validation
+ */
 public class SetRegistrationFragment extends BottomSheetDialogFragment {
     private static final String ARG_EVENT_ID = "eventId";
     private TextInputEditText regStartDateField;

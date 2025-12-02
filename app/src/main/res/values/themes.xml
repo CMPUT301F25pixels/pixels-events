@@ -11,4 +11,10 @@
     <style name="ThemeOverlay.Pixelevents.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">true</item>
     </style>
+    <style name="Theme.Pixelevents.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Ensure the window shows the gradient immediately to avoid white flash -->
+        <item name="android:windowBackground">@drawable/bg_gradient</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>

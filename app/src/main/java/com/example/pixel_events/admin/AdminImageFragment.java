@@ -17,9 +17,23 @@ import com.example.pixel_events.events.Event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * AdminImageFragment
+ *
+ * Fragment for administrators to browse and delete event poster images.
+ * Displays all uploaded event images in a grid/list format.
+ * Sends notification to organizers when their images are removed.
+ *
+ * Implements:
+ * - US 03.03.01 (Remove images)
+ * - US 03.06.01 (Browse images)
+ *
+ * Collaborators:
+ * - Event: Source of image URLs
+ * - DatabaseHandler: Image removal and notifications
+ * - Notification: Deletion alerts to organizers
+ */
 public class AdminImageFragment extends Fragment {
 	private AdminImageAdapter adapter;
 	private TextView empty;
@@ -45,6 +59,17 @@ public class AdminImageFragment extends Fragment {
 	}
 
 	private void onDeleteImage(Event e) {
+		// Notify Organizer
+		int orgId = e.getOrganizerId();
+		com.example.pixel_events.notifications.Notification notice = new com.example.pixel_events.notifications.Notification(
+			"Image Removed",
+			"The poster for your event '" + e.getTitle() + "' has been removed by the Admin.",
+			"ADMIN_DELETE",
+			e.getEventId(),
+			orgId
+		);
+		DatabaseHandler.getInstance().addNotification(orgId, notice);
+
 		java.util.Map<String, Object> updates = new java.util.HashMap<>();
 		updates.put("imageUrl", "");
 		DatabaseHandler.getInstance().modify(DatabaseHandler.getInstance().getEventCollection(), e.getEventId(), updates, err -> {

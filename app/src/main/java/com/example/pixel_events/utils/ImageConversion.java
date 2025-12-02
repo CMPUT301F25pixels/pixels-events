@@ -6,6 +6,22 @@ import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
+/**
+ * ImageConversion
+ *
+ * Utility class for converting images between Bitmap and Base64 string formats.
+ * Handles image compression and resizing for efficient storage in Firestore.
+ * Used for event posters and profile images.
+ *
+ * Implements:
+ * - US 02.04.01 (Upload event poster)
+ * - US 02.04.02 (Update event poster)
+ * - Image storage for profiles
+ *
+ * Collaborators:
+ * - Event: Poster image storage
+ * - Profile: Profile image storage
+ */
 public class ImageConversion {
     public static String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

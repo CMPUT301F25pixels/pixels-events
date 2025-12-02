@@ -1,0 +1,948 @@
+@startuml
+class com.example.pixel_events.login.AuthManager {
+- {static} String TAG
+- {static} AuthManager instance
+- {static} String PREF_NAME
+- {static} String KEY_USER_ID
+- Profile currentUserProfile
+- <<Create>> AuthManager()
++ {static} AuthManager getInstance()
++ Profile getCurrentUserProfile()
++ void setCurrentUserProfile(Profile)
++ void setCurrentEmail(String)
++ void signup(Context,Profile,Runnable,Consumer<Exception>)
++ void login(Context,String,String,Runnable,Consumer<Exception>)
++ void autoLogin(Context,Runnable,Runnable)
++ void signOut(Context)
+- void saveSession(Context,int)
+- void clearSession(Context)
++ Boolean isUserLoggedIn()
+}
+
+
+class com.example.pixel_events.events.SetRegistrationFragment {
+- {static} String ARG_EVENT_ID
+- TextInputEditText regStartDateField
+- TextInputEditText regEndDateField
+- Button doneButton
+- int eventId
+- Event event
++ {static} SetRegistrationFragment newInstance(int)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
++ int getTheme()
+- void showDatePicker(TextInputEditText)
+- void onSave()
+}
+
+
+class com.example.pixel_events.waitinglist.WaitingList {
+- {static} int DEFAULT_MAX_WAITLIST_SIZE
+- int eventId
+- String status
+- ArrayList<WaitlistUser> waitList
+- int maxWaitlistSize
+- boolean autoUpdateDatabase
++ <<Create>> WaitingList()
++ <<Create>> WaitingList(int,int)
++ <<Create>> WaitingList(int)
++ void setAutoUpdateDatabase(boolean)
++ boolean isUserInWaitlist(int)
++ int getEventId()
++ String getStatus()
++ ArrayList<WaitlistUser> getSelected()
++ ArrayList<WaitlistUser> getWaiting()
++ ArrayList<WaitlistUser> getCancelled()
++ ArrayList<WaitlistUser> getWaitList()
++ int getMaxWaitlistSize()
++ void setStatus(String)
++ void updateUserStatus(int,int)
++ void drawLottery(OnLotteryDrawnListener)
++ void setMaxWaitlistSize(int)
+- void updateDatabase(String,Object)
+}
+
+
+interface com.example.pixel_events.waitinglist.WaitingList$OnLotteryDrawnListener {
+~ void onSuccess(int)
+~ void onFailure(Exception)
+}
+
+class com.example.pixel_events.database.DatabaseHandler {
+- {static} DatabaseHandler instance
+- FirebaseFirestore db
+- CollectionReference accRef
+- CollectionReference eventRef
+- CollectionReference waitListRef
+- <<Create>> DatabaseHandler()
+- <<Create>> DatabaseHandler(boolean)
++ {static} DatabaseHandler getInstance()
++ {static} DatabaseHandler getInstance(boolean)
++ {static} void resetInstance()
++ FirebaseFirestore getFirestore()
++ {static} int uidToId(String)
++ CollectionReference getAccountCollection()
++ CollectionReference getEventCollection()
++ CollectionReference getWaitListCollection()
++ void modify(CollectionReference,Object,Map<String,Object>,Consumer<String>)
++ void addNotification(int,Notification)
++ void listenToNotifications(int,EventListener<QuerySnapshot>)
++ void deleteNotification(int,String)
++ void markNotificationRead(int,String)
++ void sendInviteNotification(int,String,int)
++ void sendWinNotification(int,String,int)
++ void sendLossNotification(int,String,int)
+- void checkNotificationPreferences(int,java.util.function.Consumer<java.util.List<Boolean>>)
++ void addAcc(Profile)
++ void getProfile(int,OnSuccessListener<Profile>,OnFailureListener)
++ void getProfileByEmail(String,OnSuccessListener<Profile>,OnFailureListener)
++ void deleteAcc(int)
++ void getAllProfile(OnSuccessListener<java.util.List<Profile>>,OnFailureListener)
++ void addEvent(Event)
++ void getEvent(int,OnSuccessListener<Event>,OnFailureListener)
++ void getAllEvents(OnSuccessListener<java.util.List<Event>>,OnFailureListener)
++ void deleteEvent(int)
+- Task<Void> ensureWaitListExists(int)
++ Task<Void> joinWaitingList(int,int)
++ Task<Void> leaveWaitingList(int,int)
++ void getEventsForUser(int,OnSuccessListener<java.util.List<Event>>,OnFailureListener)
+- Event safeMapEvent(DocumentSnapshot)
+- void setIfPresent(Object,Map<String,Object>,String)
++ void addWaitingList(WaitingList)
++ void getWaitingList(int,OnSuccessListener<WaitingList>,OnFailureListener)
+- WaitingList safeMapWaitingList(DocumentSnapshot)
+}
+
+
+class com.example.pixel_events.events.InvitationAdapter {
+- List<EventInvitation> invitations
+- OnInvitationInteractionListener listener
++ <<Create>> InvitationAdapter(List<EventInvitation>,OnInvitationInteractionListener)
++ InvitationViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(InvitationViewHolder,int)
++ int getItemCount()
++ void updateInvitations(List<EventInvitation>)
+}
+
+
+interface com.example.pixel_events.events.InvitationAdapter$OnInvitationInteractionListener {
+~ void onAccept(EventInvitation)
+~ void onDecline(EventInvitation)
+}
+
+class com.example.pixel_events.events.InvitationAdapter$InvitationViewHolder {
+~ ImageView eventImage
+~ TextView organizerName
+~ ImageButton acceptButton
++ <<Create>> InvitationViewHolder(View)
+}
+
+
+class com.example.pixel_events.waitinglist.WaitingListFragment {
+- WaitingList waitingList
+- int[] filterStatuses
+- boolean sortSelectedFirst
+- ImageButton backButton
+- int eventId
+- DatabaseHandler db
+- RecyclerView recyclerView
+- WaitingListAdapter adapter
+- List<Profile> profiles
++ <<Create>> WaitingListFragment()
++ <<Create>> WaitingListFragment(int)
++ <<Create>> WaitingListFragment(WaitingList)
++ {static} WaitingListFragment newInstance(WaitingList,int[],boolean)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadProfilesFromWaitingList()
+- void loadProfilesSorted(List<WaitlistUser>)
+- void showInfoDialog(String)
+}
+
+
+class com.example.pixel_events.profile.RegistrationHistoryFragment {
+- {static} String TAG
+- ImageButton backButton
+- RecyclerView recyclerView
+- RegistrationHistoryAdapter adapter
+- List<EventHistoryItem> historyItems
+- Profile currentUser
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void loadRegistrationHistory()
+}
+
+
+class com.example.pixel_events.profile.RegistrationHistoryFragment$EventHistoryItem {
+~ Event event
+~ int status
+}
+
+class com.example.pixel_events.admin.AdminImageAdapter {
+- List<Event> data
+- Listener listener
++ <<Create>> AdminImageAdapter(Listener)
++ void setData(List<Event>)
++ Holder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(Holder,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.admin.AdminImageAdapter$Listener {
+~ void onDelete(Event)
+}
+
+class com.example.pixel_events.admin.AdminImageAdapter$Holder {
+~ ImageView image
+~ ImageButton delete
+~ <<Create>> Holder(View)
+}
+
+
+class com.example.pixel_events.admin.AdminImageFragment {
+- AdminImageAdapter adapter
+- TextView empty
+- View progress
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void onDeleteImage(Event)
+- void loadImages()
+}
+
+
+class com.example.pixel_events.utils.Validator {
++ {static} void validateNotEmpty(String,String)
++ {static} void validateDateRelations(String,String,String,String,String,String)
+}
+
+class com.example.pixel_events.events.EventDetailedFragment {
+- {static} String TAG
+- Event event
+- WaitingList waitList
+- DatabaseHandler db
+- int userId
+- int eventId
+- boolean joined
+- int waitingListCount
+- ShapeableImageView poster
+- TextView title
+- MaterialButton joinButton
+- TextView waitingListCountView
+- ImageButton backButton
+- LinearLayout tagsContainer
++ <<Create>> EventDetailedFragment()
++ <<Create>> EventDetailedFragment(int)
++ <<Create>> EventDetailedFragment(Event)
++ <<Create>> EventDetailedFragment(Event,WaitingList)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void updateUI()
+- void displayTags()
+- void renderCTA()
+- void joinWaitlist()
+- void leaveWaitlist()
+- void setButtonEnabled(MaterialButton,boolean)
+- void updateUserStatus(int)
+- void toast(String)
+- void showQrDialog()
+- Date truncateToDay(Date)
+}
+
+
+class com.example.pixel_events.utils.SavingData {
+- List<WaitlistUser> waitlistUsers
+- List<Profile> loadedProfiles
+- DatabaseHandler db
++ <<Create>> SavingData(List<WaitlistUser>)
++ void exportProfiles(Context,int,Consumer<String>)
+- void finishExport(Context,int,Consumer<String>)
+- String csvField(Object)
+}
+
+
+class com.example.pixel_events.login.LoginFragment {
+- FragmentLoginBinding binding
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- boolean isEmailValid(String)
+- void updateUiWithUser(Profile)
+- void showLoginFailed(String)
++ void onDestroyView()
+}
+
+
+class com.example.pixel_events.profile.EditProfileFragment {
+- ImageButton backButton
+- EditText nameInput
+- EditText postalInput
+- Button saveButton
+- MaterialButtonToggleGroup roleToggle
+- MaterialButtonToggleGroup genderToggle
+- Profile profile
++ <<Create>> EditProfileFragment(Profile)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void showDiscardDialog()
+- void saveChanges()
+- String resolveRole(int,String)
+- String resolveGender(int,String)
+}
+
+
+class com.example.pixel_events.events.SetWaitlistFragment {
+- {static} String ARG_EVENT_ID
+- TextInputEditText setWaitlistSizeField
+- Button doneButton
+- int eventId
+- WaitingList waitingList
++ {static} SetWaitlistFragment newInstance(int)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
++ int getTheme()
+- void onSave()
+}
+
+
+class com.example.pixel_events.qrcode.ScannerFragment {
+- {static} int CAMERA_PERMISSION_REQUEST
+- DecoratedBarcodeView barcodeView
+- boolean navigated
+- BarcodeCallback callback
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void startScanner()
+- void toast(String)
++ void onResume()
++ void onPause()
++ void onRequestPermissionsResult(int,String[],int[])
+}
+
+
+class com.example.pixel_events.events.EventFragment {
+- Event event
+- WaitingList waitList
+- int eventId
+- DatabaseHandler db
+- Button previewButton
+- TextView eventTextView
+- ImageView eventImageView
+- ImageButton backButton
++ <<Create>> EventFragment(int)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void populateEventUI()
+- void setButtonsEnabled(boolean)
+- void refreshWaitlistAndUI()
+- void updateUIBasedOnWaitlistStatus()
+- void replaceFragment(Fragment)
+}
+
+
+class com.example.pixel_events.events.MyEventAdapter {
+- List<Event> events
+- OnEventClickListener listener
+- {static} DatabaseHandler db
++ <<Create>> MyEventAdapter(List<Event>,OnEventClickListener)
++ void updateEvents(List<Event>)
++ EventViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(EventViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.events.MyEventAdapter$OnEventClickListener {
+~ void onEventClick(Event)
+}
+
+class com.example.pixel_events.events.MyEventAdapter$EventViewHolder {
+- ImageView eventImage
+- TextView eventTitle
++ <<Create>> EventViewHolder(View)
++ void bind(Event,OnEventClickListener)
+- void checkAndSetStatus(List<WaitlistUser>,int,int)
+}
+
+
+class com.example.pixel_events.waitinglist.WaitlistUser {
+- {static} String TAG
+- int userId
+- int status
++ <<Create>> WaitlistUser()
++ <<Create>> WaitlistUser(int,int)
++ int getUserId()
++ int getStatus()
++ void setUserId(int)
++ void setStatus(int)
++ void updateStatusInDb(int,int,OnStatusUpdateListener)
+}
+
+
+interface com.example.pixel_events.waitinglist.WaitlistUser$OnStatusUpdateListener {
+~ void onSuccess()
+~ void onFailure(Exception)
+}
+
+class com.example.pixel_events.home.DashboardAdapter {
+- List<Event> events
+- OnEventClickListener listener
++ <<Create>> DashboardAdapter(List<Event>,OnEventClickListener)
++ void updateEvents(List<Event>)
++ EventViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(EventViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.home.DashboardAdapter$OnEventClickListener {
+~ void onEventClick(Event)
+}
+
+class com.example.pixel_events.home.DashboardAdapter$EventViewHolder {
+- ImageView eventImage
+- TextView eventTitle
+- TextView eventTime
+- TextView eventLocation
+- LinearLayout tagsContainer
++ <<Create>> EventViewHolder(View)
++ void bind(Event,OnEventClickListener)
+- void displayTags(Event)
+}
+
+
+class com.example.pixel_events.MainActivity {
+- {static} String TAG
+- DatabaseHandler db
+# void onCreate(Bundle)
+- void showLoginFragment()
+}
+
+
+class com.example.pixel_events.utils.ImageConversion {
++ {static} String bitmapToBase64(Bitmap)
++ {static} String bitmapToCompressedBase64(Bitmap)
++ {static} Bitmap base64ToBitmap(String)
+}
+
+class com.example.pixel_events.events.EventNotificationFragment {
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+}
+
+class com.example.pixel_events.profile.Profile {
+- int userId
+- String role
+- String userName
+- String gender
+- String email
+- String phoneNum
+- String postalcode
+- String province
+- String city
+- List<Boolean> notify
+- boolean autoUpdateDatabase
++ <<Create>> Profile()
++ <<Create>> Profile(int,String,String,String,String,String,String,String,String,List<Boolean>)
++ void setAutoUpdateDatabase(boolean)
++ void saveToDatabase()
+- void updateDatabase(String,Object)
++ int getUserId()
++ String getRole()
++ String getUserName()
++ String getGender()
++ String getEmail()
++ String getPhoneNum()
++ List<Boolean> getNotify()
++ String getPostalcode()
++ String getProvince()
++ String getCity()
++ void setUserId(int)
++ void setRole(String)
++ void setUserName(String)
++ void setGender(String)
++ void setEmail(String)
++ void setPhoneNum(String)
++ void setPostalcode(String)
++ void setProvince(String)
++ void setCity(String)
++ void setNotify(List<Boolean>)
+}
+
+
+class com.example.pixel_events.events.Event {
+- int eventId
+- String title
+- String imageUrl
+- String location
+- int capacity
+- String description
+- int organizerId
+- String qrCode
+- String eventStartDate
+- String eventEndDate
+- String registrationStartDate
+- String registrationEndDate
+- String eventStartTime
+- String eventEndTime
+- String fee
+- WaitingList waitingList
+- ArrayList<String> tags
+- boolean autoUpdateDatabase
++ <<Create>> Event()
++ <<Create>> Event(int,int,String,String,String,Integer,String,String,String,String,String,String,String,String,ArrayList<String>)
++ void setAutoUpdateDatabase(boolean)
++ void saveToDatabase()
+- void updateDatabase(String,Object)
++ int getEventId()
++ String getTitle()
++ String getImageUrl()
++ String getLocation()
++ int getCapacity()
++ String getDescription()
++ String getFullDescription()
++ int getOrganizerId()
++ String getQrCode()
++ String getEventStartDate()
++ String getEventEndDate()
++ String getFee()
++ String getEventStartTime()
++ String getEventEndTime()
++ String getRegistrationStartDate()
++ String getRegistrationEndDate()
++ ArrayList<String> getTags()
++ String getDateString()
++ void setEventId(int)
++ void setTitle(String)
++ void setImageUrl(String)
++ void setLocation(String)
++ void setCapacity(Integer)
++ void setDescription(String)
++ void setEventStartDate(String)
++ void setEventEndDate(String)
++ void setRegistrationStartDate(String)
++ void setRegistrationEndDate(String)
+}
+
+
+class com.example.pixel_events.profile.NotificationPreferencesFragment {
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+}
+
+class com.example.pixel_events.profile.RegistrationHistoryAdapter {
+- List<RegistrationHistoryFragment.EventHistoryItem> items
+- OnItemClickListener listener
++ <<Create>> RegistrationHistoryAdapter(List<RegistrationHistoryFragment.EventHistoryItem>,OnItemClickListener)
++ RegistrationHistoryViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(RegistrationHistoryViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.profile.RegistrationHistoryAdapter$OnItemClickListener {
+~ void onItemClick(RegistrationHistoryFragment.EventHistoryItem)
+}
+
+class com.example.pixel_events.profile.RegistrationHistoryAdapter$RegistrationHistoryViewHolder {
+~ ImageView eventImage
+~ TextView eventTitle
+~ TextView eventTime
+~ TextView host
+~ TextView status
+~ <<Create>> RegistrationHistoryViewHolder(View)
+}
+
+
+class com.example.pixel_events.admin.AdminEventFragment {
+- RecyclerView recyclerView
+- AdminAdapter adapter
+- List<Event> events
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadEvents()
+}
+
+
+class com.example.pixel_events.home.DashboardActivity {
+- ActivityDashboardBinding binding
+- com.google.firebase.firestore.ListenerRegistration notificationListener
+# void onResume()
+# void onPause()
+- void setupNotificationListener()
+- void showNotificationAlert(Notification,int)
+# void onCreate(Bundle)
+# void onStart()
+- void updateButtonVisibility()
+}
+
+
+class com.example.pixel_events.profile.ProfileFragment {
+- Profile profile
+- Button viewProfileButton
+- TextView usernameTextView
+- ImageView profileImageView
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void replaceFragment(Fragment)
+}
+
+
+class com.example.pixel_events.qrcode.QRCode {
+- {static} String TAG
+- {static} int DEFAULT_WIDTH
+- {static} int DEFAULT_HEIGHT
+- String data
+- Bitmap qrCodeBitmap
+- int width
+- int height
++ <<Create>> QRCode(String)
++ <<Create>> QRCode(String,int,int)
+- Bitmap generateQRCode(String,int,int)
++ Bitmap getBitmap()
++ {static} Bitmap generateQRCodeBitmap(String)
++ {static} String generateQRCodeBase64(String)
++ {static} Bitmap generateQRCodeBitmap(String,int,int)
+}
+
+
+class com.example.pixel_events.admin.AdminAdapter {
+- List<Event> events
+- OnEventClickListener listener
++ <<Create>> AdminAdapter(List<Event>,OnEventClickListener)
++ void updateEvents(List<Event>)
++ EventViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(EventViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.admin.AdminAdapter$OnEventClickListener {
+~ void onEventClick(Event)
+~ void onDeleteClick(Event)
+}
+
+class com.example.pixel_events.admin.AdminAdapter$EventViewHolder {
+- ImageView eventImage
+- TextView eventTitle
+- TextView eventTime
+- TextView eventLocation
+- LinearLayout tagsContainer
+- ImageButton deleteButton
++ <<Create>> EventViewHolder(View)
++ void bind(Event,OnEventClickListener)
+- void displayTags(Event)
+}
+
+
+class com.example.pixel_events.loading.SplashActivity {
+- {static} String TAG
+# void onCreate(Bundle)
+}
+
+
+class com.example.pixel_events.admin.AdminActivity {
+- ActivityAdminBinding binding
+# void onCreate(Bundle)
+# void onStart()
+}
+
+
+class com.example.pixel_events.notifications.NotificationFragment {
+- {static} String TAG
+- RecyclerView notificationRecyclerView
+- Profile currentUser
+- MaterialButtonToggleGroup toggleGroup
+- InvitationAdapter invitationAdapter
+- NotificationAdapter notificationAdapter
+- List<EventInvitation> currentInvitations
+- List<Notification> systemNotifications
++ <<Create>> NotificationFragment()
++ void onCreate(Bundle)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
++ void onResume()
+- void loadUserInvitations()
+- void loadSystemNotifications()
++ void onAccept(EventInvitation)
++ void onDecline(EventInvitation)
+- void updateInvitationStatus(EventInvitation,int)
+}
+
+
+class com.example.pixel_events.login.SignupFragment {
+- {static} String TAG
+- FragmentSignupBinding binding
++ <<Create>> SignupFragment()
++ void onCreate(Bundle)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- String getSelectedGender(int)
+- void createAccount(String,String,String,String,String,String,String,String)
++ void onDestroyView()
+}
+
+
+class com.example.pixel_events.events.EventInvitation {
+- Event event
+- WaitlistUser waitlistUser
++ <<Create>> EventInvitation(Event,WaitlistUser)
++ Event getEvent()
++ WaitlistUser getWaitlistUser()
+}
+
+
+class com.example.pixel_events.notifications.NotificationAdapter {
+- List<Notification> notifications
++ void setNotifications(List<Notification>)
++ ViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ViewHolder,int)
++ int getItemCount()
+}
+
+
+class com.example.pixel_events.notifications.NotificationAdapter$ViewHolder {
+~ TextView title
+~ <<Create>> ViewHolder(View)+ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+                             + void onViewCreated(View,Bundle)
+}
+
+
+class com.example.pixel_events.home.DashboardFragment {
+- {static} String TAG
+- RecyclerView eventsRecyclerView
+- DashboardAdapter adapter
+- List<Event> allEvents
+- ChipGroup chipGroup
+- TextView startDateView
+- TextView endDateView
+- Button applyBtn
+- Button clearBtn
+- SimpleDateFormat dateFmt
+- Date filterStartDate
+- Date filterEndDate
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadAllEvents()
++ void onViewCreated(View,Bundle)
+- void pickDate(boolean)
+- void applyFilters()
+- boolean matchesTags(Event,Set<String>)
+- boolean matchesDateRange(Event)
+- Date parseDateSafe(String)
+- void clearFilters()
+}
+
+
+class com.example.pixel_events.events.MyEventFragment {
+- {static} String TAG
+- RecyclerView eventsRecyclerView
+- MyEventAdapter adapter
+- MaterialButtonToggleGroup toggleGroup
+- Profile currentUser
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void initWithProfile(View)
+- void loadEvents(boolean)
+- void loadOrganizerEvents(boolean)
+- void loadUserEvents(boolean)
+- Date getTodayDate()
+- Date parseDate(String)
++ void onViewCreated(View,Bundle)
+- void replaceFragment(Fragment)
+}
+
+
+class com.example.pixel_events.notifications.Notification {
+- String notificationId
+- String title
+- String message
+- Timestamp timestamp
+- boolean isRead
+- String type
+- int relatedEventId
+- int recipientId
++ <<Create>> Notification()
++ <<Create>> Notification(String,String,String,int,int)
++ String getNotificationId()
++ void setNotificationId(String)
++ String getTitle()
++ void setTitle(String)
++ String getMessage()
++ void setMessage(String)
++ Timestamp getTimestamp()
++ void setTimestamp(Timestamp)
++ boolean isRead()
++ void setRead(boolean)
++ String getType()
++ void setType(String)
++ int getRelatedEventId()
++ void setRelatedEventId(int)
++ int getRecipientId()
++ void setRecipientId(int)
+}
+
+
+class com.example.pixel_events.admin.AdminProfileFragment {
+- androidx.recyclerview.widget.RecyclerView recyclerView
+- ProfileAdapter adapter
+- List<Profile> entrants
+- List<Profile> organizers
+- com.google.android.material.button.MaterialButtonToggleGroup toggleGroup
+- com.google.android.material.button.MaterialButton btnEntrants
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadProfiles()
+- void openProfile(Profile)
+- void deleteProfile(Profile,boolean)
+}
+
+
+class com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter {
+- List<Profile> data
+- Listener listener
+~ <<Create>> ProfileAdapter(List<Profile>,Listener)
++ ProfileViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ProfileViewHolder,int)
++ int getItemCount()
++ void updateData(List<Profile>)
+}
+
+
+interface com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter$Listener {
+~ void onClick(Profile)
+~ void onDelete(Profile)
+}
+
+class com.example.pixel_events.admin.AdminProfileFragment$ProfileViewHolder {
+~ TextView name
+~ TextView email
+~ View delete
+~ <<Create>> ProfileViewHolder(View)
+}
+
+
+class com.example.pixel_events.events.CreateEventFragment {
+- TextInputEditText startDate
+- EditText titleField
+- Button doneButton
+- ImageView imageView
+- ChipGroup tagGroup
+- Uri filePath
+- Bitmap bitmap
+- ArrayList<String> selectedTags
+- ActivityResultLauncher<String> imagePickerLauncher
+- boolean isEditMode
+- int editEventId
+- Event existingEvent
+- Profile profile
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void showDatePicker(TextInputEditText)
+- void showTimePicker(TextInputEditText)
+- void loadExistingEvent()
+- void populateFormFields(Event)
+- void saveEvent()
+}
+
+
+class com.example.pixel_events.waitinglist.WaitingListAdapter {
+- List<Profile> items
+- WaitingList waitingList
+- OnItemClick listener
++ <<Create>> WaitingListAdapter(List<Profile>,WaitingList,OnItemClick)
++ VH onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(VH,int)
++ int getItemCount()
+}
+
+
+interface com.example.pixel_events.waitinglist.WaitingListAdapter$OnItemClick {
+~ void onClick(Profile)
+~ void onDelete(Profile)
+}
+
+class com.example.pixel_events.waitinglist.WaitingListAdapter$VH {
+~ ImageView avatar
+~ TextView title
+~ TextView subtitle
+~ TextView statusText
+~ ImageButton deleteButton
+~ <<Create>> VH(View)
+}
+
+
+class com.example.pixel_events.profile.ViewProfileFragment {
+- Button editButton
+- ImageButton backButton
+- TextView profileText
+- TextView postalText
+- Profile profile
+~ boolean edit
++ <<Create>> ViewProfileFragment(Profile)
++ <<Create>> ViewProfileFragment(Profile,boolean)
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
++ void onViewCreated(View,Bundle)
+- void replaceFragment(Fragment)
+}
+
+
+
+
+com.google.android.material.bottomsheet.BottomSheetDialogFragment <|-- com.example.pixel_events.events.SetRegistrationFragment
+com.example.pixel_events.waitinglist.WaitingList +.. com.example.pixel_events.waitinglist.WaitingList$OnLotteryDrawnListener
+com.example.pixel_events.events.Adapter <|-- com.example.pixel_events.events.InvitationAdapter
+com.example.pixel_events.events.InvitationAdapter +.. com.example.pixel_events.events.InvitationAdapter$OnInvitationInteractionListener
+com.example.pixel_events.events.InvitationAdapter +.. com.example.pixel_events.events.InvitationAdapter$InvitationViewHolder
+com.example.pixel_events.events.ViewHolder <|-- com.example.pixel_events.events.InvitationAdapter$InvitationViewHolder
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.waitinglist.WaitingListFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.profile.RegistrationHistoryFragment
+com.example.pixel_events.profile.RegistrationHistoryFragment +.. com.example.pixel_events.profile.RegistrationHistoryFragment$EventHistoryItem
+com.example.pixel_events.admin.Adapter <|-- com.example.pixel_events.admin.AdminImageAdapter
+com.example.pixel_events.admin.AdminImageAdapter +.. com.example.pixel_events.admin.AdminImageAdapter$Listener
+com.example.pixel_events.admin.AdminImageAdapter +.. com.example.pixel_events.admin.AdminImageAdapter$Holder
+com.example.pixel_events.admin.ViewHolder <|-- com.example.pixel_events.admin.AdminImageAdapter$Holder
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.admin.AdminImageFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.events.EventDetailedFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.login.LoginFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.profile.EditProfileFragment
+com.google.android.material.bottomsheet.BottomSheetDialogFragment <|-- com.example.pixel_events.events.SetWaitlistFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.qrcode.ScannerFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.events.EventFragment
+com.example.pixel_events.events.Adapter <|-- com.example.pixel_events.events.MyEventAdapter
+com.example.pixel_events.events.MyEventAdapter +.. com.example.pixel_events.events.MyEventAdapter$OnEventClickListener
+com.example.pixel_events.events.MyEventAdapter +.. com.example.pixel_events.events.MyEventAdapter$EventViewHolder
+com.example.pixel_events.events.ViewHolder <|-- com.example.pixel_events.events.MyEventAdapter$EventViewHolder
+com.example.pixel_events.waitinglist.WaitlistUser +.. com.example.pixel_events.waitinglist.WaitlistUser$OnStatusUpdateListener
+com.example.pixel_events.home.Adapter <|-- com.example.pixel_events.home.DashboardAdapter
+com.example.pixel_events.home.DashboardAdapter +.. com.example.pixel_events.home.DashboardAdapter$OnEventClickListener
+com.example.pixel_events.home.DashboardAdapter +.. com.example.pixel_events.home.DashboardAdapter$EventViewHolder
+com.example.pixel_events.home.ViewHolder <|-- com.example.pixel_events.home.DashboardAdapter$EventViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.pixel_events.MainActivity
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.events.EventNotificationFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.profile.NotificationPreferencesFragment
+com.example.pixel_events.profile.Adapter <|-- com.example.pixel_events.profile.RegistrationHistoryAdapter
+com.example.pixel_events.profile.RegistrationHistoryAdapter +.. com.example.pixel_events.profile.RegistrationHistoryAdapter$OnItemClickListener
+com.example.pixel_events.profile.RegistrationHistoryAdapter +.. com.example.pixel_events.profile.RegistrationHistoryAdapter$RegistrationHistoryViewHolder
+com.example.pixel_events.profile.ViewHolder <|-- com.example.pixel_events.profile.RegistrationHistoryAdapter$RegistrationHistoryViewHolder
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.admin.AdminEventFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.pixel_events.home.DashboardActivity
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.profile.ProfileFragment
+com.example.pixel_events.admin.Adapter <|-- com.example.pixel_events.admin.AdminAdapter
+com.example.pixel_events.admin.AdminAdapter +.. com.example.pixel_events.admin.AdminAdapter$OnEventClickListener
+com.example.pixel_events.admin.AdminAdapter +.. com.example.pixel_events.admin.AdminAdapter$EventViewHolder
+com.example.pixel_events.admin.ViewHolder <|-- com.example.pixel_events.admin.AdminAdapter$EventViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.pixel_events.loading.SplashActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.pixel_events.admin.AdminActivity
+com.example.pixel_events.notifications.OnInvitationInteractionListener <|.. com.example.pixel_events.notifications.NotificationFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.notifications.NotificationFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.login.SignupFragment
+com.example.pixel_events.notifications.Adapter <|-- com.example.pixel_events.notifications.NotificationAdapter
+com.example.pixel_events.notifications.NotificationAdapter +.. com.example.pixel_events.notifications.NotificationAdapter$ViewHolder
+com.example.pixel_events.notifications.ViewHolder <|-- com.example.pixel_events.notifications.NotificationAdapter$ViewHolder
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.home.DashboardFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.events.MyEventFragment
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.admin.AdminProfileFragment
+com.example.pixel_events.admin.AdminProfileFragment +.. com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter
+com.example.pixel_events.admin.Adapter <|-- com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter
+com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter +.. com.example.pixel_events.admin.AdminProfileFragment$ProfileAdapter$Listener
+com.example.pixel_events.admin.AdminProfileFragment +.. com.example.pixel_events.admin.AdminProfileFragment$ProfileViewHolder
+com.example.pixel_events.admin.ViewHolder <|-- com.example.pixel_events.admin.AdminProfileFragment$ProfileViewHolder
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.events.CreateEventFragment
+com.example.pixel_events.waitinglist.Adapter <|-- com.example.pixel_events.waitinglist.WaitingListAdapter
+com.example.pixel_events.waitinglist.WaitingListAdapter +.. com.example.pixel_events.waitinglist.WaitingListAdapter$OnItemClick
+com.example.pixel_events.waitinglist.WaitingListAdapter +.. com.example.pixel_events.waitinglist.WaitingListAdapter$VH
+com.example.pixel_events.waitinglist.ViewHolder <|-- com.example.pixel_events.waitinglist.WaitingListAdapter$VH
+androidx.fragment.app.Fragment <|-- com.example.pixel_events.profile.ViewProfileFragment
+@enduml

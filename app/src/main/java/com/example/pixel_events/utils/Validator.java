@@ -5,6 +5,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Validator
+ *
+ * Utility class providing validation methods for event and profile data.
+ * Validates date relationships, string emptiness, and business logic constraints.
+ * Ensures data integrity before database persistence.
+ *
+ * Implements validation for:
+ * - US 02.01.04 (Registration period validation)
+ * - US 02.01.01 (Event creation validation)
+ * - US 01.02.01, 01.02.02 (Profile data validation)
+ *
+ * Collaborators:
+ * - Event: Validates event dates and fields
+ * - Profile: Validates profile fields
+ */
 public class Validator {
     public static void validateNotEmpty(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {

@@ -11,6 +11,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Profile
+ *
+ * Model class representing a user profile in the event lottery system.
+ * Stores personal information, contact details, notification preferences, and
+ * geolocation data.
+ * Supports multiple roles: entrant, organizer, and administrator.
+ * Uses device-based authentication eliminating need for passwords.
+ *
+ * Implements:
+ * - US 01.02.01 (Provide personal information)
+ * - US 01.02.02 (Update profile information)
+ * - US 01.02.04 (Delete profile)
+ * - US 01.04.03 (Opt out of notifications)
+ * - US 01.07.01 (Device-based identification)
+ * - US 02.02.02 (Store geolocation for map visualization)
+ *
+ * Collaborators:
+ * - DatabaseHandler: Persists profile data to Firestore
+ * - AuthManager: Links profile to Firebase authentication
+ * - Notification: Respects user notification preferences
+ */
 public class Profile {
     private int userId; // Unique userId (for backwards compatibility)
     private String role; // { user, org, admin }
@@ -21,10 +43,9 @@ public class Profile {
     private String postalcode; // user's postal code
     private String province; // user's province
     private String city; // user's city
-    private List<Integer> eventsUpcoming; // list of upcoming eventID
-    private List<Integer> eventsPart; // list of past eventID that user participated in
-    private List<Integer> eventsNPart; // list of past eventID that user did not participate in
-    private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]
+    private List<Boolean> notify; // [All Notif, Win notif, Lose Notif]\
+    private Double latitude; // user's latitude
+    private Double longitude; // user's longitude
     private boolean autoUpdateDatabase = true;
 
     public Profile() {
@@ -55,11 +76,6 @@ public class Profile {
         this.postalcode = postalcode;
         this.province = province;
         this.city = city;
-
-        // assign an empty events list
-        this.eventsUpcoming = new ArrayList<>();
-        this.eventsPart = new ArrayList<>();
-        this.eventsNPart = new ArrayList<>();
     }
 
     public void setAutoUpdateDatabase(boolean autoUpdate) {
@@ -124,18 +140,6 @@ public class Profile {
         return phoneNum;
     }
 
-    public List<Integer> getEventsUpcoming() {
-        return eventsUpcoming;
-    }
-
-    public List<Integer> getEventsPart() {
-        return eventsPart;
-    }
-
-    public List<Integer> getEventsNPart() {
-        return eventsNPart;
-    }
-
     public List<Boolean> getNotify() {
         return notify;
     }
@@ -150,6 +154,14 @@ public class Profile {
 
     public String getCity() {
         return city;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
     }
 
     // Setters / Modify Profile
@@ -198,23 +210,18 @@ public class Profile {
         updateDatabase("city", city);
     }
 
-    public void setEventsUpcoming(List<Integer> eventsUpcoming) {
-        this.eventsUpcoming = eventsUpcoming;
-        updateDatabase("eventsUpcoming", eventsUpcoming);
-    }
-
-    public void setEventsPart(List<Integer> eventsPart) {
-        this.eventsPart = eventsPart;
-        updateDatabase("eventsPart", eventsPart);
-    }
-
-    public void setEventsNPart(List<Integer> eventsNPart) {
-        this.eventsNPart = eventsNPart;
-        updateDatabase("eventsNPart", eventsNPart);
-    }
-
     public void setNotify(List<Boolean> notify) {
         this.notify = notify;
         updateDatabase("notify", notify);
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+        updateDatabase("latitude", latitude);
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+        updateDatabase("longitude", longitude);
     }
 }

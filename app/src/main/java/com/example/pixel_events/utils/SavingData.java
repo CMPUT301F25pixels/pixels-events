@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.profile.Profile;
+import com.example.pixel_events.waitinglist.WaitlistUser;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,16 +20,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * Utility class to export profile data to a CSV file.
- * Construct with a list of profile IDs; call exportProfiles to perform asynchronous export.
+ * SavingData
+ *
+ * Utility class for exporting entrant lists to CSV format.
+ * Fetches profile data for waitlist users and generates downloadable CSV files.
+ * Used by organizers to export final participant lists.
+ *
+ * Implements:
+ * - US 02.06.05 (Export final enrolled list to CSV)
+ *
+ * Collaborators:
+ * - WaitlistUser: Source data for export
+ * - Profile: User information to include in CSV
+ * - DatabaseHandler: Fetches profile data
  */
 public class SavingData {
-    private final List<Integer> profileIds;
+    private final List<WaitlistUser> waitlistUsers;
     private final List<Profile> loadedProfiles = Collections.synchronizedList(new ArrayList<>());
     private final DatabaseHandler db = DatabaseHandler.getInstance();
 
-    public SavingData(List<Integer> profileIds) {
-        this.profileIds = profileIds != null ? profileIds : Collections.emptyList();
+    public SavingData(List<WaitlistUser> profiles) {
+        this.waitlistUsers = new ArrayList<>(profiles);
     }
 
     /**
@@ -42,16 +54,17 @@ public class SavingData {
             if (callback != null) callback.accept("Context unavailable");
             return;
         }
-        if (profileIds.isEmpty()) {
+        if (waitlistUsers.isEmpty()) {
             if (callback != null) callback.accept("Nothing to export");
             return;
         }
-        AtomicInteger remaining = new AtomicInteger(profileIds.size());
-        for (Integer id : profileIds) {
-            if (id == null) {
+        AtomicInteger remaining = new AtomicInteger(waitlistUsers.size());
+        for (WaitlistUser user : waitlistUsers) {
+            if (user == null) {
                 if (remaining.decrementAndGet() == 0) finishExport(context, eventId, callback);
                 continue;
             }
+            int id = user.getUserId();
             db.getProfile(id, profile -> {
                 if (profile != null) {
                     loadedProfiles.add(profile);
@@ -85,8 +98,21 @@ public class SavingData {
         File outFile = new File(exportDir, fileName);
 
         try (FileWriter writer = new FileWriter(outFile)) {
-            writer.write("UserID,Name,Email,Phone Number,Gender,City,Province,Postal Code\n");
+            writer.write("UserID,Name,Email,Phone Number,Gender,City,Province,Postal Code,Status\n");
             for (Profile p : loadedProfiles) {
+                // Find status for this profile
+                String statusLabel = "Didn't Choose";
+                for (WaitlistUser user : waitlistUsers) {
+                    if (user.getUserId() == p.getUserId()) {
+                        int status = user.getStatus();
+                        if (status == 2) statusLabel = "Accepted";
+                        else if (status == 3) statusLabel = "Declined";
+                        else if (status == 1) statusLabel = "Selected";
+                        else if (status == 0) statusLabel = "Waiting";
+                        else statusLabel = "Didn't Choose";
+                        break;
+                    }
+                }
                 writer.write(csvField(p.getUserId()) + "," +
                         csvField(p.getUserName()) + "," +
                         csvField(p.getEmail()) + "," +
@@ -94,7 +120,8 @@ public class SavingData {
                         csvField(p.getGender()) + "," +
                         csvField(p.getCity()) + "," +
                         csvField(p.getProvince()) + "," +
-                        csvField(p.getPostalcode()) + "\n");
+                        csvField(p.getPostalcode()) + "," +
+                        csvField(statusLabel) + "\n");
             }
         } catch (IOException e) {
             if (callback != null) callback.accept("Failed to export: " + e.getMessage());
@@ -107,10 +134,9 @@ public class SavingData {
         if (val == null) return "null";
         String s = String.valueOf(val).trim();
         if (s.isEmpty()) return "null";
-        if (s.contains("\"") || s.contains(",") || s.contains("\n")) {
+        boolean needsWrapping = s.contains(",") || s.contains("\n") || s.contains("\"");
+        if (needsWrapping) {
             s = s.replace("\"", "\"\"");
-        }
-        if (s.contains(",") || s.contains("\n")) {
             return "\"" + s + "\"";
         }
         return s;

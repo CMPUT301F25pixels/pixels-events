@@ -1,4 +1,4 @@
-package com.example.pixel_events.database;
+package com.example.pixel_events.other;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import com.google.firebase.FirebaseApp;
@@ -22,6 +23,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+/*
+    Utilizes:
+        White Box Testing
+ */
 
 @RunWith(AndroidJUnit4.class)
 public class FirebaseConnectivityTest {
@@ -81,8 +87,8 @@ public class FirebaseConnectivityTest {
 
         Log.d(TAG, "Creating test event with ID: " + testEventId);
         Event testEvent = new Event(testEventId, 1, testTitle, "", "Test Location",
-                "100", "Test Description", "Free", "2026-01-08", "2026-01-10",
-                "10:00", "18:00", "2026-01-01", "2026-01-06", tags);
+                100, "Test Description", "Free", "2026-01-08", "2026-01-10",
+                "10:00", "18:00", "2026-01-01", "2026-01-06", tags, Boolean.FALSE);
 
         // Create event
         db.addEvent(testEvent);
@@ -197,4 +203,3 @@ public class FirebaseConnectivityTest {
         db.deleteAcc(testUserId);
     }
 }
-

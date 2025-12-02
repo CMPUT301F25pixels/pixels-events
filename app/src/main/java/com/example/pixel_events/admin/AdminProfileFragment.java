@@ -13,11 +13,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pixel_events.R;
 import com.example.pixel_events.database.DatabaseHandler;
-import com.example.pixel_events.events.Event;
 import com.example.pixel_events.profile.Profile;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AdminProfileFragment
+ *
+ * Fragment for administrators to browse and delete user profiles.
+ * Toggles between entrants and organizers with separate lists.
+ * Allows profile viewing and deletion with cleanup of related data.
+ *
+ * Implements:
+ * - US 03.02.01 (Remove profiles)
+ * - US 03.05.01 (Browse profiles)
+ * - US 03.07.01 (Remove organizers)
+ *
+ * Collaborators:
+ * - Profile: User data display and deletion
+ * - DatabaseHandler: Profile operations
+ * - ViewProfileFragment: Profile detail viewing
+ */
 public class AdminProfileFragment extends Fragment {
 	private androidx.recyclerview.widget.RecyclerView recyclerView;
 	private ProfileAdapter adapter;
@@ -30,7 +46,7 @@ public class AdminProfileFragment extends Fragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_admin_profiles, container, false);
-		recyclerView = view.findViewById(R.id.myevents_RecyclerView);
+		recyclerView = view.findViewById(R.id.admin_RecyclerView);
 		toggleGroup = view.findViewById(R.id.admin_profile_selection);
 		btnEntrants = view.findViewById(R.id.admin_profiles_entrants);
 		btnOrganizers = view.findViewById(R.id.admin_profiles_organizers);

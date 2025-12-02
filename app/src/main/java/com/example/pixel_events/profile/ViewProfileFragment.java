@@ -16,6 +16,21 @@ import com.example.pixel_events.R;
 
 import java.util.Objects;
 
+/**
+ * ViewProfileFragment
+ *
+ * Fragment displaying detailed user profile information.
+ * Shows all profile fields in read-only mode with option to edit.
+ * Used by both profile owners and administrators.
+ *
+ * Implements:
+ * - Profile viewing for US 01.02.01, 01.02.02
+ * - US 03.05.01 (Admin browse profiles)
+ *
+ * Collaborators:
+ * - Profile: Displayed user data
+ * - EditProfileFragment: Navigation to edit mode
+ */
 public class ViewProfileFragment extends Fragment {
     private Button editButton;
     private ImageButton backButton;

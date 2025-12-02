@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,13 +14,27 @@ import com.example.pixel_events.R;
 import com.example.pixel_events.events.Event;
 import android.util.Log;
 
-import com.example.pixel_events.login.AuthManager;
-import com.example.pixel_events.profile.Profile;
 import com.example.pixel_events.utils.ImageConversion;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AdminImageAdapter
+ *
+ * RecyclerView adapter for administrators to browse and delete event poster images.
+ * Displays image thumbnails with delete buttons.
+ * Triggers organizer notifications upon image removal.
+ *
+ * Implements:
+ * - US 03.03.01 (Remove images)
+ * - US 03.06.01 (Browse images)
+ *
+ * Collaborators:
+ * - Event: Source of image data
+ * - AdminImageFragment: Parent fragment
+ * - ImageConversion: Image display
+ */
 public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Holder> {
     public interface Listener { void onDelete(Event e); }
     private final List<Event> data = new ArrayList<>();

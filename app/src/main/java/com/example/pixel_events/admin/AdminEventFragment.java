@@ -16,6 +16,22 @@ import com.example.pixel_events.events.Event;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AdminEventFragment
+ *
+ * Fragment for administrators to browse and delete events.
+ * Displays all events in the system with delete functionality.
+ * Triggers admin deletion notifications to organizers and entrants.
+ *
+ * Implements:
+ * - US 03.01.01 (Remove events)
+ * - US 03.04.01 (Browse events)
+ *
+ * Collaborators:
+ * - Event: Displayed event data
+ * - DatabaseHandler: Delete operations
+ * - Notification: Deletion alerts
+ */
 public class AdminEventFragment extends Fragment {
 	private RecyclerView recyclerView;
 	private AdminAdapter adapter;

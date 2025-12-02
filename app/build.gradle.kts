@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.google.android.material:material:1.12.0")
 
     // --- Firebase (Bill of Materials) ---
@@ -56,16 +57,20 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation(libs.firebase.firestore) // If version catalog duplicates, keep – Gradle will unify.
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 
     // --- Imaging ---
     implementation("com.github.bumptech.glide:glide:5.0.5")
     implementation(libs.legacy.support.v4)
     implementation(libs.recyclerview)
+    implementation(libs.espresso.intents)
     annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 
     // --- QR / ZXing ---
     implementation("com.journeyapps:zxing-android-embedded:4.3.0") // keep single occurrence
     implementation("com.google.zxing:core:3.5.3")
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // --- Unit Testing ---
     // Use a single JUnit 4 dependency (version catalog or explicit). Remove duplicate.
@@ -80,6 +85,7 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5") // Even if libs.ext.junit present, explicit for alignment
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
 
     // Fragment testing (debug only) - keep
     debugImplementation("androidx.fragment:fragment-testing:1.7.1")

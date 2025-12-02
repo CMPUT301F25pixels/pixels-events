@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pixel_events.R;
+import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.events.Event;
 import com.example.pixel_events.utils.ImageConversion;
 
@@ -18,6 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * DashboardAdapter
+ *
+ * RecyclerView adapter for displaying event lists in the dashboard.
+ * Handles event item display, click listeners, and image loading.
+ * Used for showing available events to entrants.
+ *
+ * Collaborators:
+ * - Event: Data source
+ * - DashboardFragment: Parent fragment
+ * - ImageConversion: Poster image display
+ */
 public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.EventViewHolder> {
     private List<Event> events;
     private OnEventClickListener listener;
@@ -56,6 +69,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.Even
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
+        private TextView organizerName;
         private ImageView eventImage;
         private TextView eventTitle;
         private TextView eventTime;
@@ -64,6 +78,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.Even
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
+            organizerName = itemView.findViewById(R.id.eventListOrganizerName);
             eventImage = itemView.findViewById(R.id.eventListImage);
             eventTitle = itemView.findViewById(R.id.eventListTitle);
             eventTime = itemView.findViewById(R.id.eventListTime);
@@ -72,6 +87,13 @@ public class DashboardAdapter extends RecyclerView.Adapter<DashboardAdapter.Even
         }
 
         public void bind(Event event, OnEventClickListener listener) {
+            DatabaseHandler.getInstance().getProfile(event.getOrganizerId(), profile -> {
+                if (profile != null) {
+                    organizerName.setText(profile.getUserName());
+                }
+            }, error -> {
+                organizerName.setText("Organizer");
+            });
             eventTitle.setText(event.getTitle());
             eventTime.setText(event.getEventStartTime());
             eventLocation.setText(event.getLocation());

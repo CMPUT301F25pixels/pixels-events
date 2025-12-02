@@ -1,4 +1,4 @@
-package com.example.pixel_events.organizer;
+package com.example.pixel_events.organizerTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,7 +31,7 @@ public class OrganizerIntegrationTest {
     private static final String TEST_TITLE = "Integration Test Event";
     private String TEST_IMAGE_URL;
     private static final String TEST_LOCATION = "Test City";
-    private static final String TEST_CAPACITY = "500";
+    private static final int TEST_CAPACITY = 500;
     private static final String TEST_FEE = "Free";
     private static final String TEST_DESCRIPTION = "This is a test event";
     private static final String TEST_EVENT_START = "2026-02-01";
@@ -47,22 +47,17 @@ public class OrganizerIntegrationTest {
     public void setUp() {
         DatabaseHandler.resetInstance();
 
-        // Initialize DatabaseHandler in offline mode (uses Firebase emulator)
         databaseHandler = DatabaseHandler.getInstance(true);
 
-        // Create a bitmap to upload for testing
         TEST_BITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
-        // Clean up any existing test data
         cleanUpTestData();
     }
 
     @After
     public void tearDown() {
-        // Clean up test data after each test
         cleanUpTestData();
 
-        // Reset singleton for next test
         DatabaseHandler.resetInstance();
     }
 
@@ -94,7 +89,6 @@ public class OrganizerIntegrationTest {
 
     /**
      * This test both US 02.04.01 and US 02.04.02
-     * @throws InterruptedException
      */
     @Test
     public void testImageUploadAndModify() throws InterruptedException {
@@ -127,7 +121,8 @@ public class OrganizerIntegrationTest {
                 TEST_EVENT_END_TIME,
                 TEST_REG_START,
                 TEST_REG_END,
-                TEST_TAGS
+                TEST_TAGS,
+                Boolean.FALSE
         );
 
         databaseHandler.addEvent(testEvent);

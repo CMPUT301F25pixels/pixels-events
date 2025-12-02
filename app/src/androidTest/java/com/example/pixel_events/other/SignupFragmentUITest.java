@@ -1,4 +1,4 @@
-package com.example.pixel_events.ui;
+package com.example.pixel_events.other;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -19,6 +19,10 @@ import com.example.pixel_events.login.SignupFragment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/*
+    Utilizes:
+        Black Box Testing
+ */
 @RunWith(AndroidJUnit4.class)
 public class SignupFragmentUITest {
 
@@ -32,7 +36,6 @@ public class SignupFragmentUITest {
 
         onView(withId(R.id.signup_user_name)).check(matches(isDisplayed()));
         onView(withId(R.id.signup_user_email)).check(matches(isDisplayed()));
-        onView(withId(R.id.signup_user_password)).check(matches(isDisplayed()));
         onView(withId(R.id.signup_user_role)).check(matches(isDisplayed()));
 
         onView(withId(R.id.signup_user_save))

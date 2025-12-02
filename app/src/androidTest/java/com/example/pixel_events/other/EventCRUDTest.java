@@ -1,10 +1,11 @@
-package com.example.pixel_events.events;
+package com.example.pixel_events.other;
 
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.pixel_events.database.DatabaseHandler;
+import com.example.pixel_events.events.Event;
 import com.google.firebase.FirebaseApp;
 
 import org.junit.Before;
@@ -18,8 +19,9 @@ import java.util.concurrent.TimeUnit;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.*;
 
-/**
- * Instrumented test to verify Event CRUD operations with Firebase
+/*
+    Utilizes:
+        White Box Testing
  */
 @RunWith(AndroidJUnit4.class)
 public class EventCRUDTest {
@@ -46,7 +48,7 @@ public class EventCRUDTest {
         String title = "Test Event " + testEventId;
         String imageUrl = "";
         String location = "Test Location";
-        String capacity = "100";
+        int capacity = 100;
         String description = "Test Description";
         String fee = "Free";
         String eventStartDate = "2026-01-08";
@@ -62,7 +64,7 @@ public class EventCRUDTest {
         Log.d(TAG, "Creating event with ID: " + testEventId);
         Event testEvent = new Event(testEventId, organizerId, title, imageUrl, location,
                 capacity, description, fee, eventStartDate, eventEndDate, eventStartTime,
-                eventEndTime, registrationStartDate, registrationEndDate, tags);
+                eventEndTime, registrationStartDate, registrationEndDate, tags, Boolean.FALSE);
 
         testEvent.saveToDatabase();
         Log.d(TAG, "Event saved to database");
@@ -140,4 +142,3 @@ public class EventCRUDTest {
         Log.d(TAG, "✅ Test passed! Retrieved " + eventCount[0] + " events");
     }
 }
-

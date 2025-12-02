@@ -30,6 +30,23 @@ import com.google.zxing.ResultPoint;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * ScannerFragment
+ *
+ * Fragment providing QR code scanning functionality for entrants.
+ * Uses device camera to scan promotional QR codes and navigate to event details.
+ * Handles camera permissions and barcode decoding.
+ *
+ * Implements:
+ * - US 01.06.01 (View event details by scanning QR code)
+ * - US 01.06.02 (Sign up from scanned event)
+ *
+ * Collaborators:
+ * - QRCode: Decodes event information
+ * - Event: Displays scanned event
+ * - EventDetailedFragment: Navigation to event details
+ * - DatabaseHandler: Fetches event by ID
+ */
 public class ScannerFragment extends Fragment {
 
     private static final int CAMERA_PERMISSION_REQUEST = 1001;
