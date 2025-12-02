@@ -59,7 +59,7 @@ public class AdminDatabaseIntegrationTest {
         Event testEvent = new Event(
                 TEST_EVENT_ID, TEST_ORGANIZER_ID, "Event for Admin", imageUrl, "Loc",
                 100, "Desc", "Free", "2026-02-01", "2026-02-02",
-                "10:00", "12:00", "2026-01-01", "2026-01-30", new ArrayList<>(Arrays.asList("Test"))
+                "10:00", "12:00", "2026-01-01", "2026-01-30", new ArrayList<>(Arrays.asList("Test")), Boolean.FALSE
         );
         testEvent.setAutoUpdateDatabase(false);
         databaseHandler.addEvent(testEvent);
