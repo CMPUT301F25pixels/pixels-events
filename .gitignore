@@ -1,29 +1,34 @@
-# Ignore
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log/OS Files
+*.log
+
+# Android Studio generated files and folders
+captures/
+.externalNativeBuild/
+.cxx/
+*.aab
+*.apk
+output-metadata.json
+
+# IntelliJ
 *.iml
 .idea/
-.vscode/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
 
-# Ignore Gradle files
-.gradle
-/local.properties
+# Keystore files
+*.jks
+*.keystore
 
-# Ignore OS-specific files
-.DS_Store
+# Google Services (e.g. APIs or Firebase)
+google-services.json
 
-# Ignore build output
-/build
-/captures
-.externalNativeBuild
-.cxx
-.log
-
-# Ignore additional IntelliJ settings
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-
-# QR Feature documentation
-QR_FEATURE_README.md
+# Android Profiling
+*.hprof
