@@ -1,5 +1,7 @@
 # Pixels Event Android App: Event Lottery System Application
 
+![Demo](https://github.com/CMPUT301F25pixels/pixels-events/tree/main/assets/demo.mp4)
+
 ## Overview
 This is a mobile application where people can sign up for events at community centres that are popular and fill up fast. It allows people with limitations such as work, disability, etc. to be able to sign up for these events fairly and not have to sit refreshing a webpage until they can get a chance at reserving a spot. This is done using a lottery system.
 
