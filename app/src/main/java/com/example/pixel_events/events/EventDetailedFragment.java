@@ -22,6 +22,7 @@ import com.example.pixel_events.database.DatabaseHandler;
 import com.example.pixel_events.login.AuthManager;
 import com.example.pixel_events.waitinglist.WaitingList;
 import com.example.pixel_events.waitinglist.WaitlistUser;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -389,7 +390,8 @@ public class EventDetailedFragment extends Fragment {
                     joinButton.setOnClickListener(v -> {
                         setButtonEnabled(joinButton, false);
                         setButtonEnabled(leaveButton, false);
-                        updateUserStatus(2);
+                        updateUserStatus(2, this::renderCTA);
+                        renderCTA();
                     });
 
                     leaveButton.setText("Decline Invitation");
@@ -397,22 +399,22 @@ public class EventDetailedFragment extends Fragment {
                     leaveButton.setOnClickListener(v -> {
                         setButtonEnabled(leaveButton, false);
                         setButtonEnabled(joinButton, false);
-                        updateUserStatus(3);
-                        // redraw should be triggered after status update and reload; keep here for
-                        // safety
-                        waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
-                            @Override
-                            public void onSuccess(int numberDrawn) {
-                                Log.d(TAG, "Lottery drawn: " + numberDrawn);
-                            }
 
-                            @Override
-                            public void onFailure(Exception e) {
-                                Log.e(TAG, "Failed to draw lottery", e);
-                            }
+                        updateUserStatus(3, () -> {
+                            waitList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                                @Override
+                                public void onSuccess(int numberDrawn) {
+                                    renderCTA();  // update UI last
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Log.e(TAG, "Lottery failed", e);
+                                    renderCTA();
+                                }
+                            });
                         });
                     });
-                    renderCTA();
                 }
 
                 else if (userStatus == 2) {
@@ -538,47 +540,37 @@ public class EventDetailedFragment extends Fragment {
         btn.setAlpha(enabled ? 1f : 0.5f);
     }
 
-    private void updateUserStatus(int newStatus) {
-        if (waitList == null)
-            return;
+    private void updateUserStatus(int newStatus, Runnable onComplete) {
+        if (waitList == null) return;
 
         WaitlistUser currentUser = null;
-        if (waitList.getWaitList() != null) {
-            for (WaitlistUser user : waitList.getWaitList()) {
-                if (user.getUserId() == userId) {
-                    currentUser = user;
-                    break;
-                }
+        for (WaitlistUser user : waitList.getWaitList()) {
+            if (user.getUserId() == userId) {
+                currentUser = user;
+                break;
             }
         }
 
-        if (currentUser != null) {
-            currentUser.updateStatusInDb(eventId, newStatus, new WaitlistUser.OnStatusUpdateListener() {
-                @Override
-                public void onSuccess() {
-                    if (isAdded()) {
-                        requireActivity().runOnUiThread(() -> {
-                            toast(newStatus == 2 ? "Invitation accepted!" : "Invitation declined");
-                            db.getWaitingList(eventId, wl -> {
-                                waitList = wl;
-                                renderCTA();
-                            }, e -> Log.e(TAG, "Failed to reload waitlist", e));
-                        });
-                    }
-                }
+        if (currentUser == null) return;
 
-                @Override
-                public void onFailure(Exception e) {
-                    if (isAdded()) {
-                        requireActivity().runOnUiThread(() -> {
-                            toast("Failed to update invitation: " + e.getMessage());
-                            Log.e(TAG, "Failed to update status", e);
-                        });
-                    }
-                }
-            });
-        }
+        currentUser.updateStatusInDb(eventId, newStatus, new WaitlistUser.OnStatusUpdateListener() {
+            @Override
+            public void onSuccess() {
+                db.getWaitingList(eventId, wl -> {
+                    waitList = wl;
+                    onComplete.run();        // continue flow AFTER fresh reload
+                }, e -> Log.e(TAG, "Failed to reload waitlist", e));
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, "Failed to update status", e);
+                toast("Failed to update invitation: " + e.getMessage());
+            }
+        });
     }
+
+
 
     private void toast(String msg) {
         if (getContext() != null) {

@@ -208,45 +208,50 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
 
     @Override
     public void onAccept(EventInvitation invitation) {
-        // 2 -> accepted in new mapping
-        updateInvitationStatus(invitation, 2);
+        updateInvitationStatus(invitation, 2, null);
     }
+
 
     @Override
     public void onDecline(EventInvitation invitation) {
-        // 3 -> declined in new mapping
-        updateInvitationStatus(invitation, 3);
-        DatabaseHandler.getInstance().getWaitingList(invitation.getEvent().getEventId(), waitingList -> {
-            if (waitingList != null) {
-                waitingList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
-                    @Override
-                    public void onSuccess(int numberDrawn) {
-                        Log.d(TAG, "Lottery drawn: " + numberDrawn);
-                    }
 
-                    @Override
-                    public void onFailure(Exception e) {
-                        Log.e(TAG, "Failed to draw lottery", e);
-                    }
-                });
-            }
-        }, e -> {
-            Log.e(TAG, "Failed to get waitlist for event " + invitation.getEvent().getEventId(), e);
+        updateInvitationStatus(invitation, 3, () -> {
+            int eventId = invitation.getEvent().getEventId();
+
+            // Call AFTER Firestore update is finished
+            DatabaseHandler.getInstance().getWaitingList(eventId, waitingList -> {
+                if (waitingList != null) {
+                    waitingList.drawLottery(new WaitingList.OnLotteryDrawnListener() {
+                        @Override
+                        public void onSuccess(int numberDrawn) {
+                            Log.d(TAG, "Lottery drawn: " + numberDrawn);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Log.e(TAG, "Failed to draw lottery", e);
+                        }
+                    });
+                }
+            }, e -> {
+                Log.e(TAG, "Failed to get waitlist for event " + eventId, e);
+            });
         });
     }
 
-    private void updateInvitationStatus(EventInvitation invitation, int newStatus) {
+
+    private void updateInvitationStatus(EventInvitation invitation, int newStatus, Runnable afterUpdate) {
         invitation.getWaitlistUser().updateStatusInDb(invitation.getEvent().getEventId(), newStatus,
                 new WaitlistUser.OnStatusUpdateListener() {
                     @Override
                     public void onSuccess() {
-                        // Ensure UI updates happen on main thread and refresh from source to avoid
-                        // stale references
-                        if (getActivity() == null)
-                            return;
+                        if (getActivity() == null) return;
+
+                        // Run after Firestore update is complete
+                        if (afterUpdate != null) afterUpdate.run();
+
+                        // Refresh UI (main thread)
                         getActivity().runOnUiThread(() -> {
-                            // Rebuild list to guarantee consistency in case objects mutated or references
-                            // changed
                             loadUserInvitations();
                             Toast.makeText(getContext(), "Invitation updated.", Toast.LENGTH_SHORT).show();
                         });
@@ -259,4 +264,5 @@ public class NotificationFragment extends Fragment implements InvitationAdapter.
                     }
                 });
     }
+
 }
